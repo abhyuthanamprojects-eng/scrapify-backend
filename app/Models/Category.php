@@ -61,6 +61,11 @@ class Category extends Model
         return $this->hasMany(PricingRule::class);
     }
 
+    public function variantPricingRules()
+    {
+        return $this->hasMany(PricingVariantRule::class);
+    }
+
     public function categoryType()
     {
         return $this->belongsTo(CategoryType::class);

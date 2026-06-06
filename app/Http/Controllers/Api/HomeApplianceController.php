@@ -8,6 +8,7 @@ use App\Models\AttributeOption;
 use App\Services\HomeAppliancePricingService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use OpenApi\Attributes as OA;
 
@@ -101,12 +102,28 @@ class HomeApplianceController extends Controller
             ];
         });
 
+        $variantRules = Schema::hasTable('pricing_variant_rules')
+            ? $category->variantPricingRules()
+                ->where('status', true)
+                ->orderBy('id')
+                ->get()
+                ->map(fn($rule) => [
+                    'id' => $rule->id,
+                    'title' => $rule->title,
+                    'base_price' => (float) $rule->base_price,
+                    'option_values' => $rule->option_values ?? [],
+                    'source_column' => $rule->source_column,
+                ])
+                ->values()
+            : collect();
+
         $data = [
             'id' => $category->id,
             'name' => $category->name['en'] ?? $category->name,
             'estimated_price' => $pricing ? (float)$pricing->base_price : 0,
             'pricing_type' => $pricing?->pricing_type ?? 'per_piece',
             'sections' => $sections,
+            'variant_pricing_rules' => $variantRules,
         ];
 
         return $this->successResponse('home_appliance_details.fetched', $data);
@@ -219,6 +236,7 @@ class HomeApplianceController extends Controller
             'estimated_price' => $estimate,
             'price' => $estimate, // Backward compatibility fallback
             'pricing_type' => $pricingType,
+            'variant_rule' => $estimateMeta['variant_rule'] ?? null,
         ]);
     }
 

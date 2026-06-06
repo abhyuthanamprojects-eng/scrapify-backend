@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Models\AttributeOption;
 use App\Models\PricingRule;
+use App\Models\PricingVariantRule;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 
 class HomeAppliancePricingService
 {
@@ -14,13 +17,21 @@ class HomeAppliancePricingService
             ->where('status', true)
             ->first();
 
+        $calculation = $this->calculate($categoryId, $optionIds);
+
         return [
-            'estimated_price' => $this->estimate($categoryId, $optionIds),
+            'estimated_price' => $calculation['estimated_price'],
             'pricing_type' => $baseRule?->pricing_type ?? 'per_piece',
+            'variant_rule' => $calculation['variant_rule'],
         ];
     }
 
     public function estimate(int $categoryId, array $optionIds): float
+    {
+        return $this->calculate($categoryId, $optionIds)['estimated_price'];
+    }
+
+    private function calculate(int $categoryId, array $optionIds): array
     {
         $optionIds = collect($optionIds)
             ->filter()
@@ -36,8 +47,21 @@ class HomeAppliancePricingService
 
         $basePrice = $baseRule ? (float) $baseRule->base_price : 0.0;
 
+        $options = AttributeOption::with('attribute')
+            ->whereIn('id', $optionIds)
+            ->get();
+
+        $variantRule = $this->matchVariantRule($categoryId, $options);
+        $variantOptionLabels = $variantRule
+            ? collect($variantRule->option_values ?? [])->map(fn($value) => $this->normalizeOptionLabel($value))->all()
+            : [];
+        $calculationBase = $variantRule ? (float) $variantRule->base_price : $basePrice;
+
         if (empty($optionIds)) {
-            return round($basePrice, 2);
+            return [
+                'estimated_price' => round($basePrice, 2),
+                'variant_rule' => null,
+            ];
         }
 
         $matchedRules = PricingRule::where('category_id', $categoryId)
@@ -46,13 +70,23 @@ class HomeAppliancePricingService
             ->get(['attribute_option_id', 'base_price', 'adjustment_type', 'adjustment_value']);
 
         if ($matchedRules->isNotEmpty()) {
-            $sumDeltas = $matchedRules->sum(function ($rule) use ($basePrice) {
+            $optionLabelsById = $options
+                ->mapWithKeys(fn(AttributeOption $option) => [
+                    (int) $option->id => $this->normalizeOptionLabel($option->value['en'] ?? $option->value ?? ''),
+                ]);
+
+            $sumDeltas = $matchedRules->sum(function ($rule) use ($basePrice, $calculationBase, $variantOptionLabels, $optionLabelsById) {
+                $optionLabel = $optionLabelsById->get((int) $rule->attribute_option_id);
+                if ($optionLabel && in_array($optionLabel, $variantOptionLabels, true)) {
+                    return 0;
+                }
+
                 $type = $rule->adjustment_type ?? 'fixed';
                 $adjustmentValue = $rule->adjustment_value;
 
                 if ($adjustmentValue !== null) {
                     if ($type === 'percentage') {
-                        return $basePrice * ((float) $adjustmentValue / 100);
+                        return $calculationBase * ((float) $adjustmentValue / 100);
                     }
                     return (float) $adjustmentValue;
                 }
@@ -61,16 +95,20 @@ class HomeAppliancePricingService
                 return (float) $rule->base_price - $basePrice;
             });
 
-            $price = $basePrice + (float) $sumDeltas;
-            return round(max(0, $price), 2);
+            $price = $calculationBase + (float) $sumDeltas;
+            return [
+                'estimated_price' => round(max(0, $price), 2),
+                'variant_rule' => $variantRule ? [
+                    'id' => $variantRule->id,
+                    'title' => $variantRule->title,
+                    'base_price' => (float) $variantRule->base_price,
+                    'option_values' => $variantRule->option_values ?? [],
+                ] : null,
+            ];
         }
 
         // Fallback strategy when option-specific pricing rules are not configured:
         // derive deterministic deltas from selected option labels.
-        $options = AttributeOption::with('attribute')
-            ->whereIn('id', $optionIds)
-            ->get();
-
         $fallbackDelta = 0.0;
         foreach ($options as $option) {
             $optionValue = strtolower((string) ($option->value['en'] ?? $option->value ?? ''));
@@ -93,7 +131,54 @@ class HomeAppliancePricingService
             }
         }
 
-        return round(max(0, $basePrice + $fallbackDelta), 2);
+        return [
+            'estimated_price' => round(max(0, $calculationBase + $fallbackDelta), 2),
+            'variant_rule' => $variantRule ? [
+                'id' => $variantRule->id,
+                'title' => $variantRule->title,
+                'base_price' => (float) $variantRule->base_price,
+                'option_values' => $variantRule->option_values ?? [],
+            ] : null,
+        ];
+    }
+
+    private function matchVariantRule(int $categoryId, Collection $selectedOptions): ?PricingVariantRule
+    {
+        if (!Schema::hasTable('pricing_variant_rules')) {
+            return null;
+        }
+
+        $selectedLabels = $selectedOptions
+            ->map(fn(AttributeOption $option) => $this->normalizeOptionLabel($option->value['en'] ?? $option->value ?? ''))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($selectedLabels->isEmpty()) {
+            return null;
+        }
+
+        return PricingVariantRule::where('category_id', $categoryId)
+            ->where('status', true)
+            ->get()
+            ->sortByDesc(fn(PricingVariantRule $rule) => count($rule->option_values ?? []))
+            ->first(function (PricingVariantRule $rule) use ($selectedLabels) {
+                $requiredLabels = collect($rule->option_values ?? [])
+                    ->map(fn($value) => $this->normalizeOptionLabel($value))
+                    ->filter()
+                    ->values();
+
+                if ($requiredLabels->isEmpty()) {
+                    return false;
+                }
+
+                return $requiredLabels->every(fn($label) => $selectedLabels->contains($label));
+            });
+    }
+
+    private function normalizeOptionLabel(mixed $value): string
+    {
+        return trim(mb_strtolower((string) $value));
     }
 
     private function materialDelta(string $value): float
