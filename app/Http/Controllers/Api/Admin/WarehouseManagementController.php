@@ -97,6 +97,15 @@ class WarehouseManagementController extends Controller
             $request->input('service_pincodes', []),
             max(1, (int) AppSetting::get('warehouse_service_pincodes_limit', 10))
         );
+
+        $duplicatePincodes = Warehouse::duplicateServicePincodes($data['service_pincodes']);
+        if (!empty($duplicatePincodes)) {
+            return $this->validationErrorResponse([
+                'service_pincodes' => [$this->duplicatePincodeMessage($duplicatePincodes)],
+                'duplicates' => $duplicatePincodes,
+            ]);
+        }
+
         $warehouse = Warehouse::create($data);
 
         return $this->itemCreatedResponse('admin.warehouse_created', $warehouse);
@@ -176,11 +185,29 @@ class WarehouseManagementController extends Controller
                 $request->input('service_pincodes', []),
                 max(1, (int) AppSetting::get('warehouse_service_pincodes_limit', 10))
             );
+
+            $duplicatePincodes = Warehouse::duplicateServicePincodes($data['service_pincodes'], $warehouse->id);
+            if (!empty($duplicatePincodes)) {
+                return $this->validationErrorResponse([
+                    'service_pincodes' => [$this->duplicatePincodeMessage($duplicatePincodes)],
+                    'duplicates' => $duplicatePincodes,
+                ]);
+            }
         }
 
         $warehouse->update($data);
 
         return $this->successResponse('admin.warehouse_updated', $warehouse);
+    }
+
+    protected function duplicatePincodeMessage(array $duplicates): string
+    {
+        $items = collect($duplicates)
+            ->map(fn ($warehouse, $pincode) => "{$pincode} is already assigned to {$warehouse['warehouse_name']}")
+            ->values()
+            ->all();
+
+        return 'Each service pincode can be assigned to only one warehouse. ' . implode('; ', $items) . '.';
     }
 
     #[OA\Delete(

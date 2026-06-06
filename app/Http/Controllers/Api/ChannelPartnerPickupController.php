@@ -83,13 +83,20 @@ class ChannelPartnerPickupController extends Controller
             $pincode = $request->input('pincode') ?: $customer->pincode;
             $warehouse = $this->resolveWarehouseByPincode($pincode, $latitude, $longitude);
 
+            if (!$warehouse) {
+                return $this->validationErrorResponse([
+                    'warehouse' => ['No active warehouse is mapped for this booking pincode. Please add the pincode in warehouse service pincodes before accepting bookings.'],
+                    'pincode' => [$pincode ?: 'Pincode could not be resolved from the selected address/location.'],
+                ]);
+            }
+
             $normalizedRequestType = $request->request_type === 'basic_scrap' ? 'scrap' : $request->request_type;
             $pickup = PickupRequest::create([
                 'request_type' => $normalizedRequestType,
                 'pickup_code' => 'CP-' . strtoupper(Str::random(6)) . '-' . rand(1000, 9999),
                 'customer_id' => $customer->app_customer_id ?? $request->user()->id,
                 'partner_customer_id' => $customer->id,
-                'warehouse_id' => $warehouse?->id,
+                'warehouse_id' => $warehouse->id,
                 'created_by' => $request->user()->id,
                 'channel_partner_id' => $partnerId,
                 'customer_name' => $customer->name,

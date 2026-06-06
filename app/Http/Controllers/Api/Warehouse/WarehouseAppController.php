@@ -24,7 +24,13 @@ class WarehouseAppController extends Controller
             return Warehouse::pluck('id')->all();
         }
         if ($user->hasRole('warehouse')) {
-            return Warehouse::where('manager_id', $user->id)->pluck('id')->all();
+            $ids = Warehouse::where('manager_id', $user->id)->pluck('id');
+
+            if ($user->warehouse_id) {
+                $ids->push((int) $user->warehouse_id);
+            }
+
+            return $ids->unique()->values()->all();
         }
         if ($user->hasRole('channel_partner')) {
             return Warehouse::where('channel_partner_id', $user->channel_partner_id)->pluck('id')->all();

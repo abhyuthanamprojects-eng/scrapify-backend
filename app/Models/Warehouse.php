@@ -156,6 +156,31 @@ class Warehouse extends Model
         return $query->orderBy('id')->get();
     }
 
+    public static function duplicateServicePincodes(array $pincodes, ?int $ignoreWarehouseId = null): array
+    {
+        $duplicates = [];
+
+        foreach (self::normalizePincodeList($pincodes, count($pincodes) ?: 1) as $pincode) {
+            $query = self::withoutGlobalScopes()
+                ->whereJsonContains('service_pincodes', $pincode);
+
+            if ($ignoreWarehouseId) {
+                $query->whereKeyNot($ignoreWarehouseId);
+            }
+
+            $warehouse = $query->first(['id', 'name']);
+
+            if ($warehouse) {
+                $duplicates[$pincode] = [
+                    'warehouse_id' => $warehouse->id,
+                    'warehouse_name' => $warehouse->name,
+                ];
+            }
+        }
+
+        return $duplicates;
+    }
+
     private static function calculateDistanceKm(float $lat1, float $lng1, float $lat2, float $lng2): float
     {
         $earthRadius = 6371.0;

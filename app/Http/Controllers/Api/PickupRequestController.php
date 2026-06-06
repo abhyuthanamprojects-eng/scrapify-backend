@@ -278,12 +278,21 @@ class PickupRequestController extends Controller
         try {
             $warehouse = $this->resolveWarehouseByPincode($pincode, $lat, $lng);
 
+            if (!$warehouse) {
+                DB::rollBack();
+
+                return $this->validationErrorResponse([
+                    'warehouse' => ['No active warehouse is mapped for this booking pincode. Please add the pincode in warehouse service pincodes before accepting bookings.'],
+                    'pincode' => [$pincode ?: 'Pincode could not be resolved from the selected address/location.'],
+                ]);
+            }
+
             $pickup = PickupRequest::create([
                 'pickup_code' => 'SCR-' . strtoupper(Str::random(6)) . '-' . rand(1000, 9999),
                 'customer_id' => $user->id,
                 'address_id' => $request->address_id,
                 'payment_detail_id' => $request->payment_detail_id,
-                'warehouse_id' => $warehouse ? $warehouse->id : null,
+                'warehouse_id' => $warehouse->id,
                 'created_by' => $user->id,
                 'channel_partner_id' => $isPartner ? $user->channel_partner_id : null,
                 'customer_name' => $isPartner ? $request->customer_name : $user->name,

@@ -97,6 +97,13 @@ class WarehouseController extends Controller
             max(1, (int) AppSetting::get('warehouse_service_pincodes_limit', 10))
         );
 
+        $duplicatePincodes = Warehouse::duplicateServicePincodes($validated['service_pincodes']);
+        if (!empty($duplicatePincodes)) {
+            return back()->withErrors([
+                'service_pincodes' => $this->duplicatePincodeMessage($duplicatePincodes),
+            ])->withInput();
+        }
+
         if ($request->user()->hasRole('channel_partner')) {
             $validated['channel_partner_id'] = $request->user()->channel_partner_id;
         }
@@ -171,6 +178,13 @@ class WarehouseController extends Controller
             max(1, (int) AppSetting::get('warehouse_service_pincodes_limit', 10))
         );
 
+        $duplicatePincodes = Warehouse::duplicateServicePincodes($validated['service_pincodes'], $warehouse->id);
+        if (!empty($duplicatePincodes)) {
+            return back()->withErrors([
+                'service_pincodes' => $this->duplicatePincodeMessage($duplicatePincodes),
+            ])->withInput();
+        }
+
         // Code is immutable post-create
         $warehouse->update($validated);
 
@@ -184,6 +198,16 @@ class WarehouseController extends Controller
 
         return redirect()->route('admin.warehouses.index')
             ->with('success', 'Warehouse deleted successfully.');
+    }
+
+    protected function duplicatePincodeMessage(array $duplicates): string
+    {
+        $items = collect($duplicates)
+            ->map(fn ($warehouse, $pincode) => "{$pincode} is already assigned to {$warehouse['warehouse_name']}")
+            ->values()
+            ->all();
+
+        return 'Each service pincode can be assigned to only one warehouse. ' . implode('; ', $items) . '.';
     }
 
     public function reverseGeocode(Request $request, LocationService $locator)
