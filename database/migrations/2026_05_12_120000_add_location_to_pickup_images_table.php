@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('pickup_images', function (Blueprint $table) {
+            if (!Schema::hasColumn('pickup_images', 'latitude')) {
+                $table->decimal('latitude', 10, 8)->nullable()->after('type');
+            }
+            if (!Schema::hasColumn('pickup_images', 'longitude')) {
+                $table->decimal('longitude', 11, 8)->nullable()->after('latitude');
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('pickup_images', function (Blueprint $table) {
+            if (Schema::hasColumn('pickup_images', 'longitude')) {
+                $table->dropColumn('longitude');
+            }
+            if (Schema::hasColumn('pickup_images', 'latitude')) {
+                $table->dropColumn('latitude');
+            }
+        });
+    }
+};
+

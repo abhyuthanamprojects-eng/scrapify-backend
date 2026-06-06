@@ -1,0 +1,3041 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "E-Waste Collection API",
+        "description": "API Documentation for E-Waste & Scrap Collection Platform",
+        "contact": {
+            "email": "admin@example.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/auth/profile/addresses": {
+            "get": {
+                "tags": [
+                    "Addresses"
+                ],
+                "summary": "Get saved addresses",
+                "operationId": "getAddresses",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Addresses"
+                ],
+                "summary": "Add new address",
+                "operationId": "storeAddress",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "address_line_1",
+                                    "pincode",
+                                    "city_id"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Home"
+                                    },
+                                    "address_line_1": {
+                                        "type": "string"
+                                    },
+                                    "address_line_2": {
+                                        "type": "string"
+                                    },
+                                    "pincode": {
+                                        "type": "string"
+                                    },
+                                    "city_id": {
+                                        "type": "integer"
+                                    },
+                                    "is_default": {
+                                        "type": "boolean"
+                                    },
+                                    "latitude": {
+                                        "type": "number"
+                                    },
+                                    "longitude": {
+                                        "type": "number"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/profile/addresses/{id}": {
+            "put": {
+                "tags": [
+                    "Addresses"
+                ],
+                "summary": "Update address",
+                "operationId": "updateAddress",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Home"
+                                    },
+                                    "address_line_1": {
+                                        "type": "string"
+                                    },
+                                    "address_line_2": {
+                                        "type": "string"
+                                    },
+                                    "pincode": {
+                                        "type": "string"
+                                    },
+                                    "city_id": {
+                                        "type": "integer"
+                                    },
+                                    "is_default": {
+                                        "type": "boolean"
+                                    },
+                                    "latitude": {
+                                        "type": "number"
+                                    },
+                                    "longitude": {
+                                        "type": "number"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Addresses"
+                ],
+                "summary": "Delete address",
+                "operationId": "deleteAddress",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/logs": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "View system activity logs",
+                "description": "View Activity Logs.",
+                "operationId": "getAdminLogs",
+                "responses": {
+                    "200": {
+                        "description": "Logs fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/kyc/{id}/verify": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Approve or Reject KYC document",
+                "description": "Verify KYC Document.",
+                "operationId": "verifyKycDocument",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "verified",
+                                            "rejected"
+                                        ]
+                                    },
+                                    "rejection_reason": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "KYC Verified/Rejected"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/payments/{id}/approve": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Approve or Reject Payment",
+                "operationId": "approvePayment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "example": "approved",
+                                        "enum": [
+                                            "approved",
+                                            "failed"
+                                        ]
+                                    },
+                                    "remarks": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment status updated"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/pickups/{id}/assign": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Assign pickup to pickup boy",
+                "operationId": "assignPickup",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "pickup_boy_id"
+                                ],
+                                "properties": {
+                                    "pickup_boy_id": {
+                                        "type": "integer"
+                                    },
+                                    "notes": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pickup Assigned"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/pickups": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "List all pickup requests with global filters",
+                "description": "List all pickup requests (Admin).",
+                "operationId": "adminListPickups",
+                "responses": {
+                    "200": {
+                        "description": "Pickups fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/pickup-boys": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "List all pickup agents",
+                "description": "List all pickup boys (Agents).",
+                "operationId": "adminListAgents",
+                "responses": {
+                    "200": {
+                        "description": "Agents fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/payments": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "List all payments and settlements",
+                "description": "List payments / settlements.",
+                "operationId": "adminListPayments",
+                "responses": {
+                    "200": {
+                        "description": "Payments fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/payments/{id}": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get specific payment details",
+                "description": "Get single payment details.",
+                "operationId": "adminGetPaymentDetails",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Payment details fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/withdrawals/{id}/approve": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Approve or Reject a withdrawal request",
+                "description": "Approve/Reject a withdrawal request.",
+                "operationId": "adminApproveWithdrawal",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "approved",
+                                            "paid",
+                                            "failed",
+                                            "rejected"
+                                        ]
+                                    },
+                                    "transaction_id": {
+                                        "type": "string"
+                                    },
+                                    "admin_notes": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Withdrawal Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/user-types/{code}/visibility": {
+            "patch": {
+                "tags": [
+                    "Admin User Types"
+                ],
+                "summary": "Toggle visibility of a user type in login screen",
+                "operationId": "updateUserTypeVisibility",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "visible"
+                                ],
+                                "properties": {
+                                    "visible": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Visibility updated"
+                    },
+                    "404": {
+                        "description": "Role not found"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/corporate-bookings": {
+            "get": {
+                "tags": [
+                    "Admin Corporate"
+                ],
+                "summary": "List corporate pickup requests for admin",
+                "operationId": "adminGetCorporateBookings",
+                "responses": {
+                    "200": {
+                        "description": "List of corporate bookings"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/corporate-bookings/{id}/quote": {
+            "post": {
+                "tags": [
+                    "Admin Corporate"
+                ],
+                "summary": "Provide a quote for a corporate booking",
+                "operationId": "adminQuoteCorporateBooking",
+                "responses": {
+                    "200": {
+                        "description": "Quote provided successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/partner-approvals": {
+            "get": {
+                "tags": [
+                    "Admin Partner Approvals"
+                ],
+                "summary": "List all partner approval requests",
+                "operationId": "listApprovalRequests",
+                "responses": {
+                    "200": {
+                        "description": "Requests fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/waitlist": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "List all waitlist entries with filters",
+                "operationId": "adminListWaitlist",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/waitlist/{id}/status": {
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Update waitlist entry status",
+                "operationId": "adminUpdateWaitlistStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "new",
+                                            "contacted",
+                                            "planned",
+                                            "launched",
+                                            "closed"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status updated"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/waitlist/export": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Export waitlist entries as CSV",
+                "operationId": "adminExportWaitlist",
+                "responses": {
+                    "200": {
+                        "description": "CSV file"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/warehouses": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "List all warehouses with filters",
+                "operationId": "adminListWarehouses",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Create a new warehouse",
+                "operationId": "adminStoreWarehouse",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "address",
+                                    "city_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "address": {
+                                        "type": "string"
+                                    },
+                                    "latitude": {
+                                        "type": "number"
+                                    },
+                                    "longitude": {
+                                        "type": "number"
+                                    },
+                                    "service_radius_km": {
+                                        "type": "number"
+                                    },
+                                    "city_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Warehouse created"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/warehouses/{id}": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Get warehouse details",
+                "operationId": "adminShowWarehouse",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Update warehouse details",
+                "operationId": "adminUpdateWarehouse",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Warehouse updated"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "Delete warehouse",
+                "operationId": "adminDeleteWarehouse",
+                "responses": {
+                    "200": {
+                        "description": "Warehouse deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/app-settings": {
+            "post": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Get global app settings and feature flags with serviceability check",
+                "operationId": "getAppSettings",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "latitude": {
+                                        "type": "number",
+                                        "example": 19.076
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "example": 72.8777
+                                    },
+                                    "location_name": {
+                                        "type": "string",
+                                        "example": "Mumbai"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Settings fetched successfully"
+                    }
+                }
+            }
+        },
+        "/api/app-settings/language": {
+            "post": {
+                "tags": [
+                    "Settings"
+                ],
+                "summary": "Update user's preferred language",
+                "operationId": "updateAppLanguage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "language"
+                                ],
+                                "properties": {
+                                    "language": {
+                                        "type": "string",
+                                        "enum": [
+                                            "en",
+                                            "hi",
+                                            "gu"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Language updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/send-otp": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Send OTP to mobile number",
+                "description": "Sends a 6-digit OTP to the provided mobile number.",
+                "operationId": "sendOtp",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "9876543210"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "customer",
+                                        "enum": [
+                                            "customer",
+                                            "pickup_boy",
+                                            "warehouse",
+                                            "channel_partner"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OTP sent successfully"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "phone": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                }
+            }
+        },
+        "/api/auth/verify-otp": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify OTP and Login",
+                "description": "Verifies the OTP and returns an authentication token.",
+                "operationId": "verifyOtp",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "phone",
+                                    "otp",
+                                    "device_name"
+                                ],
+                                "properties": {
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "9876543210"
+                                    },
+                                    "otp": {
+                                        "type": "string",
+                                        "example": "123456"
+                                    },
+                                    "device_name": {
+                                        "type": "string",
+                                        "example": "My Device"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Login successful"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "token": {
+                                                    "type": "string"
+                                                },
+                                                "user": {
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid OTP"
+                    }
+                }
+            }
+        },
+        "/api/auth/profile": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get User Profile",
+                "operationId": "getProfile",
+                "responses": {
+                    "200": {
+                        "description": "Profile fetched successfully"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout",
+                "operationId": "logout",
+                "responses": {
+                    "200": {
+                        "description": "Logout successful"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/user-types": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get available user types for login selection",
+                "operationId": "getUserTypes",
+                "responses": {
+                    "200": {
+                        "description": "List of user types"
+                    }
+                }
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get all category types",
+                "description": "Returns list of top-level category types (e.g. E-Waste, Metal Scrap) with their names and images.",
+                "operationId": "getCategoryTypes",
+                "responses": {
+                    "200": {
+                        "description": "Category types fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "format": "url"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/subcategories": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get subcategories for a category type",
+                "description": "Returns the second-level categories (e.g. Computers & Laptops) for a given category type ID.",
+                "operationId": "getSubcategories",
+                "parameters": [
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "The ID of the category type",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Subcategories fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "category_id": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "format": "url"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/items": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get final-level items with pricing",
+                "description": "Returns specific items (e.g. Iron Scrap) with their base prices, units, and metadata.",
+                "operationId": "getItems",
+                "parameters": [
+                    {
+                        "name": "subcategory_id",
+                        "in": "query",
+                        "description": "The ID of the subcategory",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Items fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "subcategory_id": {
+                                            "type": "integer"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer"
+                                                    },
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float"
+                                                    },
+                                                    "unit": {
+                                                        "type": "string"
+                                                    },
+                                                    "material_type": {
+                                                        "type": "string"
+                                                    },
+                                                    "pickup_size": {
+                                                        "type": "string"
+                                                    },
+                                                    "price_type": {
+                                                        "type": "string"
+                                                    },
+                                                    "condition": {
+                                                        "type": "string"
+                                                    },
+                                                    "image": {
+                                                        "type": "string",
+                                                        "format": "url"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/categories/{id}": {
+            "get": {
+                "tags": [
+                    "Categories"
+                ],
+                "summary": "Get specific category details",
+                "description": "Get single category details.",
+                "operationId": "getCategoryDetail",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category fetched"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/channel-partner/dashboard": {
+            "get": {
+                "tags": [
+                    "Channel Partner"
+                ],
+                "summary": "Get channel partner dashboard metrics",
+                "operationId": "getChannelPartnerDashboard",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard data fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/corporate-bookings": {
+            "get": {
+                "tags": [
+                    "Corporate"
+                ],
+                "summary": "List corporate pickup requests",
+                "operationId": "getCorporateBookings",
+                "responses": {
+                    "200": {
+                        "description": "List of corporate bookings"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Corporate"
+                ],
+                "summary": "Create a new corporate booking request",
+                "operationId": "createCorporateBooking",
+                "responses": {
+                    "201": {
+                        "description": "Corporate Booking Created"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/donation-request": {
+            "post": {
+                "tags": [
+                    "Donation"
+                ],
+                "summary": "Create a new donation pickup request",
+                "operationId": "createDonationRequest",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "address",
+                                    "city_id",
+                                    "scheduled_at",
+                                    "donation_category",
+                                    "items",
+                                    "images"
+                                ],
+                                "properties": {
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Street, City"
+                                    },
+                                    "address_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "city_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "example": 19.076
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "example": 72.8777
+                                    },
+                                    "scheduled_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-04-20 10:00:00"
+                                    },
+                                    "donation_category": {
+                                        "type": "string",
+                                        "example": "clothes"
+                                    },
+                                    "notes": {
+                                        "type": "string"
+                                    },
+                                    "images[]": {
+                                        "description": "Min 1, max 3 images (max 5MB each)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "category_id": {
+                                                    "type": "integer",
+                                                    "example": 21
+                                                },
+                                                "weight": {
+                                                    "type": "number",
+                                                    "example": 10.5
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Donation Request Created"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/donation-requests": {
+            "get": {
+                "tags": [
+                    "Donation"
+                ],
+                "summary": "List donation pickup requests",
+                "operationId": "getDonationRequests",
+                "responses": {
+                    "200": {
+                        "description": "List of donations"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-requests/{id}/clone-as-donation": {
+            "post": {
+                "tags": [
+                    "Donation"
+                ],
+                "summary": "Clone an existing scrap pickup as a donation",
+                "operationId": "cloneAsDonation",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "scheduled_at": {
+                                        "type": "string",
+                                        "format": "date-time"
+                                    },
+                                    "notes": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Donation Created"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/home-appliances/details": {
+            "get": {
+                "tags": [
+                    "Home Appliances"
+                ],
+                "summary": "Get structured details for specific home appliance category",
+                "description": "Returns attributes (Brands, Capacity, Types) and base pricing specifically for categories like AC and Microwave.",
+                "operationId": "getHomeApplianceDetails",
+                "parameters": [
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "description": "The ID of the category (e.g. Air Conditioner or Microwave)",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Details fetched successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "estimated_price": {
+                                                    "type": "number"
+                                                },
+                                                "sections": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "title": {
+                                                                "type": "string"
+                                                            },
+                                                            "slug": {
+                                                                "type": "string"
+                                                            },
+                                                            "options": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer"
+                                                                        },
+                                                                        "value": {
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/states": {
+            "get": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "List all states",
+                "operationId": "getStates",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/cities": {
+            "get": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "List cities by state",
+                "operationId": "getCities",
+                "parameters": [
+                    {
+                        "name": "state_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/serviceable-cities": {
+            "get": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "List all serviceable cities",
+                "operationId": "getServiceableCities",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/pickup-slots": {
+            "get": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "Get available pickup slots",
+                "operationId": "getPickupSlots",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/auth/profile/payment-details": {
+            "get": {
+                "tags": [
+                    "Payment Details"
+                ],
+                "summary": "Get saved payment details",
+                "operationId": "getPaymentDetails",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Payment Details"
+                ],
+                "summary": "Add new payment detail",
+                "operationId": "storePaymentDetail",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "bank",
+                                            "upi"
+                                        ]
+                                    },
+                                    "bank_name": {
+                                        "type": "string"
+                                    },
+                                    "account_number": {
+                                        "type": "string"
+                                    },
+                                    "ifsc_code": {
+                                        "type": "string"
+                                    },
+                                    "account_holder_name": {
+                                        "type": "string"
+                                    },
+                                    "upi_id": {
+                                        "type": "string"
+                                    },
+                                    "is_default": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Added"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/profile/payment-details/{id}": {
+            "put": {
+                "tags": [
+                    "Payment Details"
+                ],
+                "summary": "Update payment detail",
+                "operationId": "updatePaymentDetail",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "bank",
+                                            "upi"
+                                        ]
+                                    },
+                                    "bank_name": {
+                                        "type": "string"
+                                    },
+                                    "account_number": {
+                                        "type": "string"
+                                    },
+                                    "ifsc_code": {
+                                        "type": "string"
+                                    },
+                                    "account_holder_name": {
+                                        "type": "string"
+                                    },
+                                    "upi_id": {
+                                        "type": "string"
+                                    },
+                                    "is_default": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Payment Details"
+                ],
+                "summary": "Delete payment detail",
+                "operationId": "deletePaymentDetail",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Deleted"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-boy/assignments": {
+            "get": {
+                "tags": [
+                    "Pickup Boy"
+                ],
+                "summary": "List assigned and accepted pickups for the agent",
+                "description": "List assigned pickups.",
+                "operationId": "getPickupAssignments",
+                "responses": {
+                    "200": {
+                        "description": "Assignments fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-boy/pickups/{id}": {
+            "get": {
+                "tags": [
+                    "Pickup Boy"
+                ],
+                "summary": "Get specific pickup details for the agent",
+                "description": "Get pickup details.",
+                "operationId": "getPickupBoyDetails",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pickup details fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-boy/pickups/{id}/verify": {
+            "post": {
+                "tags": [
+                    "Pickup Boy"
+                ],
+                "summary": "Verify items and update final price",
+                "operationId": "verifyPickup",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "items",
+                                    "images[]"
+                                ],
+                                "properties": {
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer"
+                                                },
+                                                "weight": {
+                                                    "type": "number"
+                                                },
+                                                "quantity": {
+                                                    "type": "integer"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "images[]": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pickup Verified"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-boy/pickups/{id}/accept": {
+            "post": {
+                "tags": [
+                    "Pickup Boy"
+                ],
+                "summary": "Accept an assigned pickup",
+                "description": "Accept a pickup assignment.",
+                "operationId": "acceptPickupAssignment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pickup Accepted"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-boy/pickups/{id}/reject": {
+            "post": {
+                "tags": [
+                    "Pickup Boy"
+                ],
+                "summary": "Reject an assigned pickup",
+                "description": "Reject a pickup assignment.",
+                "operationId": "rejectPickupAssignment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pickup Rejected"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-boy/pickups/{id}/status": {
+            "post": {
+                "tags": [
+                    "Pickup Boy"
+                ],
+                "summary": "Update current travel/operations status",
+                "description": "Update travel status (on_the_way, arrived, etc).",
+                "operationId": "updatePickupTravelStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "status"
+                                ],
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "on_the_way",
+                                            "arrived",
+                                            "verifying"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-boy/status": {
+            "post": {
+                "tags": [
+                    "Pickup Boy"
+                ],
+                "summary": "Toggle agent online/offline status",
+                "description": "Update online/offline status.",
+                "operationId": "toggleAgentStatus",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "is_online"
+                                ],
+                                "properties": {
+                                    "is_online": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status Toggled"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-boy/location": {
+            "post": {
+                "tags": [
+                    "Pickup Boy"
+                ],
+                "summary": "Update current GPS coordinates and vehicle number",
+                "description": "Update live location coordinates and vehicle info.",
+                "operationId": "updateAgentLocation",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "latitude": {
+                                        "type": "number",
+                                        "example": 19.076
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "example": 72.8777
+                                    },
+                                    "vehicle_number": {
+                                        "type": "string",
+                                        "example": "GJ-01-AB-1234"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Location Updated"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-boy/dashboard": {
+            "get": {
+                "tags": [
+                    "Pickup Boy"
+                ],
+                "summary": "Get dashboard counts and upcoming routes",
+                "operationId": "getPickupBoyDashboard",
+                "responses": {
+                    "200": {
+                        "description": "Dashboard fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-boy/pickups/{id}/reschedule-request": {
+            "post": {
+                "tags": [
+                    "Pickup Boy"
+                ],
+                "summary": "Request a reschedule with reason",
+                "operationId": "requestReschedule",
+                "responses": {
+                    "200": {
+                        "description": "Reschedule request submitted"
+                    },
+                    "404": {
+                        "description": "Assignment not found"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-requests": {
+            "get": {
+                "tags": [
+                    "Pickup"
+                ],
+                "summary": "List pickup requests",
+                "operationId": "getPickupRequests",
+                "responses": {
+                    "200": {
+                        "description": "List of pickup requests"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-requests/stats": {
+            "get": {
+                "tags": [
+                    "Pickup"
+                ],
+                "summary": "Get counts for different pickup statuses",
+                "description": "Get pickup stats for the user.",
+                "operationId": "getPickupStats",
+                "responses": {
+                    "200": {
+                        "description": "Stats fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-request": {
+            "post": {
+                "tags": [
+                    "Pickup"
+                ],
+                "summary": "Create a new pickup request",
+                "operationId": "createPickupRequest",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "address",
+                                    "city_id",
+                                    "scheduled_at",
+                                    "items",
+                                    "images"
+                                ],
+                                "properties": {
+                                    "address": {
+                                        "type": "string",
+                                        "example": "123 Street, City"
+                                    },
+                                    "address_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "city_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "example": 19.076
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "example": 72.8777
+                                    },
+                                    "scheduled_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-02-20 10:00:00"
+                                    },
+                                    "payout_method": {
+                                        "type": "string",
+                                        "enum": [
+                                            "upi",
+                                            "bank",
+                                            "cash",
+                                            "wallet"
+                                        ]
+                                    },
+                                    "payment_detail_id": {
+                                        "type": "integer"
+                                    },
+                                    "images[]": {
+                                        "description": "Min 1, max 3 images (max 5MB each)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "category_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "weight": {
+                                                    "type": "number",
+                                                    "example": 10.5
+                                                },
+                                                "quantity": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "customer_name": {
+                                        "type": "string"
+                                    },
+                                    "customer_phone": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pickup Request Created"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-requests/{id}": {
+            "get": {
+                "tags": [
+                    "Pickup"
+                ],
+                "summary": "Get specific pickup request details",
+                "description": "Show details.",
+                "operationId": "getPickupDetail",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail fetched"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-requests/{id}/reschedule": {
+            "post": {
+                "tags": [
+                    "Pickup"
+                ],
+                "summary": "Reschedule a pickup request",
+                "description": "Reschedule pickup request.",
+                "operationId": "reschedulePickup",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "scheduled_at"
+                                ],
+                                "properties": {
+                                    "scheduled_at": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-04-20 14:00:00"
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "I am not at home"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pickup Rescheduled"
+                    },
+                    "400": {
+                        "description": "Invalid Status"
+                    },
+                    "403": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-requests/{id}/tracking": {
+            "get": {
+                "tags": [
+                    "Pickup"
+                ],
+                "summary": "Get tracking timeline for a pickup request",
+                "description": "Get tracking timeline for a pickup request.",
+                "operationId": "getPickupTracking",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Tracking Data Fetched"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-requests/{id}/cancel": {
+            "post": {
+                "tags": [
+                    "Pickup"
+                ],
+                "summary": "Cancel a pickup request",
+                "description": "Cancel pickup request.",
+                "operationId": "cancelPickup",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "reason"
+                                ],
+                                "properties": {
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Changed my mind"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pickup Cancelled"
+                    },
+                    "400": {
+                        "description": "Invalid Status"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pickup-requests/{id}/review": {
+            "post": {
+                "tags": [
+                    "Pickup"
+                ],
+                "summary": "Submit rating and review for a completed pickup",
+                "description": "Submit a review for a completed pickup.",
+                "operationId": "submitPickupReview",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "rating"
+                                ],
+                                "properties": {
+                                    "rating": {
+                                        "type": "integer",
+                                        "example": 5,
+                                        "maximum": 5,
+                                        "minimum": 1
+                                    },
+                                    "review": {
+                                        "type": "string",
+                                        "example": "Great service!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Review Submitted"
+                    },
+                    "400": {
+                        "description": "Invalid Status"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/profile/bank-details": {
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Update user bank/upi details",
+                "description": "Update Bank Details.",
+                "operationId": "updateBankDetails",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "bank_name",
+                                    "account_number",
+                                    "ifsc_code"
+                                ],
+                                "properties": {
+                                    "bank_name": {
+                                        "type": "string"
+                                    },
+                                    "account_number": {
+                                        "type": "string"
+                                    },
+                                    "ifsc_code": {
+                                        "type": "string"
+                                    },
+                                    "upi_id": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Bank details updated"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/profile/kyc": {
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Upload KYC document",
+                "description": "Upload KYC Document.",
+                "operationId": "uploadKyc",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "document_type",
+                                    "image"
+                                ],
+                                "properties": {
+                                    "document_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "aadhaar_front",
+                                            "aadhaar_back",
+                                            "pan_card",
+                                            "driving_license"
+                                        ]
+                                    },
+                                    "document_number": {
+                                        "type": "string"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "KYC uploaded"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/auth/profile/update": {
+            "post": {
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "Update User Profile",
+                "description": "Update the user's name, email, city ID, and optionally upload a profile photo.",
+                "operationId": "updateProfile",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "city_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "profile_photo": {
+                                        "description": "Profile photo image file",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "profile.updated"
+                                        },
+                                        "data": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "apiAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/service-coverage": {
+            "get": {
+                "tags": [
+                    "Location"
+                ],
+                "summary": "List cities and areas covered by active warehouses",
+                "operationId": "getServiceCoverage",
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    }
+                }
+            }
+        },
+        "/api/v1/waitlist": {
+            "post": {
+                "tags": [
+                    "Waitlist"
+                ],
+                "summary": "Join waitlist for unsupported locations",
+                "operationId": "submitWaitlist",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "phone",
+                                    "city"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Amit Sinha"
+                                    },
+                                    "phone": {
+                                        "type": "string",
+                                        "example": "9876543210"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "amit@example.com"
+                                    },
+                                    "city": {
+                                        "type": "string",
+                                        "example": "Gurugram"
+                                    },
+                                    "state": {
+                                        "type": "string",
+                                        "example": "Haryana"
+                                    },
+                                    "location_name": {
+                                        "type": "string",
+                                        "example": "Gurugram, Haryana"
+                                    },
+                                    "latitude": {
+                                        "type": "number",
+                                        "example": 28.4958
+                                    },
+                                    "longitude": {
+                                        "type": "number",
+                                        "example": 77.0069
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Please launch service here."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Waitlist request submitted successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "apiAuth": {
+                "type": "http",
+                "description": "Login with email and password to get the authentication token",
+                "name": "Token based Based",
+                "in": "header",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Addresses",
+            "description": "Addresses"
+        },
+        {
+            "name": "Admin",
+            "description": "Admin"
+        },
+        {
+            "name": "Admin User Types",
+            "description": "Admin User Types"
+        },
+        {
+            "name": "Admin Corporate",
+            "description": "Admin Corporate"
+        },
+        {
+            "name": "Admin Partner Approvals",
+            "description": "Admin Partner Approvals"
+        },
+        {
+            "name": "Settings",
+            "description": "Settings"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Categories",
+            "description": "Categories"
+        },
+        {
+            "name": "Channel Partner",
+            "description": "Channel Partner"
+        },
+        {
+            "name": "Corporate",
+            "description": "Corporate"
+        },
+        {
+            "name": "Donation",
+            "description": "Donation"
+        },
+        {
+            "name": "Home Appliances",
+            "description": "Home Appliances"
+        },
+        {
+            "name": "Location",
+            "description": "Location"
+        },
+        {
+            "name": "Payment Details",
+            "description": "Payment Details"
+        },
+        {
+            "name": "Pickup Boy",
+            "description": "Pickup Boy"
+        },
+        {
+            "name": "Pickup",
+            "description": "Pickup"
+        },
+        {
+            "name": "Profile",
+            "description": "Profile"
+        },
+        {
+            "name": "Waitlist",
+            "description": "Waitlist"
+        }
+    ]
+}

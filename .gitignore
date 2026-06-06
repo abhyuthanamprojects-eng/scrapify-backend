@@ -1,0 +1,56 @@
+# Laravel Framework
+/vendor
+/node_modules
+/public/hot
+/public/storage
+/storage/*.key
+/bootstrap/cache
+.env
+.env.backup
+.env.production.backup
+.phpunit.result.cache
+.php-cs-fixer.cache
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.classpath
+*.c9/
+*.sublime-workspace
+
+# OS
+Thumbs.db
+Desktop.ini
+
+# Logs
+storage/logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts
+/dist
+/build
+.env.local
+.env.*.local
+
+# Dependencies
+composer.lock
+package-lock.json
+yarn.lock
+
+# Testing
+.phpunit.xml
+coverage/
+.coverage
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

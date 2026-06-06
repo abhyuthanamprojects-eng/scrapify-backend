@@ -1,0 +1,1916 @@
+openapi: 3.0.0
+info:
+  title: E-Waste Collection Platform API
+  description: |
+    Complete API documentation for E-Waste & Scrap Collection Platform
+    
+    ## Features
+    - OTP-based authentication
+    - Dynamic attribute system
+    - Multi-city operations
+    - Image upload
+    - Real-time notifications
+    - Partner settlements
+    - Warehouse management
+    
+    ## Authentication
+    Most endpoints require Bearer token authentication.
+    Use the `/auth/verify-otp` endpoint to get your token.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@ewaste.com
+
+servers:
+  - url: http://127.0.0.1:8000/api
+    description: Local Development Server
+  - url: https://floralwhite-spoonbill-935004.hostingersite.com/api
+    description: Production Server
+
+tags:
+  - name: Authentication
+    description: OTP-based authentication endpoints
+  - name: Profile
+    description: User profile management
+  - name: Locations
+    description: States and cities
+  - name: Categories
+    description: E-waste categories
+  - name: Attributes
+    description: Dynamic attributes (Admin only)
+  - name: Pickup Requests
+    description: Pickup request management
+  - name: Images
+    description: Image upload and management
+  - name: Notifications
+    description: User notifications
+  - name: Warehouse
+    description: Warehouse inventory operations
+  - name: Settlements
+    description: Partner settlement management (Admin)
+  - name: Admin
+    description: Admin operations
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Enter your Bearer token from the verify-otp response
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: validation.failed
+        errors:
+          type: object
+          additionalProperties: true
+
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: operation.success
+        data:
+          type: object
+          additionalProperties: true
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: John Doe
+        phone:
+          type: string
+          example: "9876543210"
+        email:
+          type: string
+          example: john@example.com
+        roles:
+          type: array
+          items:
+            type: string
+          example: ["customer"]
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: object
+          properties:
+            en:
+              type: string
+            hi:
+              type: string
+        slug:
+          type: string
+        category_type_id:
+          type: integer
+        category_type:
+          $ref: '#/components/schemas/CategoryType'
+        pricing_type:
+          type: string
+          enum: [per_kg, per_piece, per_capacity]
+        base_price:
+          type: number
+        image_url:
+          type: string
+          nullable: true
+          example: "https://example.com/storage/categories/image.png"
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attribute'
+
+    CategoryType:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+          example: "https://example.com/storage/category_types/icon.png"
+        status:
+          type: boolean
+
+    Address:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+          example: "Home"
+        address_line_1:
+          type: string
+          example: "123 Main St"
+        address_line_2:
+          type: string
+          nullable: true
+          example: "Apt 4B"
+        pincode:
+          type: string
+          example: "400001"
+        city_id:
+          type: integer
+          example: 1
+        state:
+          type: string
+          nullable: true
+        is_default:
+          type: boolean
+          example: true
+          
+    PaymentDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [bank, upi]
+        bank_name:
+          type: string
+          nullable: true
+        account_number:
+          type: string
+          nullable: true
+        ifsc_code:
+          type: string
+          nullable: true
+        account_holder_name:
+          type: string
+          nullable: true
+        upi_id:
+          type: string
+          nullable: true
+        is_default:
+          type: boolean
+
+    Attribute:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: object
+          example: {"en": "Brand"}
+        type:
+          type: string
+          enum: [text, number, select, radio, checkbox, date]
+        is_required:
+          type: boolean
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              value:
+                type: object
+                example: {"en": "Samsung"}
+
+    PickupRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        customer_name:
+          type: string
+        customer_phone:
+          type: string
+        address:
+          type: string
+        city_id:
+          type: integer
+        scheduled_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, assigned, on_the_way, picked_up, completed, cancelled]
+        estimated_amount:
+          type: number
+          format: float
+        final_amount:
+          type: number
+          format: float
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PickupItem'
+
+    PickupItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        category_id:
+          type: integer
+        quantity:
+          type: integer
+        attributes:
+          type: array
+          items:
+            type: object
+            properties:
+              attribute_id:
+                type: integer
+              value:
+                type: string
+
+paths:
+  /auth/send-otp:
+    post:
+      tags:
+        - Authentication
+      summary: Send OTP to mobile number
+      description: Sends a 6-digit OTP to the provided mobile number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+                - role
+              properties:
+                phone:
+                  type: string
+                  example: "9876543210"
+                  description: 10-digit mobile number
+                role:
+                  type: string
+                  enum: [customer, pickup_boy, channel_partner, admin]
+                  example: customer
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: otp.sent
+                  data:
+                    type: object
+                    properties:
+                      otp:
+                        type: string
+                        example: "123456"
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/verify-otp:
+    post:
+      tags:
+        - Authentication
+      summary: Verify OTP and login
+      description: Verifies the OTP and returns authentication token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - phone
+                - otp
+              properties:
+                phone:
+                  type: string
+                  example: "9876543210"
+                otp:
+                  type: string
+                  example: "123456"
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: "1|abc123..."
+                      user:
+                        $ref: '#/components/schemas/User'
+
+  /auth/profile:
+    get:
+      tags:
+        - Authentication
+      summary: Get user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/User'
+
+  /auth/profile/update:
+    post:
+      tags:
+        - Profile
+      summary: Update user profile
+      description: Update the user's name, email, city ID, and optionally upload a profile photo.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+                email:
+                  type: string
+                  format: email
+                  example: "john@example.com"
+                city_id:
+                  type: integer
+                  example: 1
+                profile_photo:
+                  type: string
+                  format: binary
+                  description: Profile photo image file (jpeg, png, jpg, webp)
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: profile.updated
+                  data:
+                    type: object
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+
+  /auth/profile/addresses:
+    get:
+      tags:
+        - Profile
+      summary: Get all user addresses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Addresses fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Address'
+    post:
+      tags:
+        - Profile
+      summary: Add new address
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [address_line_1, pincode, city_id]
+              properties:
+                title:
+                  type: string
+                address_line_1:
+                  type: string
+                address_line_2:
+                  type: string
+                pincode:
+                  type: string
+                city_id:
+                  type: integer
+                state:
+                  type: string
+                is_default:
+                  type: boolean
+      responses:
+        '200':
+          description: Address created successfully
+
+  /auth/profile/addresses/{id}:
+    put:
+      tags:
+        - Profile
+      summary: Update address
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                address_line_1:
+                  type: string
+                address_line_2:
+                  type: string
+                pincode:
+                  type: string
+                city_id:
+                  type: integer
+                state:
+                  type: string
+                is_default:
+                  type: boolean
+      responses:
+        '200':
+          description: Address updated successfully
+    delete:
+      tags:
+        - Profile
+      summary: Delete address
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Address deleted successfully
+
+  /auth/profile/payment-details:
+    get:
+      tags:
+        - Profile
+      summary: Get all payment details
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Payment details fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PaymentDetail'
+    post:
+      tags:
+        - Profile
+      summary: Add new payment details
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type]
+              properties:
+                type:
+                  type: string
+                  enum: [bank, upi]
+                account_number:
+                  type: string
+                ifsc_code:
+                  type: string
+                bank_name:
+                  type: string
+                account_holder_name:
+                  type: string
+                upi_id:
+                  type: string
+                is_default:
+                  type: boolean
+      responses:
+        '200':
+          description: Payment details added successfully
+
+  /auth/profile/payment-details/{id}:
+    put:
+      tags:
+        - Profile
+      summary: Update payment details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [bank, upi]
+                account_number:
+                  type: string
+                ifsc_code:
+                  type: string
+                bank_name:
+                  type: string
+                account_holder_name:
+                  type: string
+                upi_id:
+                  type: string
+                is_default:
+                  type: boolean
+      responses:
+        '200':
+          description: Payment details updated successfully
+    delete:
+      tags:
+        - Profile
+      summary: Delete payment details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Payment details deleted successfully
+
+  /auth/profile/bank-details:
+    post:
+      tags:
+        - Profile
+      summary: Update bank details
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account_number:
+                  type: string
+                  example: "1234567890"
+                ifsc_code:
+                  type: string
+                  example: SBIN0001234
+                bank_name:
+                  type: string
+                  example: State Bank of India
+                account_holder_name:
+                  type: string
+                  example: John Doe
+                upi_id:
+                  type: string
+                  example: john@paytm
+      responses:
+        '200':
+          description: Bank details updated
+
+  /auth/profile/kyc:
+    post:
+      tags:
+        - Profile
+      summary: Upload KYC document
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - document_type
+                - document_number
+                - document_image
+              properties:
+                document_type:
+                  type: string
+                  enum: [aadhaar, pan, driving_license]
+                document_number:
+                  type: string
+                  example: "123456789012"
+                document_image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: KYC uploaded successfully
+
+  /states:
+    get:
+      tags:
+        - Locations
+      summary: Get all states
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: States fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        code:
+                          type: string
+                        status:
+                          type: boolean
+
+  /cities:
+    get:
+      tags:
+        - Locations
+      summary: Get cities
+      description: Get all cities, optionally filter by state
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: state_id
+          in: query
+          schema:
+            type: integer
+          description: Filter by state ID
+      responses:
+        '200':
+          description: Cities fetched successfully
+
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: List all top-level category types
+      description: Returns list of category types (e.g. E-Waste, Metal Scrap) with their names and images.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Category types fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        image:
+                          type: string
+                          format: url
+
+  /subcategories:
+    get:
+      tags:
+        - Categories
+      summary: Get subcategories for a category type
+      description: Returns the parent-level categories (e.g. Computers & Laptops) for a given category type ID.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: category_id
+          in: query
+          description: The ID of the category type
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Subcategories fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  category_id:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        image:
+                          type: string
+                          format: url
+
+  /items:
+    get:
+      tags:
+        - Categories
+      summary: Get final-level items with pricing
+      description: Returns specific items (e.g. Iron Scrap) with their base prices, units, and metadata.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: subcategory_id
+          in: query
+          description: The ID of the subcategory
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Items fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  subcategory_id:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        price:
+                          type: number
+                          format: float
+                        unit:
+                          type: string
+                        material_type:
+                          type: string
+                        pickup_size:
+                          type: string
+                        price_type:
+                          type: string
+                        condition:
+                          type: string
+                        image:
+                          type: string
+                          format: url
+
+  /categories/{id}:
+    get:
+      tags:
+        - Categories
+      summary: Get category details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Category details fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Category'
+
+  /category-types:
+    get:
+      tags:
+        - Categories
+      summary: List all category types
+      responses:
+        '200':
+          description: Category types fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CategoryType'
+    post:
+      tags:
+        - Admin
+      summary: Create special category type (Admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+                status:
+                  type: boolean
+      responses:
+        '201':
+          description: Category type created
+
+  /category-types/{id}:
+    post:
+      tags:
+        - Admin
+      summary: Update category type (Admin)
+      description: Use POST with _method=PUT for multipart support
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                _method:
+                  type: string
+                  enum: [PUT]
+                name:
+                  type: string
+                image:
+                  type: string
+                  format: binary
+                status:
+                  type: boolean
+      responses:
+        '200':
+          description: Updated successfully
+    delete:
+      tags:
+        - Admin
+      summary: Delete category type (Admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted successfully
+    get:
+      tags:
+        - Admin
+      summary: Get category type details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Category fetched successfully
+
+  /pickup-request:
+    post:
+      tags:
+        - Pickup Requests
+      summary: Create new pickup request
+      description: |
+        Create a new pickup request with dynamic attributes.
+        
+        **Important:** Minimum value validation is ₹1500
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - customer_name
+                - customer_phone
+                - address
+                - city_id
+                - scheduled_at
+                - items
+              properties:
+                customer_name:
+                  type: string
+                  example: John Doe
+                customer_phone:
+                  type: string
+                  example: "9876543210"
+                address:
+                  type: string
+                  example: 123 Main St, Mumbai
+                city_id:
+                  type: integer
+                  example: 1
+                scheduled_at:
+                  type: string
+                  format: date-time
+                  example: "2026-02-15 10:00:00"
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - category_id
+                      - quantity
+                    properties:
+                      category_id:
+                        type: integer
+                        example: 1
+                      quantity:
+                        type: integer
+                        example: 1
+                      attributes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            attribute_id:
+                              type: integer
+                              example: 1
+                            value:
+                              type: string
+                              example: "1.5 Ton"
+      responses:
+        '201':
+          description: Pickup request created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      estimated_amount:
+                        type: number
+                      status:
+                        type: string
+        '400':
+          description: Minimum value not met (₹1500)
+
+  /pickup-requests:
+    get:
+      tags:
+        - Pickup Requests
+      summary: List pickup requests
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, assigned, on_the_way, picked_up, completed, cancelled]
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Pickup requests fetched successfully
+
+  /pickup-requests/stats:
+    get:
+      tags:
+        - Pickup Requests
+      summary: Get pickup statistics
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Statistics fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      pending:
+                        type: integer
+                      assigned:
+                        type: integer
+                      completed:
+                        type: integer
+                      cancelled:
+                        type: integer
+
+  /pickup-requests/{id}:
+    get:
+      tags:
+        - Pickup Requests
+      summary: Get pickup request details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Pickup request fetched successfully
+
+  /pickup-requests/{id}/reschedule:
+    post:
+      tags:
+        - Pickup Requests
+      summary: Reschedule pickup request
+      description: Customer or pickup boy can reschedule the pickup
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - scheduled_at
+              properties:
+                scheduled_at:
+                  type: string
+                  format: date-time
+                  example: "2026-02-16 14:00:00"
+                reason:
+                  type: string
+                  example: Customer not available
+      responses:
+        '200':
+          description: Pickup rescheduled successfully
+
+  /pickup-images/upload:
+    post:
+      tags:
+        - Images
+      summary: Upload pickup images
+      description: |
+        Upload images for a pickup request.
+        
+        **Limits:**
+        - Max 10 images per request
+        - Max 5MB per image
+        - Formats: JPEG, PNG, JPG
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - pickup_request_id
+                - images
+              properties:
+                pickup_request_id:
+                  type: integer
+                  example: 1
+                type:
+                  type: string
+                  enum: [booking, verification]
+                  default: booking
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  maxItems: 10
+      responses:
+        '201':
+          description: Images uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      images:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            url:
+                              type: string
+                            type:
+                              type: string
+                      count:
+                        type: integer
+
+  /pickup-requests/{id}/images:
+    get:
+      tags:
+        - Images
+      summary: Get pickup images
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Images fetched successfully
+
+  /pickup-images/{id}:
+    delete:
+      tags:
+        - Images
+      summary: Delete an image
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Image deleted successfully
+
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: List user notifications
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: unread_only
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Notifications fetched successfully
+
+  /notifications/{id}/read:
+    post:
+      tags:
+        - Notifications
+      summary: Mark notification as read
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notification marked as read
+
+  /notifications/read-all:
+    post:
+      tags:
+        - Notifications
+      summary: Mark all notifications as read
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All notifications marked as read
+
+  /notifications/{id}:
+    delete:
+      tags:
+        - Notifications
+      summary: Delete notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notification deleted
+
+  /notifications/fcm-token:
+    post:
+      tags:
+        - Notifications
+      summary: Update FCM token
+      description: Update Firebase Cloud Messaging token for push notifications
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fcm_token
+              properties:
+                fcm_token:
+                  type: string
+                  example: firebase-token-here
+      responses:
+        '200':
+          description: FCM token updated
+
+  /warehouse:
+    get:
+      tags:
+        - Warehouse
+      summary: List warehouses
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: city_id
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Warehouses fetched successfully
+
+  /warehouse/{id}:
+    get:
+      tags:
+        - Warehouse
+      summary: Get warehouse details with inventory
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Warehouse details fetched
+
+  /warehouse/{id}/inventory:
+    post:
+      tags:
+        - Warehouse
+      summary: Update warehouse inventory
+      description: Update inventory after pickup delivery
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pickup_request_id
+                - category_id
+                - quantity
+                - condition
+              properties:
+                pickup_request_id:
+                  type: integer
+                  example: 1
+                category_id:
+                  type: integer
+                  example: 1
+                weight:
+                  type: number
+                  format: float
+                  example: 25.5
+                quantity:
+                  type: integer
+                  example: 1
+                condition:
+                  type: string
+                  enum: [excellent, good, fair, poor, scrap]
+                  example: good
+                notes:
+                  type: string
+                  example: AC in working condition
+      responses:
+        '201':
+          description: Inventory updated successfully
+
+  /warehouse/{id}/inventory/summary:
+    get:
+      tags:
+        - Warehouse
+      summary: Get inventory summary
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Inventory summary fetched
+
+  /warehouse/{id}/inventory/logs:
+    get:
+      tags:
+        - Warehouse
+      summary: Get inventory logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Inventory logs fetched
+
+  /admin/settlements:
+    get:
+      tags:
+        - Settlements
+      summary: List partner settlements
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, approved, paid, rejected]
+        - name: partner_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Settlements fetched successfully
+
+  /admin/settlements/{id}:
+    get:
+      tags:
+        - Settlements
+      summary: Get settlement details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Settlement details fetched
+
+  /admin/settlements/{id}/approve:
+    post:
+      tags:
+        - Settlements
+      summary: Approve settlement
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+                  example: Approved for payment
+      responses:
+        '200':
+          description: Settlement approved
+
+  /admin/settlements/{id}/mark-as-paid:
+    post:
+      tags:
+        - Settlements
+      summary: Mark settlement as paid
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - transaction_id
+                - payment_type
+              properties:
+                transaction_id:
+                  type: string
+                  example: TXN123456
+                payment_type:
+                  type: string
+                  enum: [bank_transfer, upi, cash]
+                  example: bank_transfer
+                proof_image_path:
+                  type: string
+                notes:
+                  type: string
+                  example: Paid via NEFT
+      responses:
+        '200':
+          description: Settlement marked as paid
+
+  /admin/settlements/{id}/reject:
+    post:
+      tags:
+        - Settlements
+      summary: Reject settlement
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+                  example: Invalid amount calculation
+      responses:
+        '200':
+          description: Settlement rejected
+
+  /admin/settlements/partner/{partnerId}/summary:
+    get:
+      tags:
+        - Settlements
+      summary: Get partner settlement summary
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Partner summary fetched
+
+  /admin/attributes:
+    get:
+      tags:
+        - Attributes
+      summary: List all attributes
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Attributes fetched successfully
+    post:
+      tags:
+        - Attributes
+      summary: Create new attribute
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - code
+                - type
+              properties:
+                name:
+                  type: object
+                  example: {"en": "Brand"}
+                code:
+                  type: string
+                  example: brand
+                type:
+                  type: string
+                  enum: [text, number, select, radio, checkbox, date]
+                  example: select
+                options:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Samsung", "LG", "Whirlpool"]
+                is_required:
+                  type: boolean
+                  example: true
+      responses:
+        '201':
+          description: Attribute created
+
+  /admin/attributes/{id}:
+    put:
+      tags:
+        - Attributes
+      summary: Update attribute
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: object
+                type:
+                  type: string
+                options:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Attribute updated
+    delete:
+      tags:
+        - Attributes
+      summary: Delete attribute
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Attribute deleted
+
+  /admin/attributes/{id}/assign:
+    post:
+      tags:
+        - Attributes
+      summary: Assign attribute to category
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - category_id
+              properties:
+                category_id:
+                  type: integer
+                  example: 1
+                is_required:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: Attribute assigned to category
+
+  /admin/logs:
+    get:
+      tags:
+        - Admin
+      summary: View system logs
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logs fetched
+
+  /admin/kyc/{id}/verify:
+    post:
+      tags:
+        - Admin
+      summary: Verify KYC document
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [approved, rejected]
+                remarks:
+                  type: string
+      responses:
+        '200':
+          description: KYC verified
+
+  /admin/payments/{id}/approve:
+    post:
+      tags:
+        - Admin
+      summary: Approve payment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Payment approved
+
+  /admin/pickups/{id}/assign:
+    post:
+      tags:
+        - Admin
+      summary: Assign pickup to pickup boy
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - pickup_boy_id
+              properties:
+                pickup_boy_id:
+                  type: integer
+                  example: 5
+      responses:
+        '200':
+          description: Pickup assigned
