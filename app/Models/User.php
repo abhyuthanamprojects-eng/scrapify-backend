@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -39,6 +40,7 @@ class User extends Authenticatable
         'longitude',
         'pincode',
         'vehicle_number',
+        'employee_id',
         'is_online',
         'is_manual_offline',
         'is_available',
@@ -244,8 +246,29 @@ class User extends Authenticatable
             return $this->profile_photo_path;
         }
 
-        // Otherwise, return the asset URL
+        if (
+            str_starts_with($this->profile_photo_path, 'profile_photos/')
+            || Storage::disk('public')->exists($this->profile_photo_path)
+        ) {
+            return Storage::disk('public')->url($this->profile_photo_path);
+        }
+
         return asset($this->profile_photo_path);
+    }
+
+    public function ensureEmployeeId(string $prefix = 'PB'): string
+    {
+        if (!empty($this->employee_id)) {
+            return $this->employee_id;
+        }
+
+        $employeeId = sprintf('%s-%05d', strtoupper($prefix), $this->id);
+
+        $this->forceFill([
+            'employee_id' => $employeeId,
+        ])->saveQuietly();
+
+        return $employeeId;
     }
 
     protected $appends = [

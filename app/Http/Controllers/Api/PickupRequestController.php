@@ -659,10 +659,13 @@ class PickupRequestController extends Controller
             'agent' => $pickup->assignment ? [
                 'id' => $pickup->assignment->pickupBoy->id,
                 'name' => $pickup->assignment->pickupBoy->name,
+                'employee_id' => $pickup->assignment->pickupBoy->employee_id,
                 'phone' => $pickup->assignment->pickupBoy->phone,
                 'latitude' => (float) $pickup->assignment->pickupBoy->latitude,
                 'longitude' => (float) $pickup->assignment->pickupBoy->longitude,
                 'vehicle_number' => $pickup->assignment->pickupBoy->vehicle_number,
+                'image' => $pickup->assignment->pickupBoy->profile_photo_url,
+                'profile_photo_url' => $pickup->assignment->pickupBoy->profile_photo_url,
             ] : null,
             'timeline' => collect($timeline)->unique('status')->values()->all()
         ];

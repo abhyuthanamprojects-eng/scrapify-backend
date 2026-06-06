@@ -23,7 +23,19 @@ class PickupImage extends Model
 
     public function getUrlAttribute()
     {
-        return $this->image_path ? asset($this->image_path) : null;
+        if (!$this->image_path) {
+            return null;
+        }
+
+        if (str_starts_with($this->image_path, 'http://') || str_starts_with($this->image_path, 'https://')) {
+            return $this->image_path;
+        }
+
+        if (file_exists(public_path($this->image_path))) {
+            return asset($this->image_path);
+        }
+
+        return asset('storage/' . ltrim($this->image_path, '/'));
     }
 
     public function pickupRequest()

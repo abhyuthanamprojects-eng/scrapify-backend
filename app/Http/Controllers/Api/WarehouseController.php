@@ -321,22 +321,8 @@ class WarehouseController extends Controller
 
     protected function autoRescheduleMissedWarehousePickups(int $warehouseId, ?int $actorUserId = null): void
     {
-        $service = app(\App\Services\PickupAssignmentService::class);
-        $now = now('Asia/Kolkata');
-
-        PickupRequest::where('warehouse_id', $warehouseId)
-            ->whereIn('status', ['pending'])
-            ->whereDate('scheduled_at', $now->toDateString())
-            ->where('scheduled_at', '<=', $now)
-            ->whereDoesntHave('assignments', function ($q) {
-                $q->whereNotIn('status', ['completed', 'pickup_completed', 'cancelled', 'reassigned', 'rejected']);
-            })
-            ->orderBy('scheduled_at')
-            ->limit(100)
-            ->get()
-            ->each(function (PickupRequest $pickup) use ($service, $actorUserId) {
-                $service->autoRescheduleMissedTodayPickup($pickup, $actorUserId);
-            });
+        app(\App\Services\PickupAssignmentService::class)
+            ->autoRescheduleOverduePickups($actorUserId, $warehouseId);
     }
 
     public function showRequest($id)
@@ -486,7 +472,8 @@ class WarehouseController extends Controller
             $pickupRequest,
             $pickupBoy,
             $user,
-            $user->hasRole('admin') ? 'admin' : 'warehouse'
+            $user->hasRole('admin') ? 'admin' : 'warehouse',
+            true
         );
 
         if (!$result['ok']) {
@@ -551,7 +538,8 @@ class WarehouseController extends Controller
             $pickupRequest,
             $newPickupBoy,
             $user,
-            $user->hasRole('admin') ? 'admin' : 'warehouse'
+            $user->hasRole('admin') ? 'admin' : 'warehouse',
+            true
         );
 
         if (!$result['ok']) {

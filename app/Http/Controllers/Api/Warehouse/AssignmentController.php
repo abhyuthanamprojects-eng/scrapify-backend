@@ -38,7 +38,9 @@ class AssignmentController extends Controller
               : ($user->hasRole('warehouse') ? 'warehouse'
               : ($user->hasRole('channel_partner') ? 'channel_partner' : 'unknown'));
 
-        $result = $this->service->assign($pickup, $boy, $user, $type);
+        $bypassRealtimeChecks = $user->hasAnyRole(['admin', 'warehouse']);
+
+        $result = $this->service->assign($pickup, $boy, $user, $type, $bypassRealtimeChecks);
         if (!$result['ok']) {
             return $this->errorResponse($result['message'], 422);
         }
@@ -61,7 +63,7 @@ class AssignmentController extends Controller
         if (!$warehouseId) return false;
         $w = Warehouse::find($warehouseId);
         if (!$w) return false;
-        if ($user->hasRole('warehouse'))        return $w->manager_id === $user->id;
+        if ($user->hasRole('warehouse'))        return $w->manager_id === $user->id || (int) $user->warehouse_id === (int) $warehouseId;
         if ($user->hasRole('channel_partner'))  return $w->channel_partner_id === $user->channel_partner_id;
         return false;
     }

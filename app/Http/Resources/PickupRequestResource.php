@@ -32,9 +32,39 @@ class PickupRequestResource extends JsonResource
                     'quantity' => $item->quantity,
                     'condition' => $item->condition,
                     'rate_per_kg' => $item->price_per_unit,
+                    'rate_per_unit' => $item->price_per_unit,
                     'total_price' => $item->total_price,
+                    'remarks' => $item->remarks,
+                    'image_path' => $item->image_path,
+                    'image_url' => $item->image_path ? asset('storage/' . ltrim($item->image_path, '/')) : null,
                 ];
             });
+        });
+
+        $attributesList = $this->whenLoaded('requestAttributes', function () {
+            return $this->requestAttributes->map(function ($row) {
+                $attributeName = $row->attribute?->name;
+                $value = $row->value;
+
+                return [
+                    'attribute_id' => $row->attribute_id,
+                    'attribute_name' => is_array($attributeName) ? ($attributeName['en'] ?? reset($attributeName)) : $attributeName,
+                    'value' => is_array($value) ? ($value['en'] ?? reset($value)) : $value,
+                    'raw_value' => $row->value,
+                ];
+            })->values();
+        });
+
+        $imagesList = $this->whenLoaded('images', function () {
+            return $this->images->map(fn ($image) => [
+                'id' => $image->id,
+                'type' => $image->type,
+                'image_path' => $image->image_path,
+                'url' => $image->url,
+                'latitude' => $image->latitude,
+                'longitude' => $image->longitude,
+                'remarks' => $image->remarks,
+            ])->values();
         });
 
         $itemsSummary = $this->whenLoaded('items', function() {
@@ -61,12 +91,43 @@ class PickupRequestResource extends JsonResource
             'distance_km' => $distanceKm !== null ? round($distanceKm, 2) : null,
             'scheduled_at' => $this->scheduled_at ? $this->scheduled_at->format('Y-m-d H:i:s') : null,
             'items' => $itemsList,
+            'booking_attributes' => $attributesList,
             'items_summary' => $itemsSummary,
             'estimated_weight_kg' => $estimatedWeight,
+            'estimated_amount' => $this->estimated_amount,
+            'final_amount' => $this->final_amount,
+            'price_summary' => [
+                'subtotal_amount' => data_get($this->metadata, 'pricing_breakdown.subtotal_amount'),
+                'minimum_free_pickup_amount' => data_get($this->metadata, 'pricing_breakdown.minimum_free_pickup_amount'),
+                'shipping_charge' => data_get($this->metadata, 'pricing_breakdown.shipping_charge'),
+                'final_estimated_amount' => data_get($this->metadata, 'pricing_breakdown.final_estimated_amount', $this->estimated_amount),
+                'final_amount' => $this->final_amount,
+                'is_price_locked' => $this->price_locked_at !== null,
+            ],
+            'assigned_pickup_boy' => $this->whenLoaded('assignment', function () {
+                $pickupBoy = $this->assignment?->pickupBoy;
+                if (!$pickupBoy) {
+                    return null;
+                }
+
+                if ($pickupBoy->hasRole('pickup_boy')) {
+                    $pickupBoy->ensureEmployeeId();
+                }
+
+                return [
+                    'id' => $pickupBoy->id,
+                    'name' => $pickupBoy->name,
+                    'phone' => $pickupBoy->phone,
+                    'employee_id' => $pickupBoy->employee_id,
+                    'vehicle_number' => $pickupBoy->vehicle_number,
+                    'profile_photo' => $pickupBoy->profile_photo_path,
+                    'profile_photo_url' => $pickupBoy->profile_photo_url,
+                ];
+            }),
             'status' => $this->status, // pending, assigned, accepted, on_the_way, verifying, picked_up, completed, rejected, cancelled
             'reschedule_allowed' => in_array($this->status, ['pending', 'assigned', 'accepted']),
             'notes' => $this->notes,
-            'images' => $this->whenLoaded('images'),
+            'images' => $imagesList,
             'status_timeline' => $this->whenLoaded('statusLogs'),
             'final_payout_amount' => $this->final_amount,
             'verification_required' => \App\Models\AppSetting::get('verification_required', true),

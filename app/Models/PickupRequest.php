@@ -69,6 +69,11 @@ class PickupRequest extends Model
         return $this->hasMany(PickupRequestAttribute::class);
     }
 
+    public function requestAttributes()
+    {
+        return $this->hasMany(PickupRequestAttribute::class);
+    }
+
     public function city()
     {
         return $this->belongsTo(City::class);

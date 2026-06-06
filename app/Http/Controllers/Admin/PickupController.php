@@ -169,7 +169,7 @@ class PickupController extends Controller
             $pickupBoy, 
             $actor, 
             $actor->hasRole('channel_partner') ? 'channel_partner' : 'admin', 
-            $request->override_capacity ?? false
+            $actor->hasRole('channel_partner') ? (bool) $request->override_capacity : true
         );
 
         if (!$result['ok']) {
@@ -209,15 +209,18 @@ class PickupController extends Controller
                 ->where('users.status', true)
                 ->where('is_available', true)
                 ->get()
-                ->filter(function($driver) {
-                    return $driver->is_online && !$driver->is_capacity_full;
+                ->filter(function($driver) use ($pickup) {
+                    $isFuturePickup = $pickup->scheduled_at
+                        && $pickup->scheduled_at->copy()->timezone('Asia/Kolkata')->toDateString() > now('Asia/Kolkata')->toDateString();
+
+                    return $isFuturePickup || ($driver->is_online && !$driver->is_capacity_full);
                 })
                 ->sortBy('today_assignments_count'); // Prioritize drivers with less work
 
             $bestDriver = $drivers->first();
 
             if ($bestDriver) {
-                $result = $service->assign($pickup, $bestDriver, auth()->user(), 'admin');
+                $result = $service->assign($pickup, $bestDriver, auth()->user(), 'admin', true);
                 if ($result['ok']) {
                     $assignedCount++;
                 } else {

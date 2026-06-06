@@ -51,7 +51,7 @@ class PickupBoyController extends Controller
                 $q->where('status', 'completed');
                 $this->applyPeriodFilter($q, 'completed_at', $period);
             }
-        })->with(['customer', 'items.category', 'address', 'assignment']);
+        })->with(['customer', 'items.category', 'address', 'assignment', 'images', 'requestAttributes.attribute']);
 
         if ($status === 'completed') {
             $query->whereIn('status', ['picked_up', 'completed']);
@@ -100,6 +100,9 @@ class PickupBoyController extends Controller
     public function getProfile(Request $request)
     {
         $user = $request->user()->load(['city', 'warehouse']);
+        if ($user->hasRole('pickup_boy')) {
+            $user->ensureEmployeeId();
+        }
         return $this->successResponse('profile.fetched', [
             'id' => $user->id,
             'name' => $user->name,
@@ -107,6 +110,8 @@ class PickupBoyController extends Controller
             'phone' => $user->phone,
             'role' => $user->roles->first()?->name,
             'profile_photo' => $user->profile_photo_path,
+            'profile_photo_url' => $user->profile_photo_url,
+            'employee_id' => $user->employee_id,
             'vehicle_number' => $user->vehicle_number,
             'is_online' => (bool) $user->is_online,
             'is_available' => (bool) $user->is_available,
@@ -140,7 +145,11 @@ class PickupBoyController extends Controller
     )]
     public function show($id)
     {
-        $pickup = PickupRequest::with(['customer', 'items.category', 'images', 'assignment', 'address'])
+        $pickup = PickupRequest::with(['customer', 'items.category', 'images', 'assignment', 'address', 'requestAttributes.attribute', 'statusLogs'])
+            ->whereHas('assignment', function ($query) {
+                $query->where('pickup_boy_id', request()->user()->id)
+                    ->whereNotIn('status', ['rejected', 'cancelled', 'reassigned']);
+            })
             ->findOrFail($id);
 
         return $this->successResponse('pickup.details_fetched', new PickupRequestResource($pickup));
@@ -790,6 +799,8 @@ class PickupBoyController extends Controller
                 'name' => $user->name,
                 'phone' => $user->phone,
                 'profile_image' => $user->profile_photo_path,
+                'profile_photo_url' => $user->profile_photo_url,
+                'employee_id' => $user->ensureEmployeeId(),
                 'is_online' => (bool) $user->is_online,
                 'is_available' => (bool) $user->is_available
             ],
