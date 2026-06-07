@@ -245,6 +245,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Corporate Booking - Estimate Management
     Route::prefix('corporate-bookings')->group(function () {
+        Route::get('/options', [\App\Http\Controllers\Api\CorporateBookingController::class, 'options']);
         Route::get('/', [\App\Http\Controllers\Api\CorporateBookingController::class, 'index']);
         Route::get('/{id}', [\App\Http\Controllers\Api\CorporateBookingController::class, 'show']);
     });

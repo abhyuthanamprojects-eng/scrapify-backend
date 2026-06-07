@@ -110,11 +110,10 @@ class DonationController extends Controller
             $query = $this->filterByPeriod($query, $request->period);
         }
 
-        $donations = $query->latest()->paginate($request->per_page ?? 20);
+        $donations = $query->latest()->paginate($request->per_page ?? 20)
+            ->through(fn($d) => $this->formatDonationResponse($d));
 
-        return $this->paginatedResponse('donation.list_fetched', $donations->map(
-            fn($d) => $this->formatDonationResponse($d)
-        ));
+        return $this->paginatedResponse('donation.list_fetched', $donations);
     }
 
     /**

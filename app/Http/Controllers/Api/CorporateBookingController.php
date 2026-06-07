@@ -17,6 +17,18 @@ class CorporateBookingController extends Controller
     use ApiResponseTrait;
 
     /**
+     * Get corporate booking options (categories, meeting types, etc)
+     */
+    public function options()
+    {
+        return $this->successResponse('corporate.options_fetched', [
+            'categories' => ['IT Equipment', 'Office Furniture', 'Electronics', 'Others'],
+            'meeting_types' => ['in_person', 'google_meet', 'skype'],
+            'scrap_categories' => [],
+        ]);
+    }
+
+    /**
      * List corporate bookings (filtered by role)
      */
     public function index(Request $request)
@@ -52,11 +64,10 @@ class CorporateBookingController extends Controller
             }
         }
 
-        $bookings = $query->latest()->paginate($request->per_page ?? 20);
+        $bookings = $query->latest()->paginate($request->per_page ?? 20)
+            ->through(fn($b) => $this->formatBookingResponse($b));
 
-        return $this->paginatedResponse('corporate.bookings_fetched', $bookings->map(
-            fn($b) => $this->formatBookingResponse($b)
-        ));
+        return $this->paginatedResponse('corporate.bookings_fetched', $bookings);
     }
 
     /**

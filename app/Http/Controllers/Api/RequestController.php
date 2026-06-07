@@ -155,11 +155,10 @@ class RequestController extends Controller
             $query = $this->filterByPeriod($query, $period);
         }
 
-        $requests = $query->latest()->paginate($request->per_page ?? 20);
+        $requests = $query->latest()->paginate($request->per_page ?? 20)
+            ->through(fn($r) => $this->formatRequestResponse($r));
 
-        return $this->paginatedResponse('request.list_fetched', $requests->map(
-            fn($r) => $this->formatRequestResponse($r)
-        ));
+        return $this->paginatedResponse('request.list_fetched', $requests);
     }
 
     /**

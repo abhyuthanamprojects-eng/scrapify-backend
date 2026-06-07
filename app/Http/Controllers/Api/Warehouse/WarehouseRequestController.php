@@ -48,11 +48,10 @@ class WarehouseRequestController extends Controller
             $query->where('request_type', $request->request_type);
         }
 
-        $requests = $query->latest()->paginate($request->per_page ?? 20);
+        $requests = $query->latest()->paginate($request->per_page ?? 20)
+            ->through(fn($r) => $this->formatWarehouseRequestResponse($r));
 
-        return $this->paginatedResponse('warehouse.requests_fetched', $requests->map(
-            fn($r) => $this->formatWarehouseRequestResponse($r)
-        ));
+        return $this->paginatedResponse('warehouse.requests_fetched', $requests);
     }
 
     /**
