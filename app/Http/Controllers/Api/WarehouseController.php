@@ -226,10 +226,15 @@ class WarehouseController extends Controller
         $stats = [
             'total_requests' => PickupRequest::where('warehouse_id', $warehouse->id)->count(),
             'today_requests' => PickupRequest::where('warehouse_id', $warehouse->id)->whereDate('created_at', now()->toDateString())->count(),
-            'unassigned_requests' => PickupRequest::where('warehouse_id', $warehouse->id)->whereIn('status', ['pending'])->count(),
+            'unassigned_requests' => PickupRequest::where('warehouse_id', $warehouse->id)
+                ->where(function ($q) {
+                    $q->whereIn('status', ['pending'])
+                        ->orWhereIn('status_new', ['pending_warehouse', 'warehouse_receive_pending']);
+                })->count(),
             'assigned_requests' => PickupRequest::where('warehouse_id', $warehouse->id)->whereIn('status', ['assigned', 'accepted'])->count(),
             'active_pickups' => PickupRequest::where('warehouse_id', $warehouse->id)->whereIn('status', ['on_the_way'])->count(),
             'completed_pickups' => PickupRequest::where('warehouse_id', $warehouse->id)->whereIn('status', ['completed', 'picked_up'])->count(),
+            'warehouse_received' => PickupRequest::where('warehouse_id', $warehouse->id)->whereIn('status_new', ['warehouse_received'])->count(),
             'rescheduled_requests' => PickupRequest::where('warehouse_id', $warehouse->id)->whereIn('status', ['rescheduled', 'reschedule_requested'])->count(),
             'total_pickup_boys' => $this->getWarehousePickupBoysQuery($warehouse->id)->count(),
             'active_pickup_boys' => $this->getWarehousePickupBoysQuery($warehouse->id)->where('users.status', true)->count(),
@@ -239,6 +244,12 @@ class WarehouseController extends Controller
         ];
 
         $recent_requests = PickupRequest::where('warehouse_id', $warehouse->id)
+            ->where(function ($q) {
+                $q->where(function ($subQ) {
+                    $subQ->whereIn('status', ['pending', 'assigned', 'accepted', 'on_the_way', 'completed', 'picked_up'])
+                        ->orWhereIn('status_new', ['pending_warehouse', 'warehouse_receive_pending', 'warehouse_received', 'pickup_boy_assigned', 'pickup_started', 'pickup_completed']);
+                });
+            })
             ->latest()
             ->take(5)
             ->get();
