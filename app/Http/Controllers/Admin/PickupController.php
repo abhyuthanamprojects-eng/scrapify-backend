@@ -315,7 +315,12 @@ class PickupController extends Controller
         }
 
         DB::transaction(function () use ($pickup, $request) {
+            // Ensure metadata is array (may be JSON string from DB)
             $metadata = $pickup->metadata ?? [];
+            if (is_string($metadata)) {
+                $metadata = json_decode($metadata, true) ?? [];
+            }
+
             $metadata['admin_quote_notes'] = $request->notes;
             $metadata['quoted_at'] = now()->toDateTimeString();
             $metadata['quoted_by'] = auth()->id();
