@@ -61,6 +61,93 @@ class CorporateBookingController extends Controller
     }
 
     /**
+     * Create a corporate booking
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'company_name' => 'required|string|max:255',
+            'contact_name' => 'required|string|max:255',
+            'contact_mobile' => 'required|string|max:20',
+            'contact_email' => 'required|email|max:255',
+            'address' => 'required|string|max:500',
+            'address_id' => 'nullable|exists:addresses,id',
+            'city_id' => 'required|exists:cities,id',
+            'pincode' => 'nullable|string|max:10',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'scheduled_at' => 'required|date|after:now',
+            'meeting_type' => 'required|in:in_person,google_meet,skype',
+            'notes' => 'nullable|string|max:1000',
+            'items' => 'required|array|min:1',
+            'items.*.category_id' => 'required|exists:categories,id',
+            'items.*.quantity' => 'required|numeric|min:0.1',
+            'items.*.weight' => 'nullable|numeric|min:0.1',
+        ]);
+
+        try {
+            // Create pickup request
+            $pickupRequest = PickupRequest::create([
+                'customer_id' => Auth::id(),
+                'request_type' => RequestType::CORPORATE->value,
+                'status' => RequestStatus::PENDING_WAREHOUSE->value,
+                'status_new' => RequestStatus::PENDING_WAREHOUSE->value,
+                'address' => $validated['address'],
+                'address_id' => $validated['address_id'] ?? null,
+                'city_id' => $validated['city_id'],
+                'pincode' => $validated['pincode'] ?? null,
+                'latitude' => $validated['latitude'] ?? null,
+                'longitude' => $validated['longitude'] ?? null,
+                'scheduled_at' => $validated['scheduled_at'],
+                'customer_name' => $validated['contact_name'],
+                'customer_phone' => $validated['contact_mobile'],
+                'customer_email' => $validated['contact_email'],
+                'notes' => $validated['notes'] ?? null,
+                'meeting_type' => $validated['meeting_type'],
+                'pickup_code' => $this->generatePickupCode(),
+                'estimated_amount' => 0,
+                // Store corporate-specific data in JSON
+                'metadata' => json_encode([
+                    'company_name' => $validated['company_name'],
+                    'contact_name' => $validated['contact_name'],
+                    'contact_email' => $validated['contact_email'],
+                ]),
+            ]);
+
+            // Add items
+            foreach ($validated['items'] as $item) {
+                $pickupRequest->items()->create([
+                    'category_id' => $item['category_id'],
+                    'quantity' => $item['quantity'],
+                    'weight' => $item['weight'] ?? null,
+                ]);
+            }
+
+            // Log initial status
+            \App\Models\RequestStatusLog::logStatusChange(
+                $pickupRequest->id,
+                null,
+                RequestStatus::PENDING_WAREHOUSE->value,
+                Auth::id(),
+                'customer',
+                'Corporate booking created'
+            );
+
+            // Transition to estimate_pending
+            $pickupRequest->transitionTo(
+                RequestStatus::ESTIMATE_PENDING,
+                Auth::id(),
+                'customer',
+                'Corporate booking - estimate required'
+            );
+
+            return $this->successResponse('corporate.booking_created', $this->formatBookingResponse($pickupRequest->fresh(['customer', 'items'])));
+        } catch (\Exception $e) {
+            return $this->errorResponse('corporate.booking_creation_failed', 400, $e->getMessage());
+        }
+    }
+
+    /**
      * List corporate bookings (filtered by role)
      */
     public function index(Request $request)
@@ -440,5 +527,16 @@ class CorporateBookingController extends Controller
                 'name' => $booking->currentAssignment->pickupBoy->name,
             ] : null,
         ];
+    }
+
+    /**
+     * Generate unique pickup code
+     */
+    private function generatePickupCode(): string
+    {
+        $prefix = 'SCR';
+        $timestamp = now()->format('YmdHi');
+        $random = strtoupper(substr(uniqid(), -4));
+        return "{$prefix}-{$timestamp}-{$random}";
     }
 }
