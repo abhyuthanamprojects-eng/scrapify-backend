@@ -80,6 +80,7 @@ class PaymentController extends Controller
             'final_amount' => 'required|numeric|min:0',
             'payment_method' => 'required|in:bank_transfer,upi,check,cash',
             'payment_reference' => 'required|string|max:100',
+            'receiver_name' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
         ]);
 
@@ -89,6 +90,7 @@ class PaymentController extends Controller
                 'final_amount' => $validated['final_amount'],
                 'payment_method' => $validated['payment_method'],
                 'payment_reference' => $validated['payment_reference'],
+                'receiver_name' => $validated['receiver_name'] ?? null,
                 'payment_status' => 'processing',
             ]);
 

@@ -54,6 +54,9 @@ return new class extends Migration {
             if (!Schema::hasColumn('pickup_requests', 'payment_reference')) {
                 $table->string('payment_reference')->nullable()->unique();
             }
+            if (!Schema::hasColumn('pickup_requests', 'receiver_name')) {
+                $table->string('receiver_name')->nullable();
+            }
 
             // Add completion tracking
             if (!Schema::hasColumn('pickup_requests', 'completed_at')) {
