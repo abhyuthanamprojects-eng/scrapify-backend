@@ -90,8 +90,8 @@ class CorporateBookingController extends Controller
             $pickupRequest = PickupRequest::create([
                 'customer_id' => Auth::id(),
                 'request_type' => RequestType::CORPORATE->value,
-                'status' => RequestStatus::PENDING_WAREHOUSE->value,
-                'status_new' => RequestStatus::PENDING_WAREHOUSE->value,
+                'status' => 'pending', // Old enum column - use legacy value
+                'status_new' => RequestStatus::PENDING_WAREHOUSE->value, // New string column
                 'address' => $validated['address'],
                 'address_id' => $validated['address_id'] ?? null,
                 'city_id' => $validated['city_id'],
