@@ -140,6 +140,25 @@ class PickupRequest extends Model
     }
 
     /**
+     * Get latest corporate booking estimate
+     */
+    public function latestEstimate()
+    {
+        return $this->hasOne(CorporateBookingEstimate::class, 'request_id')
+            ->latest('created_at');
+    }
+
+    /**
+     * Get current pickup assignment
+     */
+    public function currentAssignment()
+    {
+        return $this->hasOne(Assignment::class)
+            ->whereIn('status', ['assigned', 'accepted'])
+            ->latest('created_at');
+    }
+
+    /**
      * Transition to a new status with validation and logging
      */
     public function transitionTo(
