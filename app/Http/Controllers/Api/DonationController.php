@@ -37,8 +37,8 @@ class DonationController extends Controller
             $donation = PickupRequest::create([
                 'customer_id' => Auth::id(),
                 'request_type' => RequestType::DONATION->value,
-                'status' => RequestStatus::PENDING_WAREHOUSE->value,
-                'status_new' => RequestStatus::PENDING_WAREHOUSE->value,
+                'status' => 'pending', // Old enum column - use legacy value
+                'status_new' => RequestStatus::PENDING_WAREHOUSE->value, // New string column
                 'address' => $validated['address'],
                 'city_id' => $validated['city_id'],
                 'scheduled_at' => $validated['scheduled_at'],
