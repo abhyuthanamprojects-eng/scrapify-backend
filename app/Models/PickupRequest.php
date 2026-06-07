@@ -138,4 +138,23 @@ class PickupRequest extends Model
     {
         return $this->hasMany(PickupAssignmentHistory::class);
     }
+
+    /**
+     * Transition to a new status with validation and logging
+     */
+    public function transitionTo(
+        \App\Enums\RequestStatus $newStatus,
+        $userId,
+        $userRole = 'system',
+        $reason = null
+    ) {
+        $service = app(\App\Services\RequestStatusTransitionService::class);
+        return $service->transitionStatus(
+            $this,
+            $newStatus,
+            $userId,
+            $userRole,
+            $reason
+        );
+    }
 }
