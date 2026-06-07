@@ -21,10 +21,21 @@ class CorporateBookingController extends Controller
      */
     public function options()
     {
+        // Get corporate-enabled category types
+        $categories = \App\Models\CategoryType::where('show_in_corporate_booking', true)
+            ->where('status', true)
+            ->get()
+            ->map(fn($cat) => [
+                'id' => $cat->id,
+                'name' => $cat->getTranslatedName(),
+                'slug' => $cat->slug,
+            ])
+            ->values();
+
         return $this->successResponse('corporate.options_fetched', [
-            'categories' => ['IT Equipment', 'Office Furniture', 'Electronics', 'Others'],
+            'categories' => $categories,
             'meeting_types' => ['in_person', 'google_meet', 'skype'],
-            'scrap_categories' => [],
+            'scrap_categories' => $categories,
         ]);
     }
 
