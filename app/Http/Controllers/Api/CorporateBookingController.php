@@ -17,18 +17,39 @@ class CorporateBookingController extends Controller
     use ApiResponseTrait;
 
     /**
-     * Get corporate booking options (categories, meeting types, etc)
+     * Get corporate booking options (categories, meeting types, sub-categories)
      */
     public function options()
     {
-        // Get corporate-enabled category types
+        // Get corporate-enabled category types with their children
         $categories = \App\Models\CategoryType::where('show_in_corporate_booking', true)
             ->where('status', true)
+            ->with('categories.children')
             ->get()
-            ->map(fn($cat) => [
-                'id' => $cat->id,
-                'name' => $cat->getTranslatedName(),
-                'slug' => $cat->slug,
+            ->map(fn($catType) => [
+                'id' => $catType->id,
+                'name' => $catType->getTranslatedName(),
+                'slug' => $catType->slug,
+                'items' => $catType->categories()
+                    ->where('status', true)
+                    ->whereNull('parent_id')
+                    ->with('children')
+                    ->get()
+                    ->map(fn($cat) => [
+                        'id' => $cat->id,
+                        'name' => $cat->getTranslatedName(),
+                        'slug' => $cat->slug,
+                        'children' => $cat->children()
+                            ->where('status', true)
+                            ->get()
+                            ->map(fn($child) => [
+                                'id' => $child->id,
+                                'name' => $child->getTranslatedName(),
+                                'slug' => $child->slug,
+                            ])
+                            ->values(),
+                    ])
+                    ->values(),
             ])
             ->values();
 
