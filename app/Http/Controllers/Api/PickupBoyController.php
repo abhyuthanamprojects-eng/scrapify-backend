@@ -8,11 +8,13 @@ use App\Models\PickupRequest;
 use App\Models\PickupBoyLocation;
 use App\Models\PickupItem;
 use App\Models\PickupImage;
+use App\Models\RequestStatusLog;
 use App\Http\Resources\PickupRequestResource;
 use App\Services\PickupAssignmentService;
 use App\Services\PickupPriceService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use OpenApi\Attributes as OA;
@@ -1141,5 +1143,87 @@ class PickupBoyController extends Controller
 
         $assignment = $service->updateStatus($assignment, $request->status, $request->remarks);
         return $this->successResponse('pickup.status_updated', $assignment);
+    }
+
+    /**
+     * Update final amount (pickup boy edits amount if items differ from estimate)
+     * Only for corporate bookings
+     */
+    public function updateFinalAmount(Request $request, $id)
+    {
+        $pickupRequest = PickupRequest::findOrFail($id);
+        $user = Auth::user();
+
+        // Only pickup boys can edit amounts
+        if (!$user->hasRole('pickup_boy')) {
+            return $this->errorResponse('auth.unauthorized', 403);
+        }
+
+        // Only corporate bookings allow amount editing
+        if ($pickupRequest->request_type !== 'corporate') {
+            return $this->errorResponse('pickup.amount_edit_not_allowed', 400);
+        }
+
+        // Check pickup boy is assigned to this request
+        $assignment = Assignment::where('pickup_request_id', $pickupRequest->id)
+            ->where('pickup_boy_id', $user->id)
+            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->first();
+
+        if (!$assignment) {
+            return $this->errorResponse('auth.unauthorized', 403);
+        }
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $oldAmount = $pickupRequest->final_amount;
+
+            // Get estimate if it exists
+            $estimate = $pickupRequest->latestEstimate;
+            if ($estimate && $validated['amount'] > $estimate->estimated_amount * 1.5) {
+                // Allow up to 50% variance, but warn
+                return $this->errorResponse('pickup.amount_exceeds_estimate', 400,
+                    "Amount {$validated['amount']} exceeds estimate {$estimate->estimated_amount} by more than 50%");
+            }
+
+            // Update final amount
+            $pickupRequest->update([
+                'final_amount' => $validated['amount'],
+                'metadata' => array_merge(
+                    is_array($pickupRequest->metadata) ? $pickupRequest->metadata : json_decode($pickupRequest->metadata, true) ?? [],
+                    [
+                        'amount_edited_by_pickup_boy' => true,
+                        'original_amount' => $oldAmount,
+                        'edited_amount' => $validated['amount'],
+                        'edit_reason' => $validated['reason'] ?? null,
+                        'edited_at' => now()->toIso8601String(),
+                    ]
+                ),
+            ]);
+
+            // Log status change (not a real status change, just audit)
+            RequestStatusLog::logStatusChange(
+                $pickupRequest->id,
+                $pickupRequest->status_new,
+                $pickupRequest->status_new,
+                $user->id,
+                'pickup_boy',
+                "Amount edited from {$oldAmount} to {$validated['amount']}: " . ($validated['reason'] ?? 'Items differ from estimate')
+            );
+
+            return $this->successResponse('pickup.amount_updated', [
+                'request_id' => $pickupRequest->id,
+                'old_amount' => $oldAmount,
+                'new_amount' => $validated['amount'],
+                'estimate_amount' => $estimate?->estimated_amount,
+                'edited_at' => now(),
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('pickup.amount_update_failed', 400, $e->getMessage());
+        }
     }
 }

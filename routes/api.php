@@ -174,6 +174,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('pickups/{id}/complete', [\App\Http\Controllers\Api\PickupBoyController::class, 'verifyPickup']);
         Route::post('pickups/{id}/update-status', [\App\Http\Controllers\Api\PickupBoyController::class, 'updateAssignmentStatus']);
         Route::post('pickups/{id}/update-final-price', [\App\Http\Controllers\Api\PickupBoyController::class, 'updateFinalPrice']);
+        Route::post('pickups/{id}/update-amount', [\App\Http\Controllers\Api\PickupBoyController::class, 'updateFinalAmount']);
         Route::post('pickups/{id}/add-item', [\App\Http\Controllers\Api\PickupBoyController::class, 'addPickupItem']);
         Route::post('pickups/{id}/reschedule-request', [\App\Http\Controllers\Api\PickupBoyController::class, 'requestReschedule']);
         Route::post('pickups/{id}/reschedule', [\App\Http\Controllers\Api\PickupBoyController::class, 'reschedulePickup']);
@@ -239,6 +240,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/{id}/reassign-pickup-boy', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'reassignPickupBoy']);
         Route::post('/{id}/confirm-received', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'confirmReceived']);
         Route::post('/{id}/move-to-payment-pending', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'moveToPaymentPending']);
+        Route::post('/{id}/mark-as-received', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'markAsReceived']);
+        Route::post('/{id}/initiate-payment', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'initiatePayment']);
+        Route::post('/{id}/confirm-payment', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'confirmPayment']);
     });
 
     Route::get('warehouse/dashboard', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'dashboard'])->middleware('role:warehouse');

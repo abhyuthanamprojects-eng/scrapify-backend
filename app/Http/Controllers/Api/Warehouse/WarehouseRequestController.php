@@ -6,6 +6,7 @@ use App\Enums\RequestStatus;
 use App\Models\PickupRequest;
 use App\Models\Assignment;
 use App\Models\User;
+use App\Models\Payment;
 use App\Services\RequestStatusTransitionService;
 use App\Http\Controllers\Controller;
 use App\Traits\ApiResponseTrait;
@@ -339,5 +340,189 @@ class WarehouseRequestController extends Controller
             ] : null,
             'next_allowed_actions' => RequestStatusTransitionService::getNextAllowedActions($request, 'warehouse'),
         ];
+    }
+
+    /**
+     * Mark items as warehouse received
+     */
+    public function markAsReceived(Request $request, $id)
+    {
+        $pickupRequest = PickupRequest::findOrFail($id);
+        $user = Auth::user();
+        $warehouse = $user->warehouse;
+
+        // Verify warehouse
+        if ($pickupRequest->warehouse_id !== $warehouse->id) {
+            return $this->errorResponse('auth.unauthorized', 403);
+        }
+
+        // Must be in warehouse_receive_pending status
+        $status = RequestStatus::tryFrom($pickupRequest->status_new);
+        if ($status !== RequestStatus::WAREHOUSE_RECEIVE_PENDING) {
+            return $this->errorResponse('warehouse.invalid_status_for_receipt', 400);
+        }
+
+        $validated = $request->validate([
+            'received_weight' => 'nullable|numeric|min:0',
+            'received_items_count' => 'nullable|integer|min:0',
+            'received_amount' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            // Update request with received data
+            $pickupRequest->update([
+                'warehouse_received_at' => now(),
+                'warehouse_received_by' => $user->id,
+                'metadata' => array_merge(
+                    is_array($pickupRequest->metadata) ? $pickupRequest->metadata : json_decode($pickupRequest->metadata, true) ?? [],
+                    [
+                        'received_weight' => $validated['received_weight'] ?? null,
+                        'received_items_count' => $validated['received_items_count'] ?? null,
+                        'received_amount' => $validated['received_amount'] ?? null,
+                        'received_notes' => $validated['notes'] ?? null,
+                    ]
+                ),
+            ]);
+
+            // Transition status
+            $pickupRequest->transitionTo(
+                RequestStatus::WAREHOUSE_RECEIVED,
+                $user->id,
+                'warehouse',
+                'Items received and verified by warehouse'
+            );
+
+            return $this->successResponse('warehouse.items_received', [
+                'request_id' => $pickupRequest->id,
+                'status' => RequestStatus::WAREHOUSE_RECEIVED->value,
+                'received_at' => $pickupRequest->warehouse_received_at?->format('Y-m-d H:i:s'),
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('warehouse.receipt_failed', 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Initiate payment for received items (only for scrap & corporate)
+     */
+    public function initiatePayment(Request $request, $id)
+    {
+        $pickupRequest = PickupRequest::findOrFail($id);
+        $user = Auth::user();
+        $warehouse = $user->warehouse;
+
+        // Verify warehouse
+        if ($pickupRequest->warehouse_id !== $warehouse->id) {
+            return $this->errorResponse('auth.unauthorized', 403);
+        }
+
+        // Must be warehouse_received
+        $status = RequestStatus::tryFrom($pickupRequest->status_new);
+        if ($status !== RequestStatus::WAREHOUSE_RECEIVED) {
+            return $this->errorResponse('warehouse.invalid_status_for_payment', 400);
+        }
+
+        // Only scrap & corporate require payment
+        $type = $pickupRequest->request_type;
+        if (!in_array($type, ['scrap', 'corporate'])) {
+            return $this->errorResponse('warehouse.no_payment_required', 400);
+        }
+
+        $validated = $request->validate([
+            'type' => 'required|in:upi,bank_transfer,cash,wallet',
+            'amount' => 'required|numeric|min:0',
+            'remarks' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            // Create payment record
+            $payment = Payment::create([
+                'user_id' => $pickupRequest->customer_id,
+                'pickup_request_id' => $pickupRequest->id,
+                'amount' => $validated['amount'],
+                'type' => $validated['type'],
+                'status' => 'pending',
+                'remarks' => $validated['remarks'] ?? null,
+            ]);
+
+            // Transition to payment pending
+            $pickupRequest->transitionTo(
+                RequestStatus::PAYMENT_PENDING,
+                $user->id,
+                'warehouse',
+                "Payment initiated: {$validated['type']}"
+            );
+
+            return $this->successResponse('warehouse.payment_initiated', [
+                'request_id' => $pickupRequest->id,
+                'payment_id' => $payment->id,
+                'amount' => $validated['amount'],
+                'type' => $validated['type'],
+                'status' => 'pending',
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('warehouse.payment_initiation_failed', 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Confirm payment received
+     */
+    public function confirmPayment(Request $request, $id)
+    {
+        $pickupRequest = PickupRequest::findOrFail($id);
+        $user = Auth::user();
+        $warehouse = $user->warehouse;
+
+        // Verify warehouse
+        if ($pickupRequest->warehouse_id !== $warehouse->id) {
+            return $this->errorResponse('auth.unauthorized', 403);
+        }
+
+        // Must be payment_pending
+        $status = RequestStatus::tryFrom($pickupRequest->status_new);
+        if (!in_array($status, [RequestStatus::PAYMENT_PENDING, RequestStatus::PAYMENT_PROCESSING])) {
+            return $this->errorResponse('warehouse.invalid_status_for_confirmation', 400);
+        }
+
+        $validated = $request->validate([
+            'payment_id' => 'required|exists:payments,id',
+            'transaction_id' => 'nullable|string|max:100',
+            'status' => 'required|in:completed,approved',
+        ]);
+
+        try {
+            $payment = Payment::findOrFail($validated['payment_id']);
+
+            // Verify payment belongs to this request
+            if ($payment->pickup_request_id !== $pickupRequest->id) {
+                return $this->errorResponse('auth.unauthorized', 403);
+            }
+
+            // Update payment
+            $payment->update([
+                'status' => $validated['status'],
+                'transaction_id' => $validated['transaction_id'] ?? null,
+            ]);
+
+            // Transition to completed
+            $pickupRequest->transitionTo(
+                RequestStatus::COMPLETED,
+                $user->id,
+                'warehouse',
+                "Payment {$validated['status']} - request completed"
+            );
+
+            return $this->successResponse('warehouse.payment_confirmed', [
+                'request_id' => $pickupRequest->id,
+                'payment_id' => $payment->id,
+                'amount' => $payment->amount,
+                'status' => $payment->status,
+                'transaction_id' => $payment->transaction_id,
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('warehouse.payment_confirmation_failed', 400, $e->getMessage());
+        }
     }
 }
