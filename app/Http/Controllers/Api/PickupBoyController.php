@@ -81,7 +81,9 @@ class PickupBoyController extends Controller
 
     public function getProfileStatus(Request $request)
     {
-        $user = $request->user()->load(['city', 'warehouse']);
+        $user = $request->user()->load(['city', 'warehouses.channelPartner']);
+        $assignedWarehouse = $user->warehouses()->with('channelPartner')->orderByDesc('created_at')->first();
+
         return $this->successResponse('profile.status_fetched', [
             'is_online' => (bool) $user->is_online,
             'is_available' => (bool) $user->is_available,
@@ -90,7 +92,8 @@ class PickupBoyController extends Controller
             'current_longitude' => $user->longitude,
             'location_updated_at' => $user->location_updated_at ? $user->location_updated_at->format('Y-m-d H:i:s') : null,
             'vehicle_number' => $user->vehicle_number,
-            'assigned_warehouse' => $user->warehouse,
+            'assigned_warehouse' => $assignedWarehouse,
+            'channel_partner_name' => $assignedWarehouse && $assignedWarehouse->channelPartner ? $assignedWarehouse->channelPartner->name : null,
             'city' => $user->city,
             'is_enabled' => $user->status === 'active',
             'support_phone' => \App\Models\AppSetting::get('support_phone', '1800-000-0000')
@@ -99,10 +102,14 @@ class PickupBoyController extends Controller
 
     public function getProfile(Request $request)
     {
-        $user = $request->user()->load(['city', 'warehouse']);
+        $user = $request->user()->load(['city', 'warehouses.channelPartner']);
         if ($user->hasRole('pickup_boy')) {
             $user->ensureEmployeeId();
         }
+
+        // Get the assigned warehouse (first one from the pivot table, latest assignment)
+        $assignedWarehouse = $user->warehouses()->with('channelPartner')->orderByDesc('created_at')->first();
+
         return $this->successResponse('profile.fetched', [
             'id' => $user->id,
             'name' => $user->name,
@@ -116,8 +123,9 @@ class PickupBoyController extends Controller
             'is_online' => (bool) $user->is_online,
             'is_available' => (bool) $user->is_available,
             'city' => $user->city,
-            'warehouse_name' => $user->warehouse ? $user->warehouse->name : 'N/A',
-            'assigned_warehouse' => $user->warehouse,
+            'warehouse_name' => $assignedWarehouse ? $assignedWarehouse->name : 'N/A',
+            'channel_partner_name' => $assignedWarehouse && $assignedWarehouse->channelPartner ? $assignedWarehouse->channelPartner->name : null,
+            'assigned_warehouse' => $assignedWarehouse,
             'status' => $user->status,
         ]);
     }
