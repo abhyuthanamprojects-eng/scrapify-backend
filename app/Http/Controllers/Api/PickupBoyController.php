@@ -602,6 +602,16 @@ class PickupBoyController extends Controller
                 'created_by' => $request->user()->id
             ]);
 
+            // Auto-transition to warehouse when pickup completed
+            if ($request->status === 'pickup_completed') {
+                $pickup = $assignment->pickupRequest;
+                $pickup->transitionTo(
+                    \App\Enums\RequestStatus::WAREHOUSE_RECEIVE_PENDING,
+                    $request->user()->id,
+                    'pickup_boy',
+                    'Pickup completed - awaiting warehouse receipt'
+                );
+            }
         });
 
         return $this->successResponse('pickup.status_updated', [
