@@ -86,6 +86,11 @@ class CorporateBookingController extends Controller
         ]);
 
         try {
+            // Auto-assign warehouse by city
+            $warehouse = \App\Models\Warehouse::where('city_id', $validated['city_id'])
+                ->where('status', true)
+                ->first();
+
             // Create pickup request
             $pickupRequest = PickupRequest::create([
                 'customer_id' => Auth::id(),
@@ -95,6 +100,8 @@ class CorporateBookingController extends Controller
                 'address' => $validated['address'],
                 'address_id' => $validated['address_id'] ?? null,
                 'city_id' => $validated['city_id'],
+                'warehouse_id' => $warehouse?->id,
+                'warehouse_assigned_at' => $warehouse ? now() : null,
                 'pincode' => $validated['pincode'] ?? null,
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,

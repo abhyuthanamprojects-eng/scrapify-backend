@@ -37,6 +37,11 @@ class RequestController extends Controller
 
         $type = RequestType::tryFrom($validated['request_type']);
 
+        // Auto-assign warehouse by city
+        $warehouse = \App\Models\Warehouse::where('city_id', $validated['city_id'])
+            ->where('status', true)
+            ->first();
+
         // Create pickup request
         $pickupRequest = PickupRequest::create([
             'customer_id' => Auth::id(),
@@ -45,6 +50,8 @@ class RequestController extends Controller
             'status_new' => RequestStatus::PENDING_WAREHOUSE->value, // New string column
             'address' => $validated['address'],
             'city_id' => $validated['city_id'],
+            'warehouse_id' => $warehouse?->id,
+            'warehouse_assigned_at' => $warehouse ? now() : null,
             'scheduled_at' => $validated['scheduled_at'],
             'latitude' => $validated['latitude'] ?? null,
             'longitude' => $validated['longitude'] ?? null,
