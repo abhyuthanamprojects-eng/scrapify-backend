@@ -216,6 +216,69 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('{id}/logs', [\App\Http\Controllers\Api\WarehouseController::class, 'inventoryLogs']);
     });
 
+    // ============================================
+    // REQUEST LIFECYCLE REFACTORING - NEW ROUTES
+    // ============================================
+
+    // Request CRUD (all authenticated users)
+    Route::prefix('requests')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\RequestController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\RequestController::class, 'store']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\RequestController::class, 'show']);
+        Route::put('/{id}', [\App\Http\Controllers\Api\RequestController::class, 'update']);
+        Route::post('/{id}/cancel', [\App\Http\Controllers\Api\RequestController::class, 'cancel']);
+        Route::get('/{id}/status-history', [\App\Http\Controllers\Api\RequestController::class, 'statusHistory']);
+        Route::get('/{id}/next-actions', [\App\Http\Controllers\Api\RequestController::class, 'getNextActions']);
+    });
+
+    // Warehouse Operations (Warehouse Role)
+    Route::prefix('warehouse/requests')->middleware('role:warehouse')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'show']);
+        Route::post('/{id}/assign-pickup-boy', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'assignPickupBoy']);
+        Route::put('/{id}/reassign-pickup-boy', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'reassignPickupBoy']);
+        Route::post('/{id}/confirm-received', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'confirmReceived']);
+        Route::post('/{id}/move-to-payment-pending', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'moveToPaymentPending']);
+    });
+
+    Route::get('warehouse/dashboard', [\App\Http\Controllers\Api\Warehouse\WarehouseRequestController::class, 'dashboard'])->middleware('role:warehouse');
+
+    // Corporate Booking - Estimate Management
+    Route::prefix('corporate-bookings')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\CorporateBookingController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\CorporateBookingController::class, 'show']);
+    });
+
+    Route::prefix('corporate-bookings')->middleware('role:warehouse|admin')->group(function () {
+        Route::post('/{id}/estimate', [\App\Http\Controllers\Api\CorporateBookingController::class, 'createEstimate']);
+        Route::put('/{id}/estimate', [\App\Http\Controllers\Api\CorporateBookingController::class, 'updateEstimate']);
+        Route::post('/{id}/estimate/share', [\App\Http\Controllers\Api\CorporateBookingController::class, 'shareEstimate']);
+    });
+
+    Route::prefix('corporate-bookings')->middleware('role:customer|admin')->group(function () {
+        Route::get('/{id}/estimate', [\App\Http\Controllers\Api\CorporateBookingController::class, 'getEstimate']);
+        Route::post('/{id}/estimate/approve', [\App\Http\Controllers\Api\CorporateBookingController::class, 'approveEstimate']);
+        Route::post('/{id}/estimate/reject', [\App\Http\Controllers\Api\CorporateBookingController::class, 'rejectEstimate']);
+    });
+
+    // Payment Processing (Admin Role)
+    Route::prefix('requests')->middleware('role:admin')->group(function () {
+        Route::post('/{id}/payment/pending', [\App\Http\Controllers\Api\PaymentController::class, 'moveToPaymentPending']);
+        Route::post('/{id}/payment/process', [\App\Http\Controllers\Api\PaymentController::class, 'processPayment']);
+        Route::post('/{id}/payment/confirm', [\App\Http\Controllers\Api\PaymentController::class, 'confirmPayment']);
+        Route::get('/{id}/payment', [\App\Http\Controllers\Api\PaymentController::class, 'getPaymentDetails']);
+    });
+
+    // Donation Requests
+    Route::prefix('donations')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\DonationController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\DonationController::class, 'store']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\DonationController::class, 'show']);
+        Route::post('/{id}/cancel', [\App\Http\Controllers\Api\DonationController::class, 'cancel']);
+    });
+
+    Route::get('donations/statistics', [\App\Http\Controllers\Api\DonationController::class, 'statistics'])->middleware('role:warehouse|admin');
+
     // Channel Partner Flow
     Route::prefix('channel-partner')->middleware('role:channel_partner')->group(function () {
         Route::get('dashboard', [\App\Http\Controllers\Api\ChannelPartnerController::class, 'dashboard']);

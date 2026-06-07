@@ -54,3 +54,8 @@ coverage/
 *.tmp
 *.temp
 .cache/
+
+# Documentation (Implementation Guides)
+*.md
+!README.md
+!CHANGELOG.md

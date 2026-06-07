@@ -1,0 +1,344 @@
+<?php
+
+namespace App\Http\Controllers\Api\Warehouse;
+
+use App\Enums\RequestStatus;
+use App\Models\PickupRequest;
+use App\Models\Assignment;
+use App\Models\User;
+use App\Services\RequestStatusTransitionService;
+use App\Http\Controllers\Controller;
+use App\Traits\ApiResponseTrait;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class WarehouseRequestController extends Controller
+{
+    use ApiResponseTrait;
+
+    /**
+     * Get warehouse requests (filtered by warehouse)
+     */
+    public function index(Request $request)
+    {
+        $user = Auth::user();
+        $warehouse = $user->warehouse;
+
+        if (!$warehouse) {
+            return $this->errorResponse('warehouse.not_assigned', 403);
+        }
+
+        $query = PickupRequest::where('warehouse_id', $warehouse->id)
+            ->with([
+                'customer',
+                'currentAssignment.pickupBoy',
+                'latestEstimate',
+            ]);
+
+        // Filter by status
+        if ($request->has('status')) {
+            $status = RequestStatus::tryFrom($request->status);
+            if ($status) {
+                $query->where('status_new', $status->value);
+            }
+        }
+
+        // Filter by request type
+        if ($request->has('request_type')) {
+            $query->where('request_type', $request->request_type);
+        }
+
+        $requests = $query->latest()->paginate($request->per_page ?? 20);
+
+        return $this->paginatedResponse('warehouse.requests_fetched', $requests->map(
+            fn($r) => $this->formatWarehouseRequestResponse($r)
+        ));
+    }
+
+    /**
+     * Assign pickup boy to request
+     */
+    public function assignPickupBoy(Request $request, $id)
+    {
+        $pickupRequest = PickupRequest::findOrFail($id);
+        $user = Auth::user();
+        $warehouse = $user->warehouse;
+
+        // Verify warehouse
+        if ($pickupRequest->warehouse_id !== $warehouse->id) {
+            return $this->errorResponse('auth.unauthorized', 403);
+        }
+
+        // Validate request is in correct status for assignment
+        $status = RequestStatus::tryFrom($pickupRequest->status_new);
+        if (!in_array($status, [
+            RequestStatus::PENDING_WAREHOUSE,
+            RequestStatus::ESTIMATE_APPROVED,
+        ])) {
+            return $this->errorResponse('warehouse.invalid_status_for_assignment', 400);
+        }
+
+        // For corporate, ensure estimate is approved
+        if ($pickupRequest->isCorporate() && !RequestStatusTransitionService::isEstimateApprovedForPickup($pickupRequest)) {
+            return $this->errorResponse('warehouse.estimate_not_approved', 400);
+        }
+
+        $validated = $request->validate([
+            'pickup_boy_id' => 'required|exists:users,id',
+        ]);
+
+        $pickupBoy = User::findOrFail($validated['pickup_boy_id']);
+        if (!$pickupBoy->hasRole('pickup_boy')) {
+            return $this->errorResponse('warehouse.invalid_pickup_boy', 422);
+        }
+
+        try {
+            // Create assignment
+            $assignment = Assignment::create([
+                'pickup_request_id' => $pickupRequest->id,
+                'pickup_boy_id' => $pickupBoy->id,
+                'status' => 'assigned',
+                'assigned_at' => now(),
+            ]);
+
+            // Transition request status
+            $pickupRequest->transitionTo(
+                RequestStatus::PICKUP_BOY_ASSIGNED,
+                $user->id,
+                'warehouse',
+                "Assigned to {$pickupBoy->name}"
+            );
+
+            // Update request warehouse assignment
+            $pickupRequest->update([
+                'warehouse_assigned_at' => now(),
+                'assigned_by' => $user->id,
+            ]);
+
+            // Fire event
+            event(new \App\Events\PickupBoyAssigned($pickupRequest, $pickupBoy));
+
+            return $this->successResponse('warehouse.pickup_boy_assigned', [
+                'request_id' => $pickupRequest->id,
+                'assignment' => $assignment,
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('warehouse.assignment_failed', 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Reassign pickup boy
+     */
+    public function reassignPickupBoy(Request $request, $id)
+    {
+        $pickupRequest = PickupRequest::findOrFail($id);
+        $user = Auth::user();
+        $warehouse = $user->warehouse;
+
+        if ($pickupRequest->warehouse_id !== $warehouse->id) {
+            return $this->errorResponse('auth.unauthorized', 403);
+        }
+
+        // Can only reassign before pickup started
+        $status = RequestStatus::tryFrom($pickupRequest->status_new);
+        if (!in_array($status, [RequestStatus::PICKUP_BOY_ASSIGNED])) {
+            return $this->errorResponse('warehouse.cannot_reassign_after_pickup_started', 400);
+        }
+
+        $validated = $request->validate([
+            'pickup_boy_id' => 'required|exists:users,id',
+        ]);
+
+        try {
+            $oldAssignment = $pickupRequest->currentAssignment;
+            $oldAssignment->delete();
+
+            $newPickupBoy = User::findOrFail($validated['pickup_boy_id']);
+            Assignment::create([
+                'pickup_request_id' => $pickupRequest->id,
+                'pickup_boy_id' => $newPickupBoy->id,
+                'status' => 'assigned',
+                'assigned_at' => now(),
+            ]);
+
+            return $this->successResponse('warehouse.pickup_boy_reassigned', [
+                'request_id' => $pickupRequest->id,
+                'new_pickup_boy' => $newPickupBoy->name,
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('warehouse.reassignment_failed', 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Confirm warehouse received items
+     */
+    public function confirmReceived(Request $request, $id)
+    {
+        $pickupRequest = PickupRequest::findOrFail($id);
+        $user = Auth::user();
+        $warehouse = $user->warehouse;
+
+        if ($pickupRequest->warehouse_id !== $warehouse->id) {
+            return $this->errorResponse('auth.unauthorized', 403);
+        }
+
+        // Must be in warehouse_receive_pending status
+        $status = RequestStatus::tryFrom($pickupRequest->status_new);
+        if ($status !== RequestStatus::WAREHOUSE_RECEIVE_PENDING) {
+            return $this->errorResponse('warehouse.invalid_status_for_receipt', 400);
+        }
+
+        $validated = $request->validate([
+            'notes' => 'nullable|string',
+        ]);
+
+        try {
+            // Determine next status based on request type
+            $type = $pickupRequest->request_type;
+            $nextStatus = ($type === 'donation')
+                ? RequestStatus::COMPLETED
+                : RequestStatus::PAYMENT_PENDING;
+
+            $pickupRequest->transitionTo(
+                RequestStatus::WAREHOUSE_RECEIVED,
+                $user->id,
+                'warehouse',
+                $validated['notes'] ?? 'Items received and verified'
+            );
+
+            // Update warehouse received tracking
+            $pickupRequest->update([
+                'warehouse_received_at' => now(),
+                'warehouse_received_by' => $user->id,
+            ]);
+
+            // Auto-transition for donation
+            if ($nextStatus === RequestStatus::COMPLETED) {
+                $pickupRequest->transitionTo(
+                    $nextStatus,
+                    $user->id,
+                    'warehouse',
+                    'Donation request completed'
+                );
+                $pickupRequest->update(['completed_at' => now()]);
+
+                event(new \App\Events\DonationCompleted($pickupRequest));
+            } else {
+                event(new \App\Events\WarehouseReceived($pickupRequest));
+            }
+
+            return $this->successResponse('warehouse.items_confirmed', [
+                'request_id' => $pickupRequest->id,
+                'next_status' => $nextStatus->value,
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('warehouse.confirmation_failed', 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Move to payment pending (for scrap/corporate after warehouse received)
+     */
+    public function moveToPaymentPending(Request $request, $id)
+    {
+        $pickupRequest = PickupRequest::findOrFail($id);
+        $user = Auth::user();
+        $warehouse = $user->warehouse;
+
+        if ($pickupRequest->warehouse_id !== $warehouse->id) {
+            return $this->errorResponse('auth.unauthorized', 403);
+        }
+
+        // Must be in warehouse_received status
+        $status = RequestStatus::tryFrom($pickupRequest->status_new);
+        if ($status !== RequestStatus::WAREHOUSE_RECEIVED) {
+            return $this->errorResponse('warehouse.invalid_status_for_payment', 400);
+        }
+
+        // Only for scrap/corporate
+        if (!in_array($pickupRequest->request_type, ['scrap', 'corporate'])) {
+            return $this->errorResponse('warehouse.payment_not_applicable_for_donation', 400);
+        }
+
+        try {
+            $pickupRequest->transitionTo(
+                RequestStatus::PAYMENT_PENDING,
+                $user->id,
+                'warehouse',
+                'Moved to payment pending'
+            );
+
+            event(new \App\Events\PaymentPending($pickupRequest));
+
+            return $this->successResponse('warehouse.moved_to_payment_pending', [
+                'request_id' => $pickupRequest->id,
+            ]);
+        } catch (\Exception $e) {
+            return $this->errorResponse('warehouse.payment_transition_failed', 400, $e->getMessage());
+        }
+    }
+
+    /**
+     * Warehouse dashboard counts
+     */
+    public function dashboard()
+    {
+        $user = Auth::user();
+        $warehouse = $user->warehouse;
+
+        if (!$warehouse) {
+            return $this->errorResponse('warehouse.not_assigned', 403);
+        }
+
+        $query = PickupRequest::where('warehouse_id', $warehouse->id);
+
+        return $this->successResponse('warehouse.dashboard_fetched', [
+            'new_requests' => (clone $query)->where('status_new', RequestStatus::PENDING_WAREHOUSE->value)->count(),
+            'pickup_assigned' => (clone $query)->where('status_new', RequestStatus::PICKUP_BOY_ASSIGNED->value)->count(),
+            'pickup_completed_waiting' => (clone $query)->whereIn('status_new', [
+                RequestStatus::PICKUP_COMPLETED->value,
+                RequestStatus::WAREHOUSE_RECEIVE_PENDING->value,
+            ])->count(),
+            'warehouse_received' => (clone $query)->where('status_new', RequestStatus::WAREHOUSE_RECEIVED->value)->count(),
+            'payment_pending' => (clone $query)->whereIn('status_new', [
+                RequestStatus::PAYMENT_PENDING->value,
+                RequestStatus::PAYMENT_PROCESSING->value,
+            ])->count(),
+            'completed' => (clone $query)->where('status_new', RequestStatus::COMPLETED->value)->count(),
+            'estimate_pending' => (clone $query)->where('status_new', RequestStatus::ESTIMATE_PENDING->value)->count(),
+        ]);
+    }
+
+    /**
+     * Format request for warehouse view
+     */
+    private function formatWarehouseRequestResponse(PickupRequest $request): array
+    {
+        $status = RequestStatus::tryFrom($request->status_new);
+
+        return [
+            'id' => $request->id,
+            'pickup_code' => $request->pickup_code,
+            'request_type' => $request->request_type,
+            'status' => $request->status_new,
+            'status_label' => $status?->label(),
+            'customer_name' => $request->customer_name,
+            'customer_phone' => $request->customer_phone,
+            'address' => $request->address,
+            'scheduled_at' => $request->scheduled_at?->format('Y-m-d H:i:s'),
+            'estimated_amount' => $request->estimated_amount,
+            'final_amount' => $request->final_amount,
+            'pickup_boy' => $request->currentAssignment?->pickupBoy ? [
+                'id' => $request->currentAssignment->pickupBoy->id,
+                'name' => $request->currentAssignment->pickupBoy->name,
+            ] : null,
+            'estimate' => $request->latestEstimate ? [
+                'amount' => $request->latestEstimate->estimated_amount,
+                'status' => $request->latestEstimate->status,
+            ] : null,
+            'next_allowed_actions' => RequestStatusTransitionService::getNextAllowedActions($request, 'warehouse'),
+        ];
+    }
+}
