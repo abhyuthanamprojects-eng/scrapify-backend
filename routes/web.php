@@ -19,6 +19,18 @@ Route::get('/support', function () {
 Route::get('/termscondition', function () {
     return view('frontend');
 });
+Route::get('/partner', function () {
+    return view('frontend');
+});
+Route::get('/contact', function () {
+    return view('frontend');
+});
+Route::get('/terms', function () {
+    return view('frontend');
+});
+Route::get('/cancellation', function () {
+    return view('frontend');
+});
 
 // Channel Partner Registration
 Route::get('register/partner', [\App\Http\Controllers\Auth\PartnerRegistrationController::class, 'create'])->name('partner.register');
