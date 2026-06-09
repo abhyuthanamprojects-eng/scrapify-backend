@@ -24,7 +24,7 @@ class PickupController extends Controller
                 $hasScope = false;
                 
                 if ($user->hasRole('warehouse')) {
-                    $warehouseIds = \App\Models\Warehouse::where('manager_id', $user->id)->pluck('id');
+                    $warehouseIds = $user->getAccessibleWarehouseIds();
                     $q->orWhereIn('warehouse_id', $warehouseIds);
                     $hasScope = true;
                 }
@@ -103,7 +103,7 @@ class PickupController extends Controller
             $isAuthorized = false;
             
             if ($user->hasRole('warehouse')) {
-                $warehouseIds = \App\Models\Warehouse::where('manager_id', $user->id)->pluck('id')->toArray();
+                $warehouseIds = $user->getAccessibleWarehouseIds();
                 if (in_array($pickup->warehouse_id, $warehouseIds)) {
                     $isAuthorized = true;
                 }

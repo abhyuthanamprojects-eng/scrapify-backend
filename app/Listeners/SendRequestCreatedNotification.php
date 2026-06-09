@@ -30,16 +30,27 @@ class SendRequestCreatedNotification implements ShouldQueue
 
         // Send notification to warehouse
         if ($request->warehouse_id) {
-            Notification::create([
-                'user_id' => $request->warehouse->user_id,
-                'type' => 'new_request',
-                'title' => 'New Request Assigned',
-                'message' => "New {$request->request_type} request received: {$request->customer_name}",
-                'data' => [
-                    'request_id' => $request->id,
-                    'request_type' => $request->request_type,
-                ],
-            ]);
+            $warehouseUserIds = \App\Models\User::where('warehouse_id', $request->warehouse_id)
+                ->pluck('id')
+                ->toArray();
+                
+            $warehouseManagerId = $request->warehouse->manager_id ?? null;
+            if ($warehouseManagerId && !in_array($warehouseManagerId, $warehouseUserIds)) {
+                $warehouseUserIds[] = $warehouseManagerId;
+            }
+
+            foreach ($warehouseUserIds as $wUserId) {
+                Notification::create([
+                    'user_id' => $wUserId,
+                    'type' => 'new_request',
+                    'title' => 'New Request Assigned',
+                    'message' => "New {$request->request_type} request received: {$request->customer_name}",
+                    'data' => [
+                        'request_id' => $request->id,
+                        'request_type' => $request->request_type,
+                    ],
+                ]);
+            }
         }
     }
 }

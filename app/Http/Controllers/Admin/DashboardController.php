@@ -41,7 +41,7 @@ class DashboardController extends Controller
             $pickupQuery->where(function ($q) use ($user) {
                 $hasScope = false;
                 if ($user->hasRole('warehouse')) {
-                    $warehouseIds = Warehouse::where('manager_id', $user->id)->pluck('id');
+                    $warehouseIds = $user->getAccessibleWarehouseIds();
                     $q->orWhereIn('warehouse_id', $warehouseIds);
                     $hasScope = true;
                 }
@@ -81,7 +81,7 @@ class DashboardController extends Controller
                 'delivered_to_warehouse' => (clone $pickupQuery)->where('status', 'delivered_to_warehouse')->count(),
                 'pending_settlement' => $user->hasRole('channel_partner') ? \App\Models\Settlement::where('partner_id', $user->id)->whereIn('payout_status', ['pending', 'processing', 'hold'])->sum('net_amount') : 0,
                 'paid_settlement' => $user->hasRole('channel_partner') ? \App\Models\Settlement::where('partner_id', $user->id)->where('payout_status', 'paid')->sum('net_amount') : 0,
-                'warehouses_count' => $user->hasRole('warehouse') ? Warehouse::where('manager_id', $user->id)->count() : null,
+                'warehouses_count' => $user->hasRole('warehouse') ? count($user->getAccessibleWarehouseIds()) : null,
                 'recent_pickups' => $pickupQuery->with('customer')->latest()->take(10)->get(),
                 'partner_requests_count' => 0,
                 'pending_approvals_count' => 0,

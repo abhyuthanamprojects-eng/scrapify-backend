@@ -92,6 +92,15 @@ class User extends Authenticatable
         return $this->belongsTo(Warehouse::class);
     }
 
+    public function getAccessibleWarehouseIds(): array
+    {
+        $ids = \App\Models\Warehouse::where('manager_id', $this->id)->pluck('id')->toArray();
+        if ($this->warehouse_id && !in_array($this->warehouse_id, $ids)) {
+            $ids[] = $this->warehouse_id;
+        }
+        return $ids;
+    }
+
     public function warehouses()
     {
         return $this->belongsToMany(Warehouse::class, 'pickup_boy_warehouse', 'pickup_boy_id', 'warehouse_id')
