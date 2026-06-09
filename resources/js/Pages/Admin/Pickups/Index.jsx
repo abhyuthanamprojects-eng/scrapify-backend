@@ -115,7 +115,8 @@ export default function Index({ pickups, filters }) {
                                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Scheduled At</th>
                                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
                                     <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Warehouse</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Booking Amount</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Final Amount</th>
                                     <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
@@ -143,8 +144,11 @@ export default function Index({ pickups, filters }) {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pickup.warehouse?.name || '-'}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                                            {pickup.estimated_amount !== null && pickup.estimated_amount !== undefined ? `₹${pickup.estimated_amount}` : '-'}
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">
-                                            {pickup.final_amount ? `₹${pickup.final_amount}` : '-'}
+                                            {pickup.final_amount !== null && pickup.final_amount !== undefined && !['pending', 'assigned', 'accepted', 'on_the_way', 'arrived', 'verifying', 'reschedule_requested', 'rescheduled', 'cancelled'].includes(pickup.status) ? `₹${pickup.final_amount}` : '-'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <Link href={route('admin.pickups.show', pickup.id)} className="text-primary font-bold hover:underline">
