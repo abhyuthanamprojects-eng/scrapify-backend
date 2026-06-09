@@ -119,10 +119,10 @@ class RequestStatusTransitionService
             RequestStatus::CANCELLED => true, // Multiple roles can cancel
 
             // Estimate operations (corporate only)
-            RequestStatus::ESTIMATE_PENDING,
-            RequestStatus::ESTIMATE_SHARED,
+            RequestStatus::ESTIMATE_PENDING => in_array($role, [UserRole::ADMIN, UserRole::WAREHOUSE, UserRole::CUSTOMER]),
+            RequestStatus::ESTIMATE_SHARED => in_array($role, [UserRole::ADMIN, UserRole::WAREHOUSE]),
             RequestStatus::ESTIMATE_APPROVED,
-            RequestStatus::ESTIMATE_REJECTED => in_array($role, [UserRole::ADMIN, UserRole::WAREHOUSE]),
+            RequestStatus::ESTIMATE_REJECTED => in_array($role, [UserRole::ADMIN, UserRole::WAREHOUSE, UserRole::CUSTOMER]),
 
             // Default - only admin
             default => $role === UserRole::ADMIN,
