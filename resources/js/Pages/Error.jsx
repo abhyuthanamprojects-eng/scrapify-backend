@@ -33,7 +33,7 @@ export default function Error({ status, message }) {
                         {message || description}
                     </p>
                     <Link
-                        href={route('admin.dashboard')}
+                        href={route('dashboard')}
                         className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-bold rounded-full text-white bg-primary hover:bg-opacity-90 transition-colors"
                     >
                         Return to Dashboard
