@@ -232,8 +232,10 @@ class ProfileController extends Controller
         // Revoke all sanctum tokens
         $user->tokens()->delete();
 
-        // Delete user
-        $user->delete();
+        // Hard-delete so the phone/email unique constraints are freed immediately.
+        // A soft-delete leaves the row (and its unique indexes) in place, causing
+        // "Duplicate entry" errors if the same phone tries to register again.
+        $user->forceDelete();
 
         return $this->successResponse('profile.deleted', null);
     }

@@ -174,10 +174,20 @@ class AuthController extends Controller
                 ]
             );
         } catch (QueryException $e) {
-            // Race condition: another concurrent request inserted the same phone
-            // just before us. Treat it as a successful firstOrCreate.
+            // Two scenarios trigger SQLSTATE 23000 (unique constraint violation):
+            // 1. Race condition – another concurrent request inserted the same phone.
+            // 2. The user previously soft-deleted their account; the row (and its
+            //    unique index entry) still exists, blocking a fresh INSERT.
+            // In both cases we fetch the existing row (including trashed), restore
+            // it if needed, and continue as if firstOrCreate had found it.
             if ($e->getCode() === '23000') {
-                $user = User::where('phone', $phone)->firstOrFail();
+                $user = User::withTrashed()->where('phone', $phone)->first();
+                if (!$user) {
+                    throw $e; // truly unexpected – re-throw
+                }
+                if ($user->trashed()) {
+                    $user->restore(); // bring the soft-deleted row back to life
+                }
             } else {
                 throw $e;
             }
