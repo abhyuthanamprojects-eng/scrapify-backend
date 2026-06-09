@@ -83,15 +83,12 @@ class CorporateBookingController extends Controller
             'items.*.category_id' => 'required|exists:categories,id',
             'items.*.quantity' => 'required|numeric|min:0',
             'items.*.weight' => 'nullable|numeric|min:0',
+            'corporate_categories' => 'nullable|array',
+            'corporate_category_items' => 'nullable|array',
         ]);
 
         try {
-            // Auto-assign warehouse by city
-            $warehouse = \App\Models\Warehouse::where('city_id', $validated['city_id'])
-                ->where('status', true)
-                ->first();
-
-            // Create pickup request
+            // Create pickup request (Warehouse will be assigned by admin later)
             $pickupRequest = PickupRequest::create([
                 'customer_id' => Auth::id(),
                 'request_type' => RequestType::CORPORATE->value,
@@ -100,8 +97,8 @@ class CorporateBookingController extends Controller
                 'address' => $validated['address'],
                 'address_id' => $validated['address_id'] ?? null,
                 'city_id' => $validated['city_id'],
-                'warehouse_id' => $warehouse?->id,
-                'warehouse_assigned_at' => $warehouse ? now() : null,
+                'warehouse_id' => null,
+                'warehouse_assigned_at' => null,
                 'pincode' => $validated['pincode'] ?? null,
                 'latitude' => $validated['latitude'] ?? null,
                 'longitude' => $validated['longitude'] ?? null,
@@ -118,6 +115,9 @@ class CorporateBookingController extends Controller
                     'company_name' => $validated['company_name'],
                     'contact_name' => $validated['contact_name'],
                     'contact_email' => $validated['contact_email'],
+                    'meeting_type' => $validated['meeting_type'],
+                    'corporate_categories' => $validated['corporate_categories'] ?? [],
+                    'corporate_category_items' => $validated['corporate_category_items'] ?? [],
                 ]),
             ]);
 
