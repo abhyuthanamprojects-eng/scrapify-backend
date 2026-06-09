@@ -140,6 +140,7 @@ class PickupController extends Controller
                     $pb->is_capacity_full = $pb->is_capacity_full;
                     return $pb;
                 }),
+            'warehouses' => $user->hasRole('admin') ? \App\Models\Warehouse::where('status', true)->get(['id', 'name']) : [],
         ]);
     }
 
@@ -184,6 +185,33 @@ class PickupController extends Controller
         );
 
         return redirect()->route('admin.pickups.show', $id)->with('success', 'Pickup boy assigned successfully.');
+    }
+
+    public function assignWarehouse(Request $request, $id)
+    {
+        $request->validate([
+            'warehouse_id' => 'required|exists:warehouses,id'
+        ]);
+
+        $pickup = PickupRequest::findOrFail($id);
+
+        abort_unless(auth()->user()->hasRole('admin'), 403);
+
+        DB::transaction(function () use ($pickup, $request) {
+            $pickup->update([
+                'warehouse_id' => $request->warehouse_id,
+                'warehouse_assigned_at' => now(),
+            ]);
+
+            \App\Models\PickupStatusLog::create([
+                'pickup_request_id' => $pickup->id,
+                'status' => $pickup->status,
+                'notes' => 'Warehouse assigned by admin.',
+                'created_by' => auth()->id()
+            ]);
+        });
+
+        return back()->with('success', 'Warehouse assigned successfully.');
     }
 
     public function autoAssign(Request $request, \App\Services\PickupAssignmentService $service)

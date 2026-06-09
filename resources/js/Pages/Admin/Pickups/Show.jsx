@@ -3,7 +3,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import axios from 'axios';
 
-export default function Show({ pickup, pickupBoys }) {
+export default function Show({ pickup, pickupBoys, warehouses }) {
     const { auth } = usePage().props;
     const canAssign = auth.user.roles.some(r => ['admin', 'warehouse'].includes(r.name));
     const isAdmin = auth.user.roles.some(r => r.name === 'admin');
@@ -62,6 +62,15 @@ export default function Show({ pickup, pickupBoys }) {
         estimated_amount: pickup.estimated_amount || '',
         notes: pickup.metadata?.admin_quote_notes || '',
     });
+
+    const { data: wData, setData: setWData, post: wPost, processing: wProcessing } = useForm({
+        warehouse_id: '',
+    });
+
+    const assignWarehouse = (e) => {
+        e.preventDefault();
+        wPost(route('admin.pickups.assign-warehouse', pickup.id));
+    };
 
     const assignPickupBoy = (e) => {
         e.preventDefault();
@@ -233,7 +242,9 @@ export default function Show({ pickup, pickupBoys }) {
                                         <div key={item.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex justify-between items-center">
                                             <div>
                                                 <p className="text-sm font-bold text-gray-800">{item.category?.name?.en || item.category?.name || item.product_name || 'Item'}</p>
-                                                <p className="text-xs text-gray-500">{item.quantity} units</p>
+                                                <p className="text-xs text-gray-500">
+                                                    {item.weight > 0 ? `${item.weight} kg` : `${item.quantity} units`}
+                                                </p>
                                             </div>
                                             {item.price_per_unit > 0 && (
                                                 <span className="text-sm font-bold text-primary">₹{item.price_per_unit} / unit</span>
@@ -374,7 +385,32 @@ export default function Show({ pickup, pickupBoys }) {
                                 </div>
                             ) : (
                                 canAssign ? (
-                                    <form onSubmit={assignPickupBoy} className="space-y-3">
+                                    !pickup.warehouse_id && isAdmin ? (
+                                        <form onSubmit={assignWarehouse} className="space-y-3 mb-6">
+                                            {corporateQuoteRequired && (
+                                                <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-xs font-semibold text-blue-800 mb-2">
+                                                    Submit the corporate quote before assigning a warehouse.
+                                                </div>
+                                            )}
+                                            <h4 className="text-xs font-bold text-gray-800">Assign Warehouse First</h4>
+                                            <select
+                                                value={wData.warehouse_id}
+                                                onChange={(e) => setWData('warehouse_id', e.target.value)}
+                                                className="w-full rounded-lg border-gray-200 text-xs focus:ring-primary"
+                                                required
+                                                disabled={corporateQuoteRequired}
+                                            >
+                                                <option value="" disabled>Select Warehouse</option>
+                                                {warehouses?.map(w => (
+                                                    <option key={w.id} value={w.id}>{w.name}</option>
+                                                ))}
+                                            </select>
+                                            <button type="submit" disabled={wProcessing || corporateQuoteRequired} className="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-opacity-90 disabled:opacity-50">
+                                                Assign Warehouse
+                                            </button>
+                                        </form>
+                                    ) : (
+                                        <form onSubmit={assignPickupBoy} className="space-y-3">
                                         {corporateQuoteRequired && (
                                             <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-xs font-semibold text-blue-800">
                                                 Submit the corporate quote before assigning a pickup boy.
@@ -411,6 +447,7 @@ export default function Show({ pickup, pickupBoys }) {
                                             Assign Now
                                         </button>
                                     </form>
+                                    )
                                 ) : (
                                     <p className="text-xs text-gray-400 italic">No agent assigned yet.</p>
                                 )

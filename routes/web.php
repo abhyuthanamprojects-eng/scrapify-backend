@@ -128,6 +128,7 @@ Route::middleware(['auth', 'role:admin|warehouse|channel_partner|pickup_boy'])->
     Route::post('/pickups/{id}/assign', [\App\Http\Controllers\Admin\PickupController::class , 'assign'])->name('admin.pickups.assign');
     Route::post('/pickups/{id}/approve-reschedule', [\App\Http\Controllers\Admin\PickupController::class , 'approveReschedule'])->name('admin.pickups.approve-reschedule');
     Route::post('/pickups/{id}/reject-reschedule', [\App\Http\Controllers\Admin\PickupController::class , 'rejectReschedule'])->name('admin.pickups.reject-reschedule');
+    Route::post('/pickups/{id}/assign-warehouse', [\App\Http\Controllers\Admin\PickupController::class , 'assignWarehouse'])->name('admin.pickups.assign-warehouse');
     Route::post('/pickups/{id}/submit-quote', [\App\Http\Controllers\Admin\PickupController::class , 'submitQuote'])->name('admin.pickups.submit-quote');
     Route::post('/pickups/{id}/receive-at-warehouse', [\App\Http\Controllers\Admin\PickupController::class , 'receiveAtWarehouse'])->name('admin.pickups.receive-at-warehouse');
     Route::post('/pickups/{id}/mark-payment-completed', [\App\Http\Controllers\Admin\PickupController::class , 'markPaymentCompleted'])->name('admin.pickups.mark-payment-completed');

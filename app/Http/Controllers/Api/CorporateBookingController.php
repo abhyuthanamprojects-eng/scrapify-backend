@@ -111,14 +111,14 @@ class CorporateBookingController extends Controller
                 'pickup_code' => $this->generatePickupCode(),
                 'estimated_amount' => 0,
                 // Store corporate-specific data in JSON
-                'metadata' => json_encode([
+                'metadata' => [
                     'company_name' => $validated['company_name'],
                     'contact_name' => $validated['contact_name'],
                     'contact_email' => $validated['contact_email'],
                     'meeting_type' => $validated['meeting_type'],
                     'corporate_categories' => $validated['corporate_categories'] ?? [],
                     'corporate_category_items' => $validated['corporate_category_items'] ?? [],
-                ]),
+                ],
             ]);
 
             // Add items
