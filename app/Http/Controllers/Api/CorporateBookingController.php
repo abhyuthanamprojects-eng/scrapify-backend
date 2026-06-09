@@ -81,8 +81,8 @@ class CorporateBookingController extends Controller
             'notes' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1',
             'items.*.category_id' => 'required|exists:categories,id',
-            'items.*.quantity' => 'required|numeric|min:0.1',
-            'items.*.weight' => 'nullable|numeric|min:0.1',
+            'items.*.quantity' => 'required|numeric|min:0',
+            'items.*.weight' => 'nullable|numeric|min:0',
         ]);
 
         try {

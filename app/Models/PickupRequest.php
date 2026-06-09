@@ -190,8 +190,7 @@ class PickupRequest extends Model
         $userRole = 'system',
         $reason = null
     ) {
-        $service = app(\App\Services\RequestStatusTransitionService::class);
-        return $service->transitionStatus(
+        return \App\Services\RequestStatusTransitionService::transition(
             $this,
             $newStatus,
             $userId,
