@@ -164,6 +164,12 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
                                         </p>
                                     </div>
                                     <div>
+                                        <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Booking Type</label>
+                                        <p className="text-sm font-semibold text-gray-800 capitalize">
+                                            {pickup.request_type === 'normal' ? 'Scrap' : pickup.request_type}
+                                        </p>
+                                    </div>
+                                    <div>
                                         <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Warehouse</label>
                                         <p className="text-sm font-semibold text-gray-800">{pickup.warehouse?.name || 'Not assigned'}</p>
                                     </div>

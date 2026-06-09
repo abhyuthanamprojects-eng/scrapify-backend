@@ -82,6 +82,8 @@ class PickupRequestResource extends JsonResource
         return [
             'pickup_id' => $this->id,
             'order_code' => $this->pickup_code,
+            'request_type' => $this->request_type,
+            'metadata' => $this->metadata,
             'customer_name' => $this->customer_name ?: ($this->customer ? $this->customer->name : null),
             'customer_phone' => $this->customer_phone ?: ($this->customer ? $this->customer->phone : null),
             'customer_image' => $this->customer ? $this->customer->profile_photo_path : null,
