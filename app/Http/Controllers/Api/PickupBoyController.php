@@ -251,6 +251,7 @@ class PickupBoyController extends Controller
             'notes' => 'nullable|string',
             'final_payout_amount' => 'nullable|numeric|min:0',
             'verification_method' => 'nullable|string',
+            'verified_items.*.final_amount' => 'nullable|numeric|min:0',
         ]);
 
         if ($validator->fails()) {
@@ -288,10 +289,14 @@ class PickupBoyController extends Controller
                         $item->price_per_unit = $rate;
 
                         $price = 0;
-                        if ($item->weight > 0) {
-                            $price = $rate * $item->weight;
+                        if (isset($itemData['final_amount'])) {
+                            $price = $itemData['final_amount'];
                         } else {
-                            $price = $rate * $item->quantity;
+                            if ($item->weight > 0) {
+                                $price = $rate * $item->weight;
+                            } else {
+                                $price = $rate * $item->quantity;
+                            }
                         }
                         $item->total_price = $price;
                         $item->save();
@@ -307,10 +312,14 @@ class PickupBoyController extends Controller
                     $quantity = $itemData['quantity'] ?? 0;
 
                     $price = 0;
-                    if ($weight > 0) {
-                        $price = $rate * $weight;
+                    if (isset($itemData['final_amount'])) {
+                        $price = $itemData['final_amount'];
                     } else {
-                        $price = $rate * $quantity;
+                        if ($weight > 0) {
+                            $price = $rate * $weight;
+                        } else {
+                            $price = $rate * $quantity;
+                        }
                     }
 
                     \App\Models\PickupItem::create([
