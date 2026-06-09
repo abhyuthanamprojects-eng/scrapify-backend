@@ -9,6 +9,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class PickupRequest extends Model
 {
     use HasFactory, SoftDeletes, \App\Traits\BelongsToPartner;
+
+    protected $appends = ['shipping_charge', 'subtotal_amount'];
+
+    public function getShippingChargeAttribute()
+    {
+        return $this->metadata['pricing_breakdown']['shipping_charge'] ?? 0;
+    }
+
+    public function getSubtotalAmountAttribute()
+    {
+        return $this->metadata['pricing_breakdown']['subtotal_amount'] ?? $this->estimated_amount;
+    }
+
     protected $fillable = [
         'request_type',
         'donation_category',
