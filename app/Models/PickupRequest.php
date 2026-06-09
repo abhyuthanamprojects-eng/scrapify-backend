@@ -49,6 +49,16 @@ class PickupRequest extends Model
         'metadata' => 'array',
     ];
 
+    public function setScheduledAtAttribute($value)
+    {
+        if ($value) {
+            $this->attributes['scheduled_at'] = \Carbon\Carbon::parse($value)
+                ->setTimezone(config('app.timezone'));
+        } else {
+            $this->attributes['scheduled_at'] = null;
+        }
+    }
+
     public function address()
     {
         return $this->belongsTo(Address::class);
