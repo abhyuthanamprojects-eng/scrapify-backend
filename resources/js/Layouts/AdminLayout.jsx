@@ -3,6 +3,7 @@ import { Link, usePage, router } from '@inertiajs/react';
 import SidebarLink from '@/Components/SidebarLink';
 import Dropdown from '@/Components/Dropdown';
 import DropdownLink from '@/Components/DropdownLink';
+import ApplicationLogo from '@/Components/ApplicationLogo';
 
 export default function AdminLayout({ children }) {
     const [showingSidebar, setShowingSidebar] = useState(false);
@@ -38,12 +39,7 @@ export default function AdminLayout({ children }) {
             >
                 <div className="flex items-center justify-center mt-6 mb-8">
                     <a href="/" className="flex items-center group">
-                        <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center group-hover:shadow-lg transition-all duration-200 transform group-hover:scale-110">
-                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                               <path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13h-13L12 6.5z"/>
-                            </svg>
-                        </div>
-                        <span className="text-gray-800 text-xl font-bold ml-3 tracking-tight bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">Scrapify</span>
+                        <ApplicationLogo className="w-auto h-12" />
                     </a>
                 </div>
 
