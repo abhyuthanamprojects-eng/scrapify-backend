@@ -387,25 +387,19 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
                                 canAssign ? (
                                     !pickup.warehouse_id && isAdmin ? (
                                         <form onSubmit={assignWarehouse} className="space-y-3 mb-6">
-                                            {corporateQuoteRequired && (
-                                                <div className="p-3 rounded-lg bg-blue-50 border border-blue-100 text-xs font-semibold text-blue-800 mb-2">
-                                                    Submit the corporate quote before assigning a warehouse.
-                                                </div>
-                                            )}
                                             <h4 className="text-xs font-bold text-gray-800">Assign Warehouse First</h4>
                                             <select
                                                 value={wData.warehouse_id}
                                                 onChange={(e) => setWData('warehouse_id', e.target.value)}
                                                 className="w-full rounded-lg border-gray-200 text-xs focus:ring-primary"
                                                 required
-                                                disabled={corporateQuoteRequired}
                                             >
                                                 <option value="" disabled>Select Warehouse</option>
                                                 {warehouses?.map(w => (
                                                     <option key={w.id} value={w.id}>{w.name}</option>
                                                 ))}
                                             </select>
-                                            <button type="submit" disabled={wProcessing || corporateQuoteRequired} className="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-opacity-90 disabled:opacity-50">
+                                            <button type="submit" disabled={wProcessing} className="w-full py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-opacity-90 disabled:opacity-50">
                                                 Assign Warehouse
                                             </button>
                                         </form>
