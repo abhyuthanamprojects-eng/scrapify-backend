@@ -14,7 +14,7 @@ class PaymentController extends Controller
      */
     public function index(Request $request)
     {
-        $query = PickupRequest::with(['customer', 'pickupBoy'])
+        $query = PickupRequest::with(['customer'])
             ->whereIn('status', ['delivered_to_warehouse', 'completed'])
             ->orderByRaw("FIELD(status, 'delivered_to_warehouse', 'completed')")
             ->orderBy('warehouse_received_at', 'desc')
