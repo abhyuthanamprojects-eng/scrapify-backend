@@ -88,5 +88,16 @@ return Application::configure(basePath: dirname(__DIR__))
                     ] : null,
                 ], $statusCode >= 100 && $statusCode < 600 ? $statusCode : 500);
             }
+
+            // For web requests, let's catch 403, 404, 500, 503 and render Inertia Error page
+            if ($e instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface) {
+                $status = $e->getStatusCode();
+                if (in_array($status, [403, 404, 500, 503])) {
+                    return \Inertia\Inertia::render('Error', [
+                        'status' => $status,
+                        'message' => $e->getMessage()
+                    ])->toResponse($request)->setStatusCode($status);
+                }
+            }
         });
     })->create();

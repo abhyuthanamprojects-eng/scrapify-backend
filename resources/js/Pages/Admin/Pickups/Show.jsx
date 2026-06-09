@@ -83,10 +83,22 @@ export default function Show({ pickup, pickupBoys }) {
         qPost(route('admin.pickups.submit-quote', pickup.id));
     };
 
+    const receiveAtWarehouse = (e) => {
+        e.preventDefault();
+        post(route('admin.pickups.receive-at-warehouse', pickup.id));
+    };
+
+    const markPaymentCompleted = (e) => {
+        e.preventDefault();
+        post(route('admin.pickups.mark-payment-completed', pickup.id));
+    };
+
     const statusColors = {
         pending: 'bg-gray-100 text-gray-800',
         assigned: 'bg-blue-100 text-blue-800',
         accepted: 'bg-indigo-100 text-indigo-800',
+        picked_up: 'bg-purple-100 text-purple-800',
+        delivered_to_warehouse: 'bg-teal-100 text-teal-800',
         completed: 'bg-green-100 text-green-800',
         reschedule_requested: 'bg-orange-100 text-orange-800 font-bold',
         cancelled: 'bg-red-100 text-red-800',
@@ -110,8 +122,19 @@ export default function Show({ pickup, pickupBoys }) {
                             {pickup.request_type}
                         </span>
                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusColors[pickup.status] || 'bg-gray-100 text-gray-800'}`}>
-                            {pickup.status.replace('_', ' ')}
+                            {pickup.status.replace(/_/g, ' ')}
                         </span>
+                        
+                        {pickup.status === 'picked_up' && (
+                            <button onClick={receiveAtWarehouse} disabled={processing} className="px-4 py-1.5 bg-teal-600 text-white text-xs font-bold rounded-full hover:bg-teal-700 transition-colors disabled:opacity-50 shadow-sm">
+                                Mark Received
+                            </button>
+                        )}
+                        {pickup.status === 'delivered_to_warehouse' && (
+                            <button onClick={markPaymentCompleted} disabled={processing} className="px-4 py-1.5 bg-green-600 text-white text-xs font-bold rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 shadow-sm">
+                                Complete Payment
+                            </button>
+                        )}
                     </div>
                 </div>
 

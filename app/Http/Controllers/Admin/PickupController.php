@@ -340,4 +340,56 @@ class PickupController extends Controller
 
         return back()->with('success', 'Quote submitted successfully.');
     }
+
+    public function receiveAtWarehouse(Request $request, $id)
+    {
+        $pickup = PickupRequest::findOrFail($id);
+        
+        if ($pickup->status !== 'picked_up') {
+            return back()->with('error', 'Pickup is not in a picked up state.');
+        }
+
+        DB::transaction(function () use ($pickup) {
+            $pickup->update([
+                'status' => 'delivered_to_warehouse',
+                'warehouse_received_at' => now(),
+                'warehouse_received_by' => auth()->id()
+            ]);
+
+            \App\Models\PickupStatusLog::create([
+                'pickup_request_id' => $pickup->id,
+                'status' => 'delivered_to_warehouse',
+                'notes' => 'Material received at warehouse.',
+                'created_by' => auth()->id()
+            ]);
+        });
+
+        return back()->with('success', 'Pickup marked as received at warehouse.');
+    }
+
+    public function markPaymentCompleted(Request $request, $id)
+    {
+        $pickup = PickupRequest::findOrFail($id);
+        
+        if ($pickup->status !== 'delivered_to_warehouse') {
+            return back()->with('error', 'Pickup must be received at warehouse before payment.');
+        }
+
+        DB::transaction(function () use ($pickup) {
+            $pickup->update([
+                'status' => 'completed',
+                'payment_completed_at' => now(),
+                'payment_status' => 'completed'
+            ]);
+
+            \App\Models\PickupStatusLog::create([
+                'pickup_request_id' => $pickup->id,
+                'status' => 'completed',
+                'notes' => 'Payment completed and pickup finalized.',
+                'created_by' => auth()->id()
+            ]);
+        });
+
+        return back()->with('success', 'Payment marked as completed.');
+    }
 }

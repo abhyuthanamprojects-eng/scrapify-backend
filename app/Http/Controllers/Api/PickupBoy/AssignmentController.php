@@ -67,7 +67,8 @@ class AssignmentController extends Controller
             if ($request->status === 'accepted') {
                 $pickupRequest->status = 'assigned'; // Confirmed assignment
             } elseif ($request->status === 'completed') {
-                $pickupRequest->status = 'completed'; // Or 'picked_up'?
+                $pickupRequest->status = 'picked_up';
+                $pickupRequest->pickup_completed_at = now();
                 if ($request->has('final_amount')) {
                     $pickupRequest->final_amount = $request->final_amount;
                 }
