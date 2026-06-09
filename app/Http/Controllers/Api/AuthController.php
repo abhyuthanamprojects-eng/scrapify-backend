@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
 use App\Services\ActivityLogger;
 use OpenApi\Attributes as OA;
 
@@ -162,15 +163,25 @@ class AuthController extends Controller
         }
 
         $domain = env('APP_ENV') === 'production' ? 'scrapi5.com' : 'test.com';
-        $user = User::firstOrCreate(
-            ['phone' => $phone],
-            [
-                'name' => $request->name,
-                'email' => $normalizedEmail ?: ($phone . '@' . $domain),
-                'password' => Hash::make($phone),
-                'status' => true,
-            ]
-        );
+        try {
+            $user = User::firstOrCreate(
+                ['phone' => $phone],
+                [
+                    'name'     => $request->name,
+                    'email'    => $normalizedEmail ?: ($phone . '@' . $domain),
+                    'password' => Hash::make($phone),
+                    'status'   => true,
+                ]
+            );
+        } catch (QueryException $e) {
+            // Race condition: another concurrent request inserted the same phone
+            // just before us. Treat it as a successful firstOrCreate.
+            if ($e->getCode() === '23000') {
+                $user = User::where('phone', $phone)->firstOrFail();
+            } else {
+                throw $e;
+            }
+        }
         $user->update(['name' => $request->name, 'email' => $normalizedEmail]);
         $this->syncUserLocationFromRequest($user, $request);
 
