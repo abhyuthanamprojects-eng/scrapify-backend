@@ -112,13 +112,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('donation-requests/{id}/tracking', [\App\Http\Controllers\Api\PickupRequestController::class, 'tracking']); // Reuse tracking
         Route::post('pickup-requests/{id}/clone-as-donation', [\App\Http\Controllers\Api\DonationRequestController::class, 'cloneAsDonation']);
 
-        // Corporate Bookings
-        Route::get('corporate-bookings/options', [\App\Http\Controllers\Api\CorporateBookingController::class, 'options']);
-        Route::post('corporate-bookings', [\App\Http\Controllers\Api\CorporateBookingController::class, 'store']);
-        Route::get('corporate-bookings', [\App\Http\Controllers\Api\CorporateBookingController::class, 'index']);
-        Route::get('corporate-bookings/{id}', [\App\Http\Controllers\Api\PickupRequestController::class, 'show']);
-        Route::get('corporate-bookings/{id}/tracking', [\App\Http\Controllers\Api\PickupRequestController::class, 'tracking']);
-        Route::post('corporate-bookings/{id}/cancel', [\App\Http\Controllers\Api\PickupRequestController::class, 'cancel']);
+        // Corporate Bookings (Migrated to generic/refactored routes)
 
         Route::get('pickup-requests', [\App\Http\Controllers\Api\PickupRequestController::class, 'index']); // List with filters
         Route::get('pickup-requests/stats', [\App\Http\Controllers\Api\PickupRequestController::class, 'stats']); // New Stats Endpoint
@@ -251,6 +245,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('corporate-bookings')->group(function () {
         Route::get('/options', [\App\Http\Controllers\Api\CorporateBookingController::class, 'options']);
         Route::get('/', [\App\Http\Controllers\Api\CorporateBookingController::class, 'index']);
+        Route::post('/', [\App\Http\Controllers\Api\CorporateBookingController::class, 'store']);
         Route::get('/{id}', [\App\Http\Controllers\Api\CorporateBookingController::class, 'show']);
     });
 

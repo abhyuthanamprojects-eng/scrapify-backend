@@ -22,7 +22,7 @@ class RequestController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'request_type' => 'required|in:scrap,corporate,donation',
+            'request_type' => 'required|in:scrap,donation',
             'address' => 'required|string',
             'city_id' => 'required|exists:cities,id',
             'scheduled_at' => 'required|date|after:now',
@@ -63,6 +63,17 @@ class RequestController extends Controller
             'estimated_amount' => 0,
         ]);
 
+        if (!empty($validated['items']) && is_array($validated['items'])) {
+            foreach ($validated['items'] as $item) {
+                $pickupRequest->items()->create([
+                    'category_id' => $item['category_id'] ?? null,
+                    'quantity' => $item['quantity'] ?? 1,
+                    'weight' => $item['weight'] ?? 0,
+                    'remarks' => $item['remarks'] ?? null,
+                ]);
+            }
+        }
+
         // Log status change
         RequestStatusLog::logStatusChange(
             $pickupRequest->id,
@@ -72,16 +83,6 @@ class RequestController extends Controller
             'customer',
             'Request created'
         );
-
-        // For corporate bookings, move to estimate_pending
-        if ($type === RequestType::CORPORATE) {
-            $pickupRequest->transitionTo(
-                RequestStatus::ESTIMATE_PENDING,
-                Auth::id(),
-                'customer',
-                'Corporate booking - estimate required'
-            );
-        }
 
         return $this->successResponse('request.created', $this->formatRequestResponse($pickupRequest));
     }
@@ -182,12 +183,14 @@ class RequestController extends Controller
 
         // Can only update if not yet picked up
         $status = RequestStatus::tryFrom($pickupRequest->status_new ?? $pickupRequest->status);
-        if ($status && !in_array($status, [
-            RequestStatus::PENDING_WAREHOUSE,
-            RequestStatus::ESTIMATE_PENDING,
-            RequestStatus::ESTIMATE_SHARED,
-            RequestStatus::ESTIMATE_APPROVED,
-        ])) {
+        if (
+            $status && !in_array($status, [
+                RequestStatus::PENDING_WAREHOUSE,
+                RequestStatus::ESTIMATE_PENDING,
+                RequestStatus::ESTIMATE_SHARED,
+                RequestStatus::ESTIMATE_APPROVED,
+            ])
+        ) {
             return $this->errorResponse('request.cannot_update_after_pickup', 400);
         }
 
