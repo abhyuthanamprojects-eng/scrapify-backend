@@ -32,8 +32,13 @@ class AppSettingsController extends Controller
             'bill_generation_enabled' => AppSetting::get('bill_generation_enabled', true),
             'qr_verification_enabled' => AppSetting::get('qr_verification_enabled', true),
 
-            // App Info
-            'app_version' => AppSetting::get('app_version', '1.0.3'),
+            // App Info & Update
+            'app_version'   => AppSetting::get('app_version',   '1.0.3'),
+            'latest_version'=> AppSetting::get('latest_version', '2.0.0'),
+            'min_version'   => AppSetting::get('min_version',    '1.0.0'),
+            'force_update'  => (bool) AppSetting::get('force_update', false),
+            'android_url'   => AppSetting::get('android_url', 'https://play.google.com/store/apps/details?id=com.scrapi5.scrapify'),
+            'ios_url'       => AppSetting::get('ios_url',     'https://apps.apple.com/app/scrapify/id0000000000'),
             'customer_support_number' => AppSetting::get('customer_support_number', '+91 00000 00000'),
             'support_phone' => AppSetting::get('support_phone', '+91 00000 00000'),
             'feedback_url' => AppSetting::get('feedback_url', 'https://scrapify.in/feedback'),
@@ -85,6 +90,7 @@ class AppSettingsController extends Controller
             'bill_generation_enabled',
             'qr_verification_enabled',
             'scrap_proof_images_required',
+            'force_update',
         ];
 
         $intFields = [
@@ -100,6 +106,10 @@ class AppSettingsController extends Controller
 
         $stringFields = [
             'app_version',
+            'latest_version',
+            'min_version',
+            'android_url',
+            'ios_url',
             'customer_support_number',
             'support_phone',
             'feedback_url',
