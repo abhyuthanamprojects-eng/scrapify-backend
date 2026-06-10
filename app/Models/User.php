@@ -266,6 +266,35 @@ class User extends Authenticatable
         return asset($this->profile_photo_path);
     }
 
+    protected static function booted()
+    {
+        static::deleting(function ($user) {
+            if (in_array(SoftDeletes::class, class_uses_recursive(static::class)) && !$user->isForceDeleting()) {
+                $timestamp = time();
+                $updates = [];
+                if ($user->phone && !str_contains($user->phone, '_del_')) {
+                    $user->phone = $user->phone . '_del_' . $timestamp;
+                    $updates['phone'] = $user->phone;
+                }
+                if ($user->email && !str_contains($user->email, '_del_')) {
+                    $user->email = $user->email . '_del_' . $timestamp;
+                    $updates['email'] = $user->email;
+                }
+                if ($user->referral_code) {
+                    $user->referral_code = null;
+                    $updates['referral_code'] = null;
+                }
+                if ($user->employee_id && !str_contains($user->employee_id, '_del_')) {
+                    $user->employee_id = $user->employee_id . '_del_' . $timestamp;
+                    $updates['employee_id'] = $user->employee_id;
+                }
+                if (!empty($updates)) {
+                    $user->saveQuietly();
+                }
+            }
+        });
+    }
+
     public function ensureEmployeeId(string $prefix = 'PB'): string
     {
         if (!empty($this->employee_id)) {

@@ -17,13 +17,37 @@ class WarehouseRequestController extends Controller
 {
     use ApiResponseTrait;
 
+    private function getWarehouse($user)
+    {
+        if ($user->warehouse_id) {
+            $warehouse = \App\Models\Warehouse::find($user->warehouse_id);
+            if ($warehouse) {
+                return $warehouse;
+            }
+        }
+
+        $warehouse = \App\Models\Warehouse::where('manager_id', $user->id)->first();
+        if ($warehouse) {
+            return $warehouse;
+        }
+
+        if ($user->channel_partner_id) {
+            $warehouse = \App\Models\Warehouse::where('channel_partner_id', $user->channel_partner_id)->first();
+            if ($warehouse) {
+                return $warehouse;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * Get warehouse requests (filtered by warehouse)
      */
     public function index(Request $request)
     {
         $user = Auth::user();
-        $warehouse = $user->warehouse;
+        $warehouse = $this->getWarehouse($user);
 
         if (!$warehouse) {
             return $this->errorResponse('warehouse.not_assigned', 403);
@@ -62,7 +86,7 @@ class WarehouseRequestController extends Controller
     {
         $pickupRequest = PickupRequest::findOrFail($id);
         $user = Auth::user();
-        $warehouse = $user->warehouse;
+        $warehouse = $this->getWarehouse($user);
 
         // Verify warehouse
         if ($pickupRequest->warehouse_id !== $warehouse->id) {
@@ -134,7 +158,7 @@ class WarehouseRequestController extends Controller
     {
         $pickupRequest = PickupRequest::findOrFail($id);
         $user = Auth::user();
-        $warehouse = $user->warehouse;
+        $warehouse = $this->getWarehouse($user);
 
         if ($pickupRequest->warehouse_id !== $warehouse->id) {
             return $this->errorResponse('auth.unauthorized', 403);
@@ -178,7 +202,7 @@ class WarehouseRequestController extends Controller
     {
         $pickupRequest = PickupRequest::findOrFail($id);
         $user = Auth::user();
-        $warehouse = $user->warehouse;
+        $warehouse = $this->getWarehouse($user);
 
         if ($pickupRequest->warehouse_id !== $warehouse->id) {
             return $this->errorResponse('auth.unauthorized', 403);
@@ -245,7 +269,7 @@ class WarehouseRequestController extends Controller
     {
         $pickupRequest = PickupRequest::findOrFail($id);
         $user = Auth::user();
-        $warehouse = $user->warehouse;
+        $warehouse = $this->getWarehouse($user);
 
         if ($pickupRequest->warehouse_id !== $warehouse->id) {
             return $this->errorResponse('auth.unauthorized', 403);
@@ -286,7 +310,7 @@ class WarehouseRequestController extends Controller
     public function dashboard()
     {
         $user = Auth::user();
-        $warehouse = $user->warehouse;
+        $warehouse = $this->getWarehouse($user);
 
         if (!$warehouse) {
             return $this->errorResponse('warehouse.not_assigned', 403);
@@ -349,7 +373,7 @@ class WarehouseRequestController extends Controller
     {
         $pickupRequest = PickupRequest::findOrFail($id);
         $user = Auth::user();
-        $warehouse = $user->warehouse;
+        $warehouse = $this->getWarehouse($user);
 
         // Verify warehouse
         if ($pickupRequest->warehouse_id !== $warehouse->id) {
@@ -410,7 +434,7 @@ class WarehouseRequestController extends Controller
     {
         $pickupRequest = PickupRequest::findOrFail($id);
         $user = Auth::user();
-        $warehouse = $user->warehouse;
+        $warehouse = $this->getWarehouse($user);
 
         // Verify warehouse
         if ($pickupRequest->warehouse_id !== $warehouse->id) {
@@ -473,7 +497,7 @@ class WarehouseRequestController extends Controller
     {
         $pickupRequest = PickupRequest::findOrFail($id);
         $user = Auth::user();
-        $warehouse = $user->warehouse;
+        $warehouse = $this->getWarehouse($user);
 
         // Verify warehouse
         if ($pickupRequest->warehouse_id !== $warehouse->id) {

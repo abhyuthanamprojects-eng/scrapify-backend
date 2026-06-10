@@ -122,8 +122,8 @@ enum RequestStatus: string
             },
 
             // Payment flow - only scrap & corporate
-            self::PAYMENT_PENDING => [self::PAYMENT_PROCESSING],
-            self::PAYMENT_PROCESSING => [self::PAYMENT_COMPLETED],
+            self::PAYMENT_PENDING => [self::PAYMENT_PROCESSING, self::COMPLETED],
+            self::PAYMENT_PROCESSING => [self::PAYMENT_COMPLETED, self::COMPLETED],
             self::PAYMENT_COMPLETED => [self::COMPLETED],
 
             // Final states
