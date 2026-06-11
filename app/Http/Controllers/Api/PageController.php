@@ -48,6 +48,25 @@ class PageController extends Controller
 
         try {
             $contact = ContactMessage::create($request->all());
+
+            // Send notification email to support team
+            try {
+                \Illuminate\Support\Facades\Mail::raw(
+                    "New Contact Message Received:\n\n" .
+                    "Name: {$contact->name}\n" .
+                    "Email: {$contact->email}\n" .
+                    "Phone: " . ($contact->phone ?? 'N/A') . "\n" .
+                    "Subject: " . ($contact->subject ?? 'No Subject') . "\n\n" .
+                    "Message:\n{$contact->message}",
+                    function ($message) use ($contact) {
+                        $message->to('support.team@scrapi5.com')
+                            ->subject('New Contact Inquiry: ' . ($contact->subject ?? 'No Subject'));
+                    }
+                );
+            } catch (\Exception $mailEx) {
+                \Illuminate\Support\Facades\Log::error('Failed to send contact inquiry email: ' . $mailEx->getMessage());
+            }
+
             return $this->successResponse('contact.submitted', $contact, 201);
         } catch (\Exception $e) {
             return $this->errorResponse('server.error', 500, $e->getMessage());

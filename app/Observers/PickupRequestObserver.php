@@ -54,5 +54,33 @@ class PickupRequestObserver
                 $pickupRequest->customer->notify(new PickupStatusNotification($pickupRequest, 'rescheduled'));
             }
         }
+
+        // 3. Handle Payment Completion Notification
+        if ($pickupRequest->wasChanged('payment_status') && $pickupRequest->payment_status === 'completed') {
+            try {
+                $customerName = $pickupRequest->customer->name ?? 'N/A';
+                $customerPhone = $pickupRequest->customer->phone ?? 'N/A';
+                $finalAmount = $pickupRequest->final_amount ?? 0;
+                $reference = $pickupRequest->payment_reference ?? 'N/A';
+                $completedAt = $pickupRequest->payment_completed_at ? $pickupRequest->payment_completed_at->toDateTimeString() : now()->toDateTimeString();
+
+                \Illuminate\Support\Facades\Mail::raw(
+                    "Payment Confirmation Notification:\n\n" .
+                    "Pickup ID: #{$pickupRequest->id}\n" .
+                    "Pickup Code: {$pickupRequest->pickup_code}\n" .
+                    "Customer Name: {$customerName}\n" .
+                    "Customer Phone: {$customerPhone}\n" .
+                    "Final Amount Paid: ₹{$finalAmount}\n" .
+                    "Payment Reference / Txn ID: {$reference}\n" .
+                    "Completed At: {$completedAt}",
+                    function ($message) use ($pickupRequest) {
+                        $message->to('account.team@scrapi5.com')
+                            ->subject("Payment Completed: Pickup #{$pickupRequest->id} ({$pickupRequest->pickup_code})");
+                    }
+                );
+            } catch (\Exception $mailEx) {
+                Log::error('Failed to send payment confirmation email: ' . $mailEx->getMessage());
+            }
+        }
     }
 }
