@@ -122,6 +122,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Raising a Request
         Route::post('pickup-request', [\App\Http\Controllers\Api\PickupRequestController::class, 'store']);
         Route::post('pickup-requests', [\App\Http\Controllers\Api\PickupRequestController::class, 'store']);
+        Route::post('pickup-requests/check-booking-eligibility', [\App\Http\Controllers\Api\PickupRequestController::class, 'checkBookingEligibility']);
 
         // Reschedule Pickup
         Route::get('pickup-requests/{id}/reschedule-slots', [\App\Http\Controllers\Api\PickupBoyController::class, 'getRescheduleSlots']);

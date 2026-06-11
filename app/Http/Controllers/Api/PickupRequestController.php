@@ -232,6 +232,15 @@ class PickupRequestController extends Controller
             }
         }
 
+        // Basket value check: if a low-value pickup charge applies, the
+        // resulting basket value must not drop below the configured minimum.
+        $estimatedTotal = $this->estimateItemsTotal($request->items);
+        $pickupCharge = $this->calculatePickupCharge($estimatedTotal);
+        $eligibility = $this->buildBookingEligibility($estimatedTotal, $pickupCharge);
+        if (!$eligibility['can_book']) {
+            return $this->errorResponse('pickup.insufficient_basket_value', 422, $eligibility);
+        }
+
         $proofImagesRequired = (bool) AppSetting::get('scrap_proof_images_required', true);
         $requiredProofLabels = collect(AppSetting::get('scrap_proof_image_labels', ['front', 'back', 'left', 'right']))
             ->map(fn($label) => strtolower(trim((string) $label)))
@@ -433,6 +442,108 @@ class PickupRequestController extends Controller
             DB::rollBack();
             return $this->errorResponse('pickup.create_failed', 500, ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
         }
+    }
+
+    /**
+     * Estimates the total value of the given items without persisting anything.
+     * Mirrors the per-item pricing logic used in store().
+     */
+    private function estimateItemsTotal(array $items): float
+    {
+        $total = 0.0;
+
+        foreach ($items as $itemData) {
+            if (empty($itemData['category_id'])) {
+                continue;
+            }
+
+            $providedOptionIds = collect($itemData['attributes'] ?? [])
+                ->whereNotNull('attribute_option_id')
+                ->pluck('attribute_option_id')
+                ->map(fn($id) => (int) $id)
+                ->toArray();
+
+            $basePrice = isset($itemData['estimated_price']) && $itemData['estimated_price'] !== null
+                ? (float) $itemData['estimated_price']
+                : $this->pricingService->estimate((int) $itemData['category_id'], $providedOptionIds);
+
+            $qty = $itemData['quantity'] ?? 1;
+            $weight = $itemData['weight'] ?? 0;
+
+            $total += ($weight > 0) ? ($basePrice * $weight) : ($basePrice * $qty);
+        }
+
+        return $total;
+    }
+
+    /**
+     * Returns the low-value pickup charge that applies for the given
+     * estimated order total (0 if the order meets the free-pickup threshold).
+     */
+    private function calculatePickupCharge(float $estimatedTotal): float
+    {
+        $minimumFreePickupAmount = (float) AppSetting::get('minimum_free_pickup_amount', 1500);
+        $lowValueShippingCharge = (float) AppSetting::get('low_value_shipping_charge', 100);
+
+        return $estimatedTotal < $minimumFreePickupAmount ? $lowValueShippingCharge : 0.0;
+    }
+
+    /**
+     * Builds the booking eligibility payload used to gate booking confirmation.
+     * Blocks booking only when a pickup charge applies and deducting it from
+     * the basket value would leave less than the configured minimum.
+     */
+    private function buildBookingEligibility(float $basketValue, float $pickupCharge): array
+    {
+        $minimumRequiredBalance = (float) AppSetting::get('minimum_basket_value_after_charge', 100);
+        $valueAfterCharge = $basketValue - $pickupCharge;
+
+        $canBook = !($pickupCharge > 0 && $valueAfterCharge < $minimumRequiredBalance);
+
+        $message = $canBook
+            ? 'You are eligible to book this pickup.'
+            : "A pickup charge of ₹" . round($pickupCharge, 2) . " applies to this order. " .
+              "Your basket value (₹" . round($basketValue, 2) . ") must remain at least ₹" .
+              round($minimumRequiredBalance, 2) . " after this charge. Please add more items to continue.";
+
+        return [
+            'can_book' => $canBook,
+            'basket_value' => round($basketValue, 2),
+            'pickup_charge' => round($pickupCharge, 2),
+            'minimum_required_balance' => round($minimumRequiredBalance, 2),
+            'message' => $message,
+        ];
+    }
+
+    /**
+     * Checks whether the basket can be booked, based on its estimated value
+     * and the pickup charge (if any) for the given items.
+     */
+    #[OA\Post(
+        path: "/api/pickup-requests/check-booking-eligibility",
+        operationId: "checkBookingEligibility",
+        tags: ["Pickup"],
+        summary: "Check basket value against the pickup charge before confirming a booking",
+        security: [["apiAuth" => []]],
+        responses: [
+            new OA\Response(response: 200, description: "Eligibility result")
+        ]
+    )]
+    public function checkBookingEligibility(Request $request)
+    {
+        $requestType = strtolower((string) $request->input('request_type', 'scrap'));
+        $items = is_array($request->input('items')) ? $request->input('items') : [];
+
+        $basketValue = $this->estimateItemsTotal($items);
+
+        // Donation and corporate bookings don't carry a low-value pickup charge.
+        $pickupCharge = $requestType === 'scrap'
+            ? $this->calculatePickupCharge($basketValue)
+            : 0.0;
+
+        $eligibility = $this->buildBookingEligibility($basketValue, $pickupCharge);
+
+        return $this->successResponse('pickup.eligibility_checked', $eligibility);
     }
 
     private function resolveWarehouseByPincode(?string $pincode, $lat = null, $lng = null): ?Warehouse

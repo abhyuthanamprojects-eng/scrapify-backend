@@ -14,6 +14,8 @@ return [
     'review_submitted' => 'Review submitted successfully.',
     'assigned_success' => 'Pickup request assigned successfully.',
     'minimum_value_not_met' => 'Minimum order value of ₹1,500 is required for pickup.',
+    'insufficient_basket_value' => 'Booking cannot be confirmed due to insufficient basket value.',
+    'eligibility_checked' => 'Booking eligibility checked successfully.',
     'missing_required_attributes' => 'Some required details are missing for the selected items.',
     'unauthorized' => 'You are not authorized to access this pickup request.',
     'reschedule_invalid_status' => 'This pickup request cannot be rescheduled in its current status.',
