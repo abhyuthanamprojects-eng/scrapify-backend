@@ -354,9 +354,8 @@ class PickupBoyController extends Controller
                 ]);
             }
 
-            // If the pickup has a channel partner, stay at 'picked_up' until settlement is approved.
-            // Otherwise mark as fully completed immediately.
-            $newPickupStatus = $pickupRequest->channel_partner_id ? 'picked_up' : 'completed';
+            // Keep status as 'picked_up' so it goes through warehouse receipt and payment flow
+            $newPickupStatus = 'picked_up';
 
             $pickupRequest->update([
                 'final_amount' => $totalFinalAmount,
