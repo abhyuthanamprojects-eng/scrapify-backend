@@ -145,6 +145,29 @@ class AppSettingsController extends Controller
             }
         }
 
+        // Dummy test customer (9999999999) can access all functionality
+        // regardless of location/pincode serviceability.
+        if ($user && $user->phone === '9999999999' && !$serviceAvailability['is_serviceable']) {
+            $fallbackWarehouse = Warehouse::where('status', true)->orderBy('id')->first();
+
+            $serviceAvailability = [
+                'is_serviceable' => true,
+                'service_type' => 'scrap_pickup',
+                'location_name' => $serviceAvailability['location_name'] ?: 'Test Location',
+                'pincode' => $resolvedPincode,
+                'matched_warehouse_id' => $fallbackWarehouse?->id,
+                'matched_warehouse_name' => $fallbackWarehouse?->name,
+                'matched_warehouses' => $fallbackWarehouse ? [[
+                    'id' => $fallbackWarehouse->id,
+                    'name' => $fallbackWarehouse->name,
+                    'code' => $fallbackWarehouse->code,
+                    'pincodes' => $fallbackWarehouse->service_pincodes ?? [],
+                    'distance_km' => null,
+                ]] : [],
+                'message' => trans('service.available'),
+            ];
+        }
+
         $data = [
             'language' => $user ? $user->language : App::getLocale(),
             'supported_languages' => AppSetting::get('supported_languages', ['en', 'hi', 'gu']),
