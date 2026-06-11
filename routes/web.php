@@ -47,7 +47,7 @@ Route::middleware('auth')->group(function () {
 
 // Admin Routes (Now Root)
 // Shared Authenticated Routes
-Route::middleware(['auth', 'role:admin|warehouse|channel_partner|pickup_boy|customer'])->group(function () {
+Route::middleware(['auth', 'role:admin|warehouse|channel_partner|pickup_boy|customer|payment_admin'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class , 'index'])->name('dashboard');
 });
 
@@ -114,14 +114,17 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('help-support/{id}/status', [\App\Http\Controllers\Admin\HelpSupportController::class, 'updateStatus'])->name('admin.help-support.update-status');
     Route::delete('help-support/{id}', [\App\Http\Controllers\Admin\HelpSupportController::class, 'destroy'])->name('admin.help-support.destroy');
 
-    Route::get('withdrawals', [\App\Http\Controllers\Admin\WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
-    Route::post('withdrawals/{id}/approve', [\App\Http\Controllers\Admin\WithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
-    Route::post('withdrawals/{id}/reject', [\App\Http\Controllers\Admin\WithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
     Route::post('pickups/auto-assign', [\App\Http\Controllers\Admin\PickupController::class, 'autoAssign'])->name('admin.pickups.auto-assign');
 });
 
+Route::middleware(['auth', 'role:admin|payment_admin'])->group(function () {
+    Route::get('withdrawals', [\App\Http\Controllers\Admin\WithdrawalController::class, 'index'])->name('admin.withdrawals.index');
+    Route::post('withdrawals/{id}/approve', [\App\Http\Controllers\Admin\WithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
+    Route::post('withdrawals/{id}/reject', [\App\Http\Controllers\Admin\WithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
+});
+
 // Shared Business Entity Routes (Accessible by relevant roles + Admin)
-Route::middleware(['auth', 'role:admin|warehouse|channel_partner|pickup_boy'])->group(function () {
+Route::middleware(['auth', 'role:admin|warehouse|channel_partner|pickup_boy|payment_admin'])->group(function () {
     // Pickups (Bookings)
     Route::get('/pickups', [\App\Http\Controllers\Admin\PickupController::class , 'index'])->name('admin.pickups.index');
     Route::get('/pickups/{id}', [\App\Http\Controllers\Admin\PickupController::class , 'show'])->name('admin.pickups.show');

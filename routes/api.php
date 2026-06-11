@@ -261,8 +261,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{id}/estimate/reject', [\App\Http\Controllers\Api\CorporateBookingController::class, 'rejectEstimate']);
     });
 
-    // Payment Processing (Admin Role)
-    Route::prefix('requests')->middleware('role:admin')->group(function () {
+    // Payment Processing (Admin & Payment Admin Roles)
+    Route::prefix('requests')->middleware('role:admin|payment_admin')->group(function () {
         Route::post('/{id}/payment/pending', [\App\Http\Controllers\Api\PaymentController::class, 'moveToPaymentPending']);
         Route::post('/{id}/payment/process', [\App\Http\Controllers\Api\PaymentController::class, 'processPayment']);
         Route::post('/{id}/payment/confirm', [\App\Http\Controllers\Api\PaymentController::class, 'confirmPayment']);
@@ -381,13 +381,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('pickup-boys/{id}/pickups', [\App\Http\Controllers\Api\Admin\AdminController::class, 'getPickupBoyPickups']);
         Route::get('pickup-boys/{id}/tracking', [\App\Http\Controllers\Api\Admin\AdminController::class, 'getPickupBoyTracking']);
 
-        Route::get('payments', [\App\Http\Controllers\Api\Admin\AdminController::class, 'listPayments']);
-        Route::get('payments/{id}', [\App\Http\Controllers\Api\Admin\AdminController::class, 'getPayment']);
-        Route::get('withdrawals', [\App\Http\Controllers\Api\Admin\AdminController::class, 'listPayments']); // Reuse list logic for overview if needed, or specific
-        Route::post('withdrawals/{id}/approve', [\App\Http\Controllers\Api\Admin\AdminController::class, 'approveWithdrawal']);
-
         Route::post('kyc/{id}/verify', [\App\Http\Controllers\Api\Admin\AdminController::class, 'verifyKyc']);
-        Route::post('payments/{id}/approve', [\App\Http\Controllers\Api\Admin\AdminController::class, 'approvePayment']);
         Route::post('pickups/{id}/assign', [\App\Http\Controllers\Api\Admin\AdminController::class, 'assignPickup']);
         Route::post('pickups/{id}/reassign', [\App\Http\Controllers\Api\Admin\AdminController::class, 'reassignPickup']);
         Route::get('pickups/{id}/timeline', [\App\Http\Controllers\Api\Admin\AdminController::class, 'getPickupTimeline']);
@@ -441,5 +435,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('onboarding/requests/{id}/reject', [\App\Http\Controllers\Api\Admin\PartnerApprovalController::class, 'reject']);
     });
 
+    // Admin & Payment Admin Routes
+    Route::prefix('admin')->middleware('role:admin|payment_admin')->group(function () {
+        Route::get('payments', [\App\Http\Controllers\Api\Admin\AdminController::class, 'listPayments']);
+        Route::get('payments/{id}', [\App\Http\Controllers\Api\Admin\AdminController::class, 'getPayment']);
+        Route::post('payments/{id}/approve', [\App\Http\Controllers\Api\Admin\AdminController::class, 'approvePayment']);
+        Route::get('withdrawals', [\App\Http\Controllers\Api\Admin\AdminController::class, 'listPayments']);
+        Route::post('withdrawals/{id}/approve', [\App\Http\Controllers\Api\Admin\AdminController::class, 'approveWithdrawal']);
+    });
 
 });

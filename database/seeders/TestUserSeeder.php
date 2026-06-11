@@ -18,7 +18,8 @@ class TestUserSeeder extends Seeder
             'customer' => '9000000001',
             'pickup_boy' => '9000000002',
             'channel_partner' => '9000000003',
-            'warehouse' => '9000000004'
+            'warehouse' => '9000000004',
+            'payment_admin' => '9000000005'
         ];
 
         foreach ($roles as $roleName => $phone) {

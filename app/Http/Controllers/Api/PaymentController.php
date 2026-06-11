@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PaymentController extends Controller
 {
@@ -65,8 +66,8 @@ class PaymentController extends Controller
     {
         $pickupRequest = PickupRequest::findOrFail($id);
 
-        // Only admin can process payment
-        if (!Auth::user()->hasRole('admin')) {
+        // Only admin/payment_admin can process payment
+        if (!Auth::user()->hasAnyRole(['admin', 'payment_admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
@@ -98,7 +99,7 @@ class PaymentController extends Controller
             $pickupRequest->transitionTo(
                 RequestStatus::PAYMENT_PROCESSING,
                 Auth::id(),
-                'admin',
+                Auth::user()?->hasRole('admin') ? 'admin' : 'payment_admin',
                 "Payment processing: {$validated['payment_reference']}"
             );
 
@@ -119,8 +120,8 @@ class PaymentController extends Controller
     {
         $pickupRequest = PickupRequest::findOrFail($id);
 
-        // Only admin can confirm payment
-        if (!Auth::user()->hasRole('admin')) {
+        // Only admin/payment_admin can confirm payment
+        if (!Auth::user()->hasAnyRole(['admin', 'payment_admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
@@ -131,22 +132,41 @@ class PaymentController extends Controller
         }
 
         $validated = $request->validate([
+            'transaction_number' => 'required|string|max:100',
+            'payment_receipt_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
             'notes' => 'nullable|string|max:500',
         ]);
 
         try {
+            $imagePath = null;
+            if ($request->hasFile('payment_receipt_image')) {
+                $imagePath = $request->file('payment_receipt_image')->store('payment_receipts', 'public');
+            }
+
             // Update payment completion
             $pickupRequest->update([
                 'payment_status' => 'completed',
+                'payment_reference' => $validated['transaction_number'],
+                'payment_receipt_image' => $imagePath,
                 'payment_completed_at' => now(),
                 'completed_at' => now(),
             ]);
+
+            // Also update the Payment model record if it exists
+            $payment = \App\Models\Payment::where('pickup_request_id', $pickupRequest->id)->latest()->first();
+            if ($payment) {
+                $payment->update([
+                    'status' => 'completed',
+                    'transaction_id' => $validated['transaction_number'],
+                    'proof_image_path' => $imagePath,
+                ]);
+            }
 
             // Transition request to completed
             $pickupRequest->transitionTo(
                 RequestStatus::COMPLETED,
                 Auth::id(),
-                'admin',
+                Auth::user()?->hasRole('admin') ? 'admin' : 'payment_admin',
                 $validated['notes'] ?? 'Payment confirmed and request completed'
             );
 
@@ -169,9 +189,9 @@ class PaymentController extends Controller
     {
         $request = PickupRequest::findOrFail($id);
 
-        // Authorization: customer, admin, warehouse
+        // Authorization: customer, admin, warehouse, payment_admin
         $user = Auth::user();
-        if ($request->customer_id !== $user->id && !$user->hasRole(['admin', 'warehouse'])) {
+        if ($request->customer_id !== $user->id && !$user->hasAnyRole(['admin', 'warehouse', 'payment_admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
@@ -180,6 +200,7 @@ class PaymentController extends Controller
             'payment_status' => $request->payment_status,
             'payment_method' => $request->payment_method,
             'payment_reference' => $request->payment_reference,
+            'payment_receipt_image' => $request->payment_receipt_image ? Storage::disk('public')->url($request->payment_receipt_image) : null,
             'estimated_amount' => $request->estimated_amount,
             'final_amount' => $request->final_amount,
             'payment_pending_at' => $request->payment_pending_at?->format('Y-m-d H:i:s'),

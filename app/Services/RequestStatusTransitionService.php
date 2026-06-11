@@ -108,9 +108,9 @@ class RequestStatusTransitionService
             RequestStatus::PICKUP_STARTED => in_array($role, [UserRole::PICKUP_BOY]),
             RequestStatus::PICKUP_COMPLETED => in_array($role, [UserRole::PICKUP_BOY]),
 
-            // Payment operations (admin only)
+            // Payment operations (admin & payment_admin)
             RequestStatus::PAYMENT_PROCESSING,
-            RequestStatus::PAYMENT_COMPLETED => $role === UserRole::ADMIN,
+            RequestStatus::PAYMENT_COMPLETED => in_array($role, [UserRole::ADMIN, UserRole::PAYMENT_ADMIN]),
 
             // Completion
             RequestStatus::COMPLETED => in_array($role, [UserRole::ADMIN, UserRole::WAREHOUSE]),

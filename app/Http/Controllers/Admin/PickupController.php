@@ -19,7 +19,7 @@ class PickupController extends Controller
         $query = PickupRequest::with(['customer', 'warehouse', 'assignment.pickupBoy']);
 
         // Role-based Scoping (Union Logic)
-        if (!$user->hasRole('admin')) {
+        if (!$user->hasAnyRole(['admin', 'payment_admin'])) {
             $query->where(function ($q) use ($user) {
                 $hasScope = false;
                 
@@ -99,7 +99,7 @@ class PickupController extends Controller
         $pickup = PickupRequest::with(['customer', 'partnerCustomer', 'items.category', 'images.pickupItem', 'assignment.pickupBoy', 'warehouse', 'statusLogs'])->findOrFail($id);
 
         // Role-based Authorization (Union Logic)
-        if (!$user->hasRole('admin')) {
+        if (!$user->hasAnyRole(['admin', 'payment_admin'])) {
             $isAuthorized = false;
             
             if ($user->hasRole('warehouse')) {
@@ -403,17 +403,39 @@ class PickupController extends Controller
             return back()->with('error', 'Pickup must be received at warehouse before payment.');
         }
 
-        DB::transaction(function () use ($pickup) {
+        $request->validate([
+            'transaction_number' => 'required|string|max:100',
+            'payment_receipt_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
+        DB::transaction(function () use ($pickup, $request) {
+            $imagePath = null;
+            if ($request->hasFile('payment_receipt_image')) {
+                $imagePath = $request->file('payment_receipt_image')->store('payment_receipts', 'public');
+            }
+
             $pickup->update([
                 'status' => 'completed',
                 'payment_completed_at' => now(),
-                'payment_status' => 'completed'
+                'payment_status' => 'completed',
+                'payment_reference' => $request->transaction_number,
+                'payment_receipt_image' => $imagePath,
             ]);
+
+            // Also update the Payment model record if it exists
+            $payment = \App\Models\Payment::where('pickup_request_id', $pickup->id)->latest()->first();
+            if ($payment) {
+                $payment->update([
+                    'status' => 'completed',
+                    'transaction_id' => $request->transaction_number,
+                    'proof_image_path' => $imagePath,
+                ]);
+            }
 
             \App\Models\PickupStatusLog::create([
                 'pickup_request_id' => $pickup->id,
                 'status' => 'completed',
-                'notes' => 'Payment completed and pickup finalized.',
+                'notes' => "Payment completed. Txn: {$request->transaction_number}.",
                 'created_by' => auth()->id()
             ]);
         });

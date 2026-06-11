@@ -106,7 +106,7 @@ class RequestController extends Controller
 
         // Authorization
         $user = Auth::user();
-        if ($request->customer_id !== $user->id && !$user->hasRole(['admin', 'warehouse'])) {
+        if ($request->customer_id !== $user->id && !$user->hasAnyRole(['admin', 'warehouse', 'payment_admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
@@ -137,7 +137,7 @@ class RequestController extends Controller
             } else {
                 return $this->errorResponse('auth.no_warehouse_assigned', 403);
             }
-        } elseif (!$user->hasRole('admin')) {
+        } elseif (!$user->hasAnyRole(['admin', 'payment_admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 
@@ -248,7 +248,7 @@ class RequestController extends Controller
 
         // Authorization
         $user = Auth::user();
-        if ($request->customer_id !== $user->id && !$user->hasRole(['admin', 'warehouse', 'pickup_boy'])) {
+        if ($request->customer_id !== $user->id && !$user->hasAnyRole(['admin', 'warehouse', 'pickup_boy', 'payment_admin'])) {
             return $this->errorResponse('auth.unauthorized', 403);
         }
 

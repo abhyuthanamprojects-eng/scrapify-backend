@@ -16,7 +16,7 @@ class DashboardController extends Controller
         $user = auth()->user();
         $period = strtolower((string) $request->query('period', 'month'));
 
-        if ($user->hasRole('admin')) {
+        if ($user->hasAnyRole(['admin', 'payment_admin'])) {
             $stats = [
                 'users_count' => User::count(),
                 'total_customers' => User::role('customer')->count() + \App\Models\ChannelPartnerCustomer::count(),

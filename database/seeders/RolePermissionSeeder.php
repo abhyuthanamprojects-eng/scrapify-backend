@@ -77,5 +77,11 @@ class RolePermissionSeeder extends Seeder
             'view_pickups',
             'cancel_pickups'
         ]);
+
+        $paymentAdminRole = Role::firstOrCreate(['name' => 'payment_admin', 'guard_name' => 'web']);
+        $paymentAdminRole->syncPermissions([
+            'view_pickups',
+            'approve_payments'
+        ]);
     }
 }

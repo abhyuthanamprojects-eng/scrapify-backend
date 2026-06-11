@@ -64,6 +64,7 @@ class PickupRequest extends Model
         'coupon_discount_value',
         'price_locked_at',
         'final_amount_modified_by',
+        'payment_receipt_image',
     ];
 
     protected $casts = [
