@@ -29,6 +29,7 @@ class WaitlistController extends Controller
                     new OA\Property(property: "city", type: "string", example: "Gurugram"),
                     new OA\Property(property: "state", type: "string", example: "Haryana"),
                     new OA\Property(property: "location_name", type: "string", example: "Gurugram, Haryana"),
+                    new OA\Property(property: "pincode", type: "string", example: "122001"),
                     new OA\Property(property: "latitude", type: "number", example: 28.4958),
                     new OA\Property(property: "longitude", type: "number", example: 77.0069),
                     new OA\Property(property: "message", type: "string", example: "Please launch service here.")
@@ -49,6 +50,7 @@ class WaitlistController extends Controller
             'city' => 'required|string|max:255',
             'state' => 'nullable|string|max:255',
             'location_name' => 'nullable|string|max:255',
+            'pincode' => 'nullable|string|max:10',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'message' => 'nullable|string',
@@ -58,8 +60,8 @@ class WaitlistController extends Controller
             return $this->validationErrorResponse($validator->errors());
         }
 
-        $waitlist = Waitlist::create($request->all());
+        $waitlist = Waitlist::create($validator->validated());
 
-        return $this->itemCreatedResponse('waitlist.submitted_success', $waitlist);
+        return $this->successResponse('waitlist.submitted_success', $waitlist, 201);
     }
 }

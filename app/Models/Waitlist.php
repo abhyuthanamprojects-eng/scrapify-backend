@@ -15,6 +15,7 @@ class Waitlist extends Model
         'city',
         'state',
         'location_name',
+        'pincode',
         'latitude',
         'longitude',
         'message',
