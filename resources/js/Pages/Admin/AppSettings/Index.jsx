@@ -20,15 +20,15 @@ export default function Index({ settings, homeBanners = [] }) {
     };
 
     const Toggle = ({ name, label, description }) => (
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
-            <div>
+        <div className="flex items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="flex-1">
                 <label className="text-sm font-semibold text-gray-800 block">{label}</label>
                 <p className="text-xs text-gray-500">{description}</p>
             </div>
             <button
                 type="button"
                 onClick={() => setData(name, !data[name])}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${data[name] ? 'bg-primary' : 'bg-gray-300'}`}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${data[name] ? 'bg-primary' : 'bg-gray-300'}`}
             >
                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${data[name] ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
