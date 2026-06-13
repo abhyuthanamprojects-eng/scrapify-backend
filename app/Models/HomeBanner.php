@@ -12,6 +12,6 @@ class HomeBanner extends Model
 
     public function getImageUrlAttribute()
     {
-        return $this->image_path ? asset($this->image_path) : null;
+        return $this->image_path ? asset('storage/' . $this->image_path) : null;
     }
 }
