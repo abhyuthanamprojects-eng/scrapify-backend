@@ -1,7 +1,8 @@
 import { Link, Head } from '@inertiajs/react';
 import React, { useState } from 'react';
 
-const googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.abhyuthanam.scrapify';
+const googlePlayUrl = 'https://play.google.com/store/apps/details?id=com.abhyuthanam.scrapify&pcampaignid=web_share';
+const appStoreUrl = 'https://apps.apple.com/us/app/scrapify/id6775160804';
 
 const mockups = {
     hero: '/images/scrapify_mockup_1776327057800.png',
@@ -80,13 +81,13 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             Download the app now and start earning.
                         </p>
                         <div className="flex justify-center gap-4 mb-20 relative z-20">
-                            <button className="bg-black text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:scale-105 transition-transform">
+                            <a href={appStoreUrl} target="_blank" rel="noopener noreferrer" className="bg-black text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:scale-105 transition-transform">
                                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M17.054 11.666c-.015-2.616 2.137-3.864 2.238-3.929-1.218-1.782-3.111-2.022-3.79-2.046-1.611-.161-3.141.95-3.966.95-.826 0-2.083-.934-3.415-.909-1.722.025-3.321.999-4.218 2.55-1.821 3.155-.466 7.828 1.309 10.388.868 1.252 1.895 2.651 3.255 2.602 1.309-.049 1.831-.842 3.395-.842 1.554 0 2.035.842 3.42.817 1.408-.025 2.292-1.252 3.141-2.499 1.002-1.454 1.41-2.868 1.428-2.941-.031-.013-2.75-.105-2.762-2.743zm-2.036-6.071c.749-.912 1.253-2.179 1.116-3.447-1.092.045-2.408.729-3.176 1.636-.688.802-1.294 2.091-1.135 3.336 1.222.095 2.445-.615 3.195-1.525z" /></svg>
                                 <div className="text-left">
                                     <div className="text-[10px] leading-tight">Download on the</div>
                                     <div className="text-sm font-semibold leading-tight">App Store</div>
                                 </div>
-                            </button>
+                            </a>
                             <a href={googlePlayUrl} target="_blank" rel="noopener noreferrer" className="bg-black text-white px-6 py-3 rounded-lg flex items-center gap-2 hover:scale-105 transition-transform">
                                 <svg className="w-6 h-6" viewBox="0 0 512 512" fill="currentColor"><path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z" /></svg>
                                 <div className="text-left">
@@ -267,13 +268,13 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                         <p className="text-gray-500 mb-10 text-lg">Thousands already trust us for hassle-free scrap selling.</p>
 
                         <div className="flex justify-center gap-4 mb-20">
-                            <button className="bg-black text-white px-8 py-3.5 rounded-xl flex items-center gap-3 hover:scale-105 transition-transform">
+                            <a href={appStoreUrl} target="_blank" rel="noopener noreferrer" className="bg-black text-white px-8 py-3.5 rounded-xl flex items-center gap-3 hover:scale-105 transition-transform">
                                 <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 24 24"><path d="M17.054 11.666c-.015-2.616 2.137-3.864 2.238-3.929-1.218-1.782-3.111-2.022-3.79-2.046-1.611-.161-3.141.95-3.966.95-.826 0-2.083-.934-3.415-.909-1.722.025-3.321.999-4.218 2.55-1.821 3.155-.466 7.828 1.309 10.388.868 1.252 1.895 2.651 3.255 2.602 1.309-.049 1.831-.842 3.395-.842 1.554 0 2.035.842 3.42.817 1.408-.025 2.292-1.252 3.141-2.499 1.002-1.454 1.41-2.868 1.428-2.941-.031-.013-2.75-.105-2.762-2.743zm-2.036-6.071c.749-.912 1.253-2.179 1.116-3.447-1.092.045-2.408.729-3.176 1.636-.688.802-1.294 2.091-1.135 3.336 1.222.095 2.445-.615 3.195-1.525z" /></svg>
                                 <div className="text-left">
                                     <div className="text-[11px] leading-tight">Download on the</div>
                                     <div className="text-base font-semibold leading-tight">App Store</div>
                                 </div>
-                            </button>
+                            </a>
                             <a href={googlePlayUrl} target="_blank" rel="noopener noreferrer" className="bg-black text-white px-8 py-3.5 rounded-xl flex items-center gap-3 hover:scale-105 transition-transform">
                                 <svg className="w-7 h-7" viewBox="0 0 512 512" fill="currentColor"><path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z" /></svg>
                                 <div className="text-left">

@@ -98,6 +98,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Mobile App Management
     Route::get('app-settings', [\App\Http\Controllers\Admin\AppSettingsController::class, 'index'])->name('admin.app-settings.index');
     Route::post('app-settings', [\App\Http\Controllers\Admin\AppSettingsController::class, 'update'])->name('admin.app-settings.update');
+    Route::post('home-banners', [\App\Http\Controllers\Admin\HomeBannerController::class, 'store'])->name('admin.home-banners.store');
+    Route::post('home-banners/reorder', [\App\Http\Controllers\Admin\HomeBannerController::class, 'reorder'])->name('admin.home-banners.reorder');
+    Route::post('home-banners/{homeBanner}', [\App\Http\Controllers\Admin\HomeBannerController::class, 'update'])->name('admin.home-banners.update');
+    Route::delete('home-banners/{homeBanner}', [\App\Http\Controllers\Admin\HomeBannerController::class, 'destroy'])->name('admin.home-banners.destroy');
 
     Route::get('referrals', [\App\Http\Controllers\Admin\ReferralController::class, 'index'])->name('admin.referrals.index');
     Route::post('referrals/setting', [\App\Http\Controllers\Admin\ReferralController::class, 'storeSetting'])->name('admin.referrals.store-setting');

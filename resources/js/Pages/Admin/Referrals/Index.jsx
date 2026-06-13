@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Pagination from '@/Components/Pagination';
 
 export default function Index({ settings, referrals, coupons, filters }) {
-    const [activeTab, setActiveTab] = useState(filters.tab || 'settings');
+    const [activeTab, setActiveTab] = useState(filters.tab || 'referrals');
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -39,7 +39,7 @@ export default function Index({ settings, referrals, coupons, filters }) {
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <div className="flex border-b border-gray-100">
-                        {['settings', 'referrals', 'coupons'].map((tab) => (
+                        {['referrals'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => handleTabChange(tab)}

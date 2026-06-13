@@ -1,8 +1,8 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function Index({ settings }) {
+export default function Index({ settings, homeBanners = [] }) {
     const normalizeCsvValue = (value) => Array.isArray(value) ? value.join(', ') : (value ?? '');
 
     const { data, setData, post, processing, errors } = useForm({
@@ -99,8 +99,22 @@ export default function Index({ settings }) {
                         >
                             SMS Gateway
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('banners')}
+                            className={`px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'banners' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            Home Banners
+                        </button>
                     </div>
 
+                    {activeTab === 'banners' && (
+                        <div className="p-6">
+                            <HomeBanners banners={homeBanners} />
+                        </div>
+                    )}
+
+                    {activeTab !== 'banners' && (
                     <form onSubmit={submit} className="p-6">
                         {activeTab === 'features' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -125,6 +139,17 @@ export default function Index({ settings }) {
                                 <Input name="low_value_shipping_charge" label="Low Value Shipping Charge (₹)" type="number" description="Shipping deduction applied when booking value is below minimum free pickup amount." />
                                 <Input name="warehouse_service_pincodes_limit" label="Warehouse Service Pincode Limit" type="number" description="Maximum number of service pincodes allowed per warehouse." />
                                 <Input name="donation_products" label="Donation Products (comma separated)" description="Example: Cloth, Shoes, Toys, Books" />
+
+                                <div className="md:col-span-2 border-t border-gray-100 pt-4 mt-2">
+                                    <h3 className="text-sm font-semibold text-gray-800 mb-1">App Update / Force Update</h3>
+                                    <p className="text-xs text-gray-500 mb-4">Controls the old-version update popup shown to users.</p>
+                                </div>
+                                <Input name="latest_version" label="Latest Version" description="Newest version available on the stores (e.g. 2.1.0)" />
+                                <Input name="min_version" label="Minimum Supported Version" description="Versions below this are forced to update" />
+                                <Toggle name="force_update" label="Force Update" description="If enabled, users below Minimum Supported Version cannot use the app until they update" />
+                                <Input name="android_url" label="Android Play Store URL" />
+                                <Input name="ios_url" label="iOS App Store URL" />
+
                                 <div className="md:col-span-2 rounded-lg border border-blue-100 bg-blue-50 p-4">
                                     <label className="text-sm font-semibold text-gray-800">Corporate Categories</label>
                                     <p className="mt-1 text-sm text-blue-900">{normalizeCsvValue(settings.corporate_categories) || 'No corporate categories enabled.'}</p>
@@ -181,8 +206,181 @@ export default function Index({ settings }) {
                             </button>
                         </div>
                     </form>
+                    )}
                 </div>
             </div>
         </AdminLayout>
+    );
+}
+
+function HomeBanners({ banners = [] }) {
+    const [newFile, setNewFile] = useState(null);
+    const [newPreview, setNewPreview] = useState(null);
+    const [newText, setNewText] = useState('');
+    const [processing, setProcessing] = useState(false);
+
+    const handleNewFileChange = (file) => {
+        setNewFile(file);
+        setNewPreview(file ? URL.createObjectURL(file) : null);
+    };
+
+    const handleAdd = (e) => {
+        e.preventDefault();
+        if (!newFile) return;
+
+        const formData = new FormData();
+        formData.append('image', newFile);
+        formData.append('text', newText ?? '');
+
+        setProcessing(true);
+        router.post(route('admin.home-banners.store'), formData, {
+            forceFormData: true,
+            onSuccess: () => {
+                setNewFile(null);
+                setNewPreview(null);
+                setNewText('');
+            },
+            onFinish: () => setProcessing(false),
+        });
+    };
+
+    const handleTextUpdate = (banner, text) => {
+        const formData = new FormData();
+        formData.append('_method', 'put');
+        formData.append('text', text ?? '');
+
+        router.post(route('admin.home-banners.update', banner.id), formData, {
+            forceFormData: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handleImageReplace = (banner, file) => {
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('_method', 'put');
+        formData.append('image', file);
+
+        router.post(route('admin.home-banners.update', banner.id), formData, {
+            forceFormData: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handleRemove = (banner) => {
+        if (!window.confirm('Remove this banner?')) return;
+
+        router.delete(route('admin.home-banners.destroy', banner.id), {
+            preserveScroll: true,
+        });
+    };
+
+    const handleMove = (index, direction) => {
+        const newOrder = [...banners];
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= newOrder.length) return;
+
+        [newOrder[index], newOrder[targetIndex]] = [newOrder[targetIndex], newOrder[index]];
+
+        router.post(route('admin.home-banners.reorder'), {
+            ids: newOrder.map((b) => b.id),
+        }, {
+            preserveScroll: true,
+        });
+    };
+
+    return (
+        <div>
+            <div className="mb-4">
+                <h3 className="text-sm font-semibold text-gray-800">Home Screen Banner Slider</h3>
+                <p className="text-xs text-gray-500">Add any number of images shown in the rotating banner on the customer app home screen. Tapping any banner takes the user to the category selection screen.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {banners.map((banner, index) => (
+                    <div key={banner.id} className="flex flex-col gap-2">
+                        <div className="aspect-video w-full rounded-lg border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
+                            <img src={banner.image_url} alt={`Banner ${index + 1}`} className="w-full h-full object-cover" />
+                        </div>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageReplace(banner, e.target.files?.[0] ?? null)}
+                            className="text-xs"
+                        />
+                        <input
+                            type="text"
+                            defaultValue={banner.text ?? ''}
+                            onBlur={(e) => handleTextUpdate(banner, e.target.value)}
+                            placeholder="Optional overlay text (e.g. Sell your scrap today!)"
+                            maxLength={120}
+                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:outline-none text-xs"
+                        />
+                        <div className="flex items-center justify-between">
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleMove(index, -1)}
+                                    disabled={index === 0}
+                                    className="text-xs font-semibold text-gray-500 hover:text-gray-700 disabled:opacity-30"
+                                >
+                                    ↑ Move up
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleMove(index, 1)}
+                                    disabled={index === banners.length - 1}
+                                    className="text-xs font-semibold text-gray-500 hover:text-gray-700 disabled:opacity-30"
+                                >
+                                    ↓ Move down
+                                </button>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handleRemove(banner)}
+                                className="text-xs font-semibold text-red-600 hover:underline"
+                            >
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <form onSubmit={handleAdd} className="border-t border-gray-100 pt-6">
+                <h3 className="text-sm font-semibold text-gray-800 mb-2">Add New Banner</h3>
+                <div className="flex flex-col gap-3 max-w-md">
+                    <div className="aspect-video w-full rounded-lg border border-dashed border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center">
+                        {newPreview ? (
+                            <img src={newPreview} alt="New banner preview" className="w-full h-full object-cover" />
+                        ) : (
+                            <span className="text-xs text-gray-400">No image selected</span>
+                        )}
+                    </div>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleNewFileChange(e.target.files?.[0] ?? null)}
+                        className="text-xs"
+                    />
+                    <input
+                        type="text"
+                        value={newText}
+                        onChange={(e) => setNewText(e.target.value)}
+                        placeholder="Optional overlay text (e.g. Sell your scrap today!)"
+                        maxLength={120}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:outline-none text-xs"
+                    />
+                    <button
+                        type="submit"
+                        disabled={processing || !newFile}
+                        className="px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-opacity-90 transition-all disabled:opacity-50 self-start"
+                    >
+                        {processing ? 'Adding...' : 'Add Banner'}
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 }
