@@ -12,7 +12,7 @@ class HomeBannerController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|max:2048',
+            'image' => 'required|image|max:8192',
             'text' => 'nullable|string|max:120',
         ]);
 
@@ -31,7 +31,7 @@ class HomeBannerController extends Controller
     public function update(Request $request, HomeBanner $homeBanner)
     {
         $request->validate([
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|image|max:8192',
             'text' => 'nullable|string|max:120',
         ]);
 
