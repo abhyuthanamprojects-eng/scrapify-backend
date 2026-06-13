@@ -213,13 +213,26 @@ export default function Index({ settings, homeBanners = [] }) {
     );
 }
 
+const MAX_BANNER_SIZE_MB = 8;
+const MAX_BANNER_SIZE_BYTES = MAX_BANNER_SIZE_MB * 1024 * 1024;
+
 function HomeBanners({ banners = [] }) {
     const [newFile, setNewFile] = useState(null);
     const [newPreview, setNewPreview] = useState(null);
     const [newText, setNewText] = useState('');
+    const [newFileError, setNewFileError] = useState(null);
     const [processing, setProcessing] = useState(false);
+    const [replaceErrors, setReplaceErrors] = useState({});
 
     const handleNewFileChange = (file) => {
+        if (file && file.size > MAX_BANNER_SIZE_BYTES) {
+            setNewFileError(`Image is too large. Maximum allowed size is ${MAX_BANNER_SIZE_MB} MB.`);
+            setNewFile(null);
+            setNewPreview(null);
+            return;
+        }
+
+        setNewFileError(null);
         setNewFile(file);
         setNewPreview(file ? URL.createObjectURL(file) : null);
     };
@@ -257,6 +270,16 @@ function HomeBanners({ banners = [] }) {
 
     const handleImageReplace = (banner, file) => {
         if (!file) return;
+
+        if (file.size > MAX_BANNER_SIZE_BYTES) {
+            setReplaceErrors((prev) => ({
+                ...prev,
+                [banner.id]: `Image is too large. Maximum allowed size is ${MAX_BANNER_SIZE_MB} MB.`,
+            }));
+            return;
+        }
+
+        setReplaceErrors((prev) => ({ ...prev, [banner.id]: null }));
 
         const formData = new FormData();
         formData.append('_method', 'put');
@@ -309,6 +332,9 @@ function HomeBanners({ banners = [] }) {
                             onChange={(e) => handleImageReplace(banner, e.target.files?.[0] ?? null)}
                             className="text-xs"
                         />
+                        {replaceErrors[banner.id] && (
+                            <p className="text-xs text-red-600">{replaceErrors[banner.id]}</p>
+                        )}
                         <input
                             type="text"
                             defaultValue={banner.text ?? ''}
@@ -364,6 +390,9 @@ function HomeBanners({ banners = [] }) {
                         onChange={(e) => handleNewFileChange(e.target.files?.[0] ?? null)}
                         className="text-xs"
                     />
+                    {newFileError && (
+                        <p className="text-xs text-red-600">{newFileError}</p>
+                    )}
                     <input
                         type="text"
                         value={newText}
