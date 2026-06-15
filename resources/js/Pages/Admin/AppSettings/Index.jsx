@@ -223,6 +223,10 @@ function HomeBanners({ banners = [] }) {
     const [newFileError, setNewFileError] = useState(null);
     const [processing, setProcessing] = useState(false);
     const [replaceErrors, setReplaceErrors] = useState({});
+    const [textDrafts, setTextDrafts] = useState(() =>
+        Object.fromEntries(banners.map((banner) => [banner.id, banner.text ?? '']))
+    );
+    const [savingTextId, setSavingTextId] = useState(null);
 
     const handleNewFileChange = (file) => {
         if (file && file.size > MAX_BANNER_SIZE_BYTES) {
@@ -262,9 +266,11 @@ function HomeBanners({ banners = [] }) {
         formData.append('_method', 'put');
         formData.append('text', text ?? '');
 
+        setSavingTextId(banner.id);
         router.post(route('admin.home-banners.update', banner.id), formData, {
             forceFormData: true,
             preserveScroll: true,
+            onFinish: () => setSavingTextId(null),
         });
     };
 
@@ -337,12 +343,28 @@ function HomeBanners({ banners = [] }) {
                         )}
                         <input
                             type="text"
-                            defaultValue={banner.text ?? ''}
-                            onBlur={(e) => handleTextUpdate(banner, e.target.value)}
+                            value={textDrafts[banner.id] ?? ''}
+                            onChange={(e) => setTextDrafts((prev) => ({
+                                ...prev,
+                                [banner.id]: e.target.value,
+                            }))}
                             placeholder="Optional overlay text (e.g. Sell your scrap today!)"
                             maxLength={120}
                             className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:outline-none text-xs"
                         />
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] text-gray-500">
+                                Change text and click save.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => handleTextUpdate(banner, textDrafts[banner.id] ?? '')}
+                                disabled={savingTextId === banner.id}
+                                className="px-3 py-1.5 text-xs font-semibold text-white bg-primary rounded-md hover:bg-opacity-90 disabled:opacity-50"
+                            >
+                                {savingTextId === banner.id ? 'Saving...' : 'Save Text'}
+                            </button>
+                        </div>
                         <div className="flex items-center justify-between">
                             <div className="flex gap-2">
                                 <button
