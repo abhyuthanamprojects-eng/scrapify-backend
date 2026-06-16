@@ -64,6 +64,7 @@ class CategoryController extends Controller
                     'name' => $category->getTranslatedName(),
                     'image' => $category->image_url,
                     'base_price' => $rule ? (float) $rule->base_price : 0,
+                    'carbon_per_unit' => $rule && $rule->carbon_per_unit !== null ? (float) $rule->carbon_per_unit : 0,
                     'pricing_type' => $rule?->pricing_type ?? 'per_piece',
                     'requires_details' => (bool) ($category->requires_details ?? false) || ((int) ($category->attributes_count ?? 0)) > 0,
                 ];
@@ -162,6 +163,7 @@ class CategoryController extends Controller
                 'name' => $cat->getTranslatedName(),
                 'image' => $cat->image_url,
                 'base_price' => $rule ? (float) $rule->base_price : 0,
+                'carbon_per_unit' => $rule && $rule->carbon_per_unit !== null ? (float) $rule->carbon_per_unit : 0,
                 'pricing_type' => $rule?->pricing_type ?? 'per_piece',
                 'requires_details' => (bool) ($cat->requires_details ?? false) || ((int) ($cat->attributes_count ?? 0)) > 0,
             ];

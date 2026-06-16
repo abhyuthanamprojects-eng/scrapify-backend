@@ -15,6 +15,7 @@ export default function Form({ category, types, attributes = [], selectedAttribu
                 attribute_option_id: Number(r.attribute_option_id),
                 adjustment_percent: r.adjustment_percent ?? '',
                 pricing_type: r.pricing_type || category?.pricing_rules?.[0]?.pricing_type || 'per_piece',
+                carbon_per_unit: r.carbon_per_unit ?? '',
             }));
         }
         return [];
@@ -32,6 +33,7 @@ export default function Form({ category, types, attributes = [], selectedAttribu
         selected_attribute_ids: selectedAttributeIds || [],
         pricing_type: category?.pricing_rules?.[0]?.pricing_type || 'per_piece',
         base_price: category?.pricing_rules?.[0]?.base_price || '',
+        carbon_per_unit: category?.pricing_rules?.[0]?.carbon_per_unit || '',
         image: null,
         remove_image: false,
         option_pricing_rules: [],
@@ -85,6 +87,7 @@ export default function Form({ category, types, attributes = [], selectedAttribu
                 attribute_option_id: Number(rule.attribute_option_id),
                 adjustment_percent: rule.adjustment_percent,
                 pricing_type: rule.pricing_type || data.pricing_type,
+                carbon_per_unit: rule.carbon_per_unit,
             }));
 
         transform((formData) => ({
@@ -129,6 +132,7 @@ export default function Form({ category, types, attributes = [], selectedAttribu
                     attribute_option_id: Number(attributeOptionId),
                     adjustment_percent: field === 'adjustment_percent' ? value : '',
                     pricing_type: field === 'pricing_type' ? value : data.pricing_type,
+                    carbon_per_unit: field === 'carbon_per_unit' ? value : '',
                 },
             ];
         });
@@ -289,11 +293,28 @@ export default function Form({ category, types, attributes = [], selectedAttribu
                             <InputError message={errors.base_price} className="mt-2" />
                         </div>
 
+                        <div>
+                            <InputLabel htmlFor="carbon_per_unit" value="Carbon Saved Per Unit (kg CO2)" />
+                            <TextInput
+                                id="carbon_per_unit"
+                                type="number"
+                                step="0.001"
+                                className="mt-1 block w-full"
+                                value={data.carbon_per_unit}
+                                onChange={(e) => setData('carbon_per_unit', e.target.value)}
+                                placeholder="e.g. 2.500"
+                            />
+                            <p className="mt-1 text-xs text-gray-500">
+                                Used in the app to show genuine environmental return for this category.
+                            </p>
+                            <InputError message={errors.carbon_per_unit} className="mt-2" />
+                        </div>
+
                         {groupedOptions.length > 0 && (
                             <div>
                                 <InputLabel value="Option-Specific Pricing Rules (Optional)" />
                                 <p className="text-sm text-gray-500 mt-1">
-                                    Set per-option percentage adjustments for dynamic estimate (material type, pickup size, condition, etc).
+                                    Set per-option percentage adjustments and optional carbon override for dynamic estimate.
                                 </p>
                                 <div className="mt-3 space-y-4">
                                     {groupedOptions.map((group) => (
@@ -303,7 +324,7 @@ export default function Form({ category, types, attributes = [], selectedAttribu
                                                 {group.options.map((option) => {
                                                     const rule = getOptionRule(option.id);
                                                     return (
-                                                        <div key={option.id} className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
+                                                        <div key={option.id} className="grid grid-cols-1 md:grid-cols-4 gap-2 items-center">
                                                             <div className="text-sm text-gray-700">{option.value}</div>
                                                             <TextInput
                                                                 type="number"
@@ -321,6 +342,13 @@ export default function Form({ category, types, attributes = [], selectedAttribu
                                                                 <option value="per_piece">Per Piece</option>
                                                                 <option value="per_capacity">Per Capacity</option>
                                                             </select>
+                                                            <TextInput
+                                                                type="number"
+                                                                step="0.001"
+                                                                placeholder="Carbon kg CO2"
+                                                                value={rule?.carbon_per_unit ?? ''}
+                                                                onChange={(e) => updateOptionRule(option.id, 'carbon_per_unit', e.target.value)}
+                                                            />
                                                         </div>
                                                     );
                                                 })}

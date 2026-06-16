@@ -13,6 +13,7 @@ class PricingRule extends Model
 
     protected $casts = [
         'base_price' => 'decimal:2',
+        'carbon_per_unit' => 'decimal:3',
         'adjustment_value' => 'decimal:2',
         'status' => 'boolean',
     ];

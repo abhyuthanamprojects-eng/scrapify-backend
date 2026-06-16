@@ -121,6 +121,7 @@ class HomeApplianceController extends Controller
             'id' => $category->id,
             'name' => $category->name['en'] ?? $category->name,
             'estimated_price' => $pricing ? (float)$pricing->base_price : 0,
+            'carbon_per_unit' => $pricing && $pricing->carbon_per_unit !== null ? (float) $pricing->carbon_per_unit : 0,
             'pricing_type' => $pricing?->pricing_type ?? 'per_piece',
             'sections' => $sections,
             'variant_pricing_rules' => $variantRules,
@@ -235,6 +236,7 @@ class HomeApplianceController extends Controller
         return $this->successResponse('home_appliance.estimate_calculated', [
             'estimated_price' => $estimate,
             'price' => $estimate, // Backward compatibility fallback
+            'carbon_per_unit' => (float) ($estimateMeta['carbon_per_unit'] ?? 0),
             'pricing_type' => $pricingType,
             'variant_rule' => $estimateMeta['variant_rule'] ?? null,
         ]);

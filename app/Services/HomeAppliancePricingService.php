@@ -21,6 +21,7 @@ class HomeAppliancePricingService
 
         return [
             'estimated_price' => $calculation['estimated_price'],
+            'carbon_per_unit' => $calculation['carbon_per_unit'],
             'pricing_type' => $baseRule?->pricing_type ?? 'per_piece',
             'variant_rule' => $calculation['variant_rule'],
         ];
@@ -46,6 +47,9 @@ class HomeAppliancePricingService
             ->first();
 
         $basePrice = $baseRule ? (float) $baseRule->base_price : 0.0;
+        $baseCarbonPerUnit = $baseRule && $baseRule->carbon_per_unit !== null
+            ? (float) $baseRule->carbon_per_unit
+            : 0.0;
 
         $options = AttributeOption::with('attribute')
             ->whereIn('id', $optionIds)
@@ -60,6 +64,7 @@ class HomeAppliancePricingService
         if (empty($optionIds)) {
             return [
                 'estimated_price' => round($basePrice, 2),
+                'carbon_per_unit' => round($baseCarbonPerUnit, 3),
                 'variant_rule' => null,
             ];
         }
@@ -67,7 +72,7 @@ class HomeAppliancePricingService
         $matchedRules = PricingRule::where('category_id', $categoryId)
             ->whereIn('attribute_option_id', $optionIds)
             ->where('status', true)
-            ->get(['attribute_option_id', 'base_price', 'adjustment_type', 'adjustment_value']);
+            ->get(['attribute_option_id', 'base_price', 'adjustment_type', 'adjustment_value', 'carbon_per_unit']);
 
         if ($matchedRules->isNotEmpty()) {
             $optionLabelsById = $options
@@ -96,8 +101,12 @@ class HomeAppliancePricingService
             });
 
             $price = $calculationBase + (float) $sumDeltas;
+            $carbonOverride = $matchedRules
+                ->map(fn($rule) => $rule->carbon_per_unit !== null ? (float) $rule->carbon_per_unit : null)
+                ->first(fn($value) => $value !== null);
             return [
                 'estimated_price' => round(max(0, $price), 2),
+                'carbon_per_unit' => round($carbonOverride ?? $baseCarbonPerUnit, 3),
                 'variant_rule' => $variantRule ? [
                     'id' => $variantRule->id,
                     'title' => $variantRule->title,
@@ -133,6 +142,7 @@ class HomeAppliancePricingService
 
         return [
             'estimated_price' => round(max(0, $calculationBase + $fallbackDelta), 2),
+            'carbon_per_unit' => round($baseCarbonPerUnit, 3),
             'variant_rule' => $variantRule ? [
                 'id' => $variantRule->id,
                 'title' => $variantRule->title,
