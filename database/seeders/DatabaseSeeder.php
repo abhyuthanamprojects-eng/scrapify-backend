@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             StateCitySeeder::class,
                 // CategorySeeder::class,
             ScrapSellingCatalogSeeder::class,
+            CarbonFootprintSeeder::class,
             FakeDataSeeder::class,
             PageSeeder::class,
         ]);
