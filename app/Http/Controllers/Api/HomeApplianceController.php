@@ -87,6 +87,7 @@ class HomeApplianceController extends Controller
         }
 
         $pricing = $category->pricingRules->first();
+        $carbonRule = $category->pricingRules->firstWhere('attribute_option_id', null);
         
         $sections = $category->attributes->map(function ($attr) {
             return [
@@ -121,7 +122,7 @@ class HomeApplianceController extends Controller
             'id' => $category->id,
             'name' => $category->name['en'] ?? $category->name,
             'estimated_price' => $pricing ? (float)$pricing->base_price : 0,
-            'carbon_per_unit' => $pricing && $pricing->carbon_per_unit !== null ? (float) $pricing->carbon_per_unit : 0,
+            'carbon_per_unit' => $carbonRule && $carbonRule->carbon_per_unit !== null ? (float) $carbonRule->carbon_per_unit : 0,
             'pricing_type' => $pricing?->pricing_type ?? 'per_piece',
             'sections' => $sections,
             'variant_pricing_rules' => $variantRules,
