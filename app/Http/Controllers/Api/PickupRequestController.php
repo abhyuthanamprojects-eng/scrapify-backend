@@ -46,7 +46,7 @@ class PickupRequestController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $query = PickupRequest::with(['items', 'images'])->orderBy('created_at', 'desc');
+        $query = PickupRequest::with(['items.category.pricingRules', 'images'])->orderBy('created_at', 'desc');
 
         if ($user->hasRole('customer')) {
             $query->where('customer_id', $user->id);
@@ -584,7 +584,7 @@ class PickupRequestController extends Controller
     public function show($id)
     {
         $user = Auth::user();
-        $pickup = PickupRequest::with(['items.category', 'images', 'assignments.pickupBoy'])
+        $pickup = PickupRequest::with(['items.category.pricingRules', 'images', 'assignments.pickupBoy'])
             ->find($id);
 
         if (!$pickup) {
