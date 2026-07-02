@@ -16,8 +16,8 @@ export function Footer() {
             <div className="mt-5 flex gap-2">
               {[
                 { Icon: Twitter, href: "https://x.com/_scrapify" },
-                { Icon: Instagram, href: "https://www.instagram.com/kabadhataocashpao?igsh=cWRpcmNpeXpkaHA4" },
-                { Icon: Linkedin, href: "https://www.linkedin.com/company/scrapify-%E0%A4%95%E0%A4%AC%E0%A4%BE%E0%A4%B1-%E0%A4%B9%E0%A4%9F%E0%A4%BE%E0%A4%93-%E0%A4%95%E0%A5%88%E0%A4%B6-%E0%A4%AA%E0%A4%BE%E0%A4%93/" },
+                { Icon: Instagram, href: "https://www.instagram.com/scrapify.ai" },
+                { Icon: Linkedin, href: "https://www.linkedin.com/company/scrapify-%E0%A4%95%E0%A4%AC%E0%A4%BE%E0%A4%B1-%E0%A4%B9%E0%A4%9F%E0%A4%BE%E0%A4%93-%E0%A4%95%E0%A5%88%E0%A4%B6-%E0%A4%AA%E0%A4%BE%E0%A4%93" },
                 { Icon: Facebook, href: "https://www.facebook.com/profile.php?id=61589460632983" },
                 { Icon: Youtube, href: "https://www.youtube.com/@scrapify" },
                 { Icon: Mail, href: "mailto:amitsinhadeveloper@gmail.com" },
