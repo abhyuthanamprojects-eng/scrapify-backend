@@ -1,7 +1,8 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import Modal from '@/Components/Modal';
 
 export default function Show({ pickup, pickupBoys, warehouses }) {
     const { auth } = usePage().props;
@@ -16,6 +17,11 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
     const [priceErr, setPriceErr] = useState(null);
     const [priceBusy, setPriceBusy] = useState(false);
     const [currentPickup, setCurrentPickup] = useState(pickup);
+
+    useEffect(() => {
+        setCurrentPickup(pickup);
+        setNewAmount(pickup.final_amount || pickup.estimated_amount || 0);
+    }, [pickup]);
     const corporateEntries = pickup.metadata?.corporate_category_items || [];
     const corporateQuoteRequired = pickup.request_type === 'corporate' && pickup.estimated_amount === null;
 
@@ -97,9 +103,25 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
         post(route('admin.pickups.receive-at-warehouse', pickup.id));
     };
 
-    const markPaymentCompleted = (e) => {
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const { data: pData, setData: setPData, post: pPost, processing: pProcessing, errors: pErrors, reset: pReset } = useForm({
+        transaction_number: '',
+        payment_receipt_image: null,
+    });
+
+    const openPaymentModal = () => {
+        pReset();
+        setShowPaymentModal(true);
+    };
+
+    const submitPayment = (e) => {
         e.preventDefault();
-        post(route('admin.pickups.mark-payment-completed', pickup.id));
+        pPost(route('admin.pickups.mark-payment-completed', pickup.id), {
+            onSuccess: () => {
+                setShowPaymentModal(false);
+                pReset();
+            }
+        });
     };
 
     const statusColors = {
@@ -112,6 +134,11 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
         reschedule_requested: 'bg-orange-100 text-orange-800 font-bold',
         cancelled: 'bg-red-100 text-red-800',
     };
+
+    // Calculate totals from items
+    const totalItemsCount = currentPickup.items?.length || 0;
+    const totalWeight = currentPickup.items?.reduce((sum, item) => sum + (Number(item.weight) || 0), 0) || 0;
+    const totalQuantity = currentPickup.items?.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0) || 0;
 
     return (
         <AdminLayout>
@@ -140,7 +167,7 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
                             </button>
                         )}
                         {pickup.status === 'delivered_to_warehouse' && (
-                            <button onClick={markPaymentCompleted} disabled={processing} className="px-4 py-1.5 bg-green-600 text-white text-xs font-bold rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 shadow-sm">
+                            <button onClick={openPaymentModal} className="px-4 py-1.5 bg-green-600 text-white text-xs font-bold rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 shadow-sm">
                                 Complete Payment
                             </button>
                         )}
@@ -244,7 +271,7 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
                             </div>
                             <div className="p-6 space-y-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {pickup.items.map((item) => (
+                                    {currentPickup.items.map((item) => (
                                         <div key={item.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex justify-between items-center">
                                             <div>
                                                 <p className="text-sm font-bold text-gray-800">{item.category?.name?.en || item.category?.name || item.product_name || 'Item'}</p>
@@ -259,15 +286,124 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
                                     ))}
                                 </div>
 
-                                {pickup.images?.length > 0 && (
+                                {currentPickup.images?.length > 0 && (
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                        {pickup.images.map((img) => (
+                                        {currentPickup.images.map((img) => (
                                             <a key={img.id} href={img.url} target="_blank" className="aspect-square rounded-lg overflow-hidden border border-gray-200 group">
                                                 <img src={img.url} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                                             </a>
                                         ))}
                                     </div>
                                 )}
+
+                                {/* Summary Section */}
+                                <div className="mt-6 pt-6 border-t border-gray-100">
+                                    <h3 className="text-sm font-bold text-gray-800 uppercase mb-4 tracking-wider">Pickup Summary</h3>
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                            <span className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Total Items Selected</span>
+                                            <div className="flex items-baseline gap-2">
+                                                <span className="text-xl font-extrabold text-gray-800">{totalItemsCount}</span>
+                                                <span className="text-xs font-semibold text-gray-500">Categories</span>
+                                            </div>
+                                            <div className="text-xs text-gray-500 mt-1 space-y-0.5">
+                                                {totalWeight > 0 && <div>Total Weight: <span className="font-bold">{totalWeight.toFixed(2)} kg</span></div>}
+                                                {totalQuantity > 0 && <div>Total Quantity: <span className="font-bold">{totalQuantity} units</span></div>}
+                                            </div>
+                                        </div>
+
+                                        <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                                            <span className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Estimated Amount</span>
+                                            <span className="text-xl font-extrabold text-primary">₹{(Number(currentPickup.estimated_amount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                            <p className="text-[10px] text-gray-400 mt-1">Based on category rates</p>
+                                        </div>
+
+                                        <div className="p-4 bg-green-50/50 rounded-xl border border-green-100">
+                                            <span className="text-[10px] text-green-700 uppercase font-bold block mb-1">Final Amount</span>
+                                            {editingPrice ? (
+                                                <div className="space-y-2 mt-1">
+                                                    <input 
+                                                        type="number" 
+                                                        className="w-full text-sm font-bold border-gray-200 rounded-lg p-1.5 focus:ring-primary focus:border-primary"
+                                                        value={newAmount}
+                                                        onChange={e => setNewAmount(e.target.value)}
+                                                        placeholder="Enter final amount"
+                                                    />
+                                                    <input 
+                                                        type="text" 
+                                                        className="w-full text-xs border-gray-200 rounded-lg p-1.5 focus:ring-primary focus:border-primary"
+                                                        value={priceReason}
+                                                        onChange={e => setPriceReason(e.target.value)}
+                                                        placeholder="Reason for change..."
+                                                        required
+                                                    />
+                                                    {priceErr && <p className="text-[10px] text-red-600 font-semibold">{priceErr}</p>}
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            onClick={submitPrice} 
+                                                            disabled={priceBusy || !priceReason} 
+                                                            className="px-3 py-1 bg-primary text-white text-xs font-bold rounded-lg hover:bg-opacity-95 transition-all disabled:opacity-50"
+                                                        >
+                                                            {priceBusy ? 'Saving...' : 'Save'}
+                                                        </button>
+                                                        <button 
+                                                            onClick={() => { setEditingPrice(false); setPriceErr(null); }} 
+                                                            className="px-3 py-1 bg-white border border-gray-200 text-gray-600 text-xs font-semibold rounded-lg hover:bg-gray-50 transition-all"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="text-xl font-extrabold text-green-800">
+                                                        ₹{(Number(currentPickup.final_amount || currentPickup.estimated_amount) || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                                                    </span>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        {isAdmin && !priceLocked && (
+                                                            <button 
+                                                                onClick={() => setEditingPrice(true)} 
+                                                                className="text-xs text-primary font-bold hover:underline"
+                                                            >
+                                                                Edit Final Amount
+                                                            </button>
+                                                        )}
+                                                        <button 
+                                                            onClick={loadLogs} 
+                                                            className="text-xs text-gray-500 font-semibold hover:underline"
+                                                        >
+                                                            {showLogs ? 'Hide Logs' : 'View Logs'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Price Logs */}
+                                    {showLogs && priceLogs && (
+                                        <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl space-y-2">
+                                            <h4 className="text-xs font-bold text-gray-700 uppercase mb-2">Price Revision History</h4>
+                                            {priceLogs.length > 0 ? (
+                                                <div className="space-y-2 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
+                                                    {priceLogs.map((log) => (
+                                                        <div key={log.id} className="text-xs border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                                                            <div className="flex justify-between items-center mb-1">
+                                                                <span className="font-bold text-gray-800">₹{Number(log.final_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+                                                                <span className="text-[10px] text-gray-400 font-bold">{new Date(log.created_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}</span>
+                                                            </div>
+                                                            <p className="text-gray-600 font-medium">{log.reason || 'No reason provided'}</p>
+                                                            <p className="text-[10px] text-gray-400">By {log.changer?.name || 'Admin'}</p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-xs text-gray-400 italic">No price revisions yet.</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
@@ -471,6 +607,61 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
                     </div>
                 </div>
             </div>
+
+            <Modal show={showPaymentModal} onClose={() => setShowPaymentModal(false)} maxWidth="md">
+                <form onSubmit={submitPayment} className="p-6">
+                    <h2 className="text-lg font-bold text-gray-800 mb-4">Complete Payment</h2>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <label className="text-xs font-bold text-gray-600 block mb-1">Transaction Number / Reference ID *</label>
+                            <input 
+                                type="text"
+                                className="w-full text-sm rounded-lg border-gray-200 focus:ring-primary focus:border-primary"
+                                value={pData.transaction_number}
+                                onChange={e => setPData('transaction_number', e.target.value)}
+                                placeholder="Enter transaction reference"
+                                required
+                            />
+                            {pErrors.transaction_number && (
+                                <p className="text-xs text-red-600 font-semibold mt-1">{pErrors.transaction_number}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold text-gray-600 block mb-1">Payment Receipt / Screenshot *</label>
+                            <input 
+                                type="file"
+                                className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                                onChange={e => setPData('payment_receipt_image', e.target.files[0])}
+                                accept="image/*"
+                                required
+                            />
+                            <p className="text-[10px] text-gray-400 mt-1">Accepted formats: JPEG, PNG, JPG, WEBP. Max size: 5MB.</p>
+                            {pErrors.payment_receipt_image && (
+                                <p className="text-xs text-red-600 font-semibold mt-1">{pErrors.payment_receipt_image}</p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mt-6 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={() => setShowPaymentModal(false)}
+                            className="px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-lg hover:bg-gray-50"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={pProcessing}
+                            className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50"
+                        >
+                            {pProcessing ? 'Submitting...' : 'Complete Payment'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </AdminLayout>
     );
 }

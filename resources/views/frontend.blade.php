@@ -13,6 +13,12 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
         <!-- Scripts -->
+        <script>
+            window.Laravel = {
+                check: @json(auth()->check()),
+                user: @json(auth()->user())
+            };
+        </script>
         @viteReactRefresh
         @vite(['resources/js/Frontend/styles.css', 'resources/js/frontend.tsx'])
 

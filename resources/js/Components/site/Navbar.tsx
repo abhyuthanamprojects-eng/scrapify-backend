@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import logo from "@/assets/scrapify-logo-05.svg";
@@ -13,6 +13,11 @@ const navItems = [
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+  const isAuthenticated = typeof window !== "undefined" && (window as any).Laravel?.check;
+  const authUrl = isAuthenticated ? "/dashboard" : "/login";
+  const authText = isAuthenticated ? "Dashboard" : "Login / App";
 
   return (
     <motion.header
@@ -28,11 +33,12 @@ export function Navbar() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((n) => (
-              n.href.startsWith("/") ? (
+            {navItems.map((n) => {
+              const resolvedHref = !isHomePage && n.href.startsWith("#") ? `/${n.href}` : n.href;
+              return resolvedHref.startsWith("/") && !resolvedHref.includes("#") ? (
                 <Link
                   key={n.href}
-                  to={n.href}
+                  to={resolvedHref}
                   className="relative px-4 py-2 text-sm font-semibold text-foreground/75 hover:text-foreground transition-smooth group"
                 >
                   {n.label}
@@ -41,22 +47,22 @@ export function Navbar() {
               ) : (
                 <a
                   key={n.href}
-                  href={n.href}
+                  href={resolvedHref}
                   className="relative px-4 py-2 text-sm font-semibold text-foreground/75 hover:text-foreground transition-smooth group"
                 >
                   {n.label}
                   <span className="absolute left-4 right-4 -bottom-0.5 h-0.5 origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />
                 </a>
-              )
-            ))}
+              );
+            })}
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
             <a
-              href="#download"
+              href={authUrl}
               className="inline-flex items-center gap-2 rounded-full gradient-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-soft hover:shadow-glow transition-spring hover:-translate-y-0.5"
             >
-              Login / App
+              {authText}
             </a>
           </div>
 
@@ -76,11 +82,12 @@ export function Navbar() {
             className="md:hidden overflow-hidden mt-3 pt-3 border-t border-border/60"
           >
             <div className="flex flex-col gap-1">
-              {navItems.map((n) => (
-                n.href.startsWith("/") ? (
+              {navItems.map((n) => {
+                const resolvedHref = !isHomePage && n.href.startsWith("#") ? `/${n.href}` : n.href;
+                return resolvedHref.startsWith("/") && !resolvedHref.includes("#") ? (
                   <Link
                     key={n.href}
-                    to={n.href}
+                    to={resolvedHref}
                     onClick={() => setOpen(false)}
                     className="rounded-lg px-3 py-2 text-sm font-semibold hover:bg-secondary"
                   >
@@ -89,19 +96,19 @@ export function Navbar() {
                 ) : (
                   <a
                     key={n.href}
-                    href={n.href}
+                    href={resolvedHref}
                     onClick={() => setOpen(false)}
                     className="rounded-lg px-3 py-2 text-sm font-semibold hover:bg-secondary"
                   >
                     {n.label}
                   </a>
-                )
-              ))}
+                );
+              })}
               <a
-                href="#download"
+                href={authUrl}
                 className="mt-2 rounded-full gradient-primary px-4 py-2.5 text-center text-sm font-bold text-primary-foreground"
               >
-                Login / App
+                {authText}
               </a>
             </div>
           </motion.div>

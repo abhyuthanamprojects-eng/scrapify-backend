@@ -1,8 +1,12 @@
 import { Twitter, Instagram, Linkedin, Mail, Facebook, Youtube } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import logo from "@/assets/scrapify-logo-04.svg";
 
 export function Footer() {
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
+  const aboutHref = isHomePage ? "#about" : "/#about";
+
   return (
     <footer className="border-t border-border bg-card">
       <div className="mx-auto w-[min(1200px,94%)] py-14">
@@ -34,7 +38,7 @@ export function Footer() {
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-navy">Company</p>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-              <li><a href="#about" className="hover:text-primary-deep">About Us</a></li>
+              <li><a href={aboutHref} className="hover:text-primary-deep">About Us</a></li>
               <li><Link to="/contact" className="hover:text-primary-deep">Contact Us</Link></li>
               <li><Link to="/partner" className="hover:text-primary-deep">Become a Partner</Link></li>
               <li><Link to="/warehouses" className="hover:text-primary-deep">Our Warehouses</Link></li>
