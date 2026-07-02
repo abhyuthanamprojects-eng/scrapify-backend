@@ -33,6 +33,8 @@ class PickupRequestResource extends JsonResource
                     'condition' => $item->condition,
                     'rate_per_kg' => $item->price_per_unit,
                     'rate_per_unit' => $item->price_per_unit,
+                    'carbon_per_unit' => $item->carbon_per_unit,
+                    'total_carbon_saved' => $item->total_carbon_saved,
                     'total_price' => $item->total_price,
                     'remarks' => $item->remarks,
                     'image_path' => $item->image_path,
@@ -96,6 +98,9 @@ class PickupRequestResource extends JsonResource
             'booking_attributes' => $attributesList,
             'items_summary' => $itemsSummary,
             'estimated_weight_kg' => $estimatedWeight,
+            'total_carbon_saved' => $this->whenLoaded('items', function () {
+                return round($this->items->sum('total_carbon_saved'), 3);
+            }),
             'estimated_amount' => $this->estimated_amount,
             'final_amount' => $this->final_amount,
             'price_summary' => [

@@ -23,7 +23,7 @@ export default function AdminCard({
     };
 
     return (
-        <div className={`rounded-xl border p-6 ${colorClasses[color]}`}>
+        <div className={`rounded-2xl border p-6 ${colorClasses[color]}`}>
             <div className="flex items-start justify-between">
                 <div className="flex-1">
                     <p className="text-sm font-medium opacity-80">{title}</p>

@@ -1,8 +1,8 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { useState } from 'react';
 
-export default function Index({ settings }) {
+export default function Index({ settings, homeBanners = [] }) {
     const normalizeCsvValue = (value) => Array.isArray(value) ? value.join(', ') : (value ?? '');
 
     const { data, setData, post, processing, errors } = useForm({
@@ -20,15 +20,15 @@ export default function Index({ settings }) {
     };
 
     const Toggle = ({ name, label, description }) => (
-        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-100">
-            <div>
+        <div className="flex items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="flex-1">
                 <label className="text-sm font-semibold text-gray-800 block">{label}</label>
                 <p className="text-xs text-gray-500">{description}</p>
             </div>
             <button
                 type="button"
                 onClick={() => setData(name, !data[name])}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${data[name] ? 'bg-primary' : 'bg-gray-300'}`}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${data[name] ? 'bg-primary' : 'bg-gray-300'}`}
             >
                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${data[name] ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
@@ -99,8 +99,22 @@ export default function Index({ settings }) {
                         >
                             SMS Gateway
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('banners')}
+                            className={`px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'banners' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            Home Banners
+                        </button>
                     </div>
 
+                    {activeTab === 'banners' && (
+                        <div className="p-6">
+                            <HomeBanners banners={homeBanners} />
+                        </div>
+                    )}
+
+                    {activeTab !== 'banners' && (
                     <form onSubmit={submit} className="p-6">
                         {activeTab === 'features' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -125,6 +139,17 @@ export default function Index({ settings }) {
                                 <Input name="low_value_shipping_charge" label="Low Value Shipping Charge (₹)" type="number" description="Shipping deduction applied when booking value is below minimum free pickup amount." />
                                 <Input name="warehouse_service_pincodes_limit" label="Warehouse Service Pincode Limit" type="number" description="Maximum number of service pincodes allowed per warehouse." />
                                 <Input name="donation_products" label="Donation Products (comma separated)" description="Example: Cloth, Shoes, Toys, Books" />
+
+                                <div className="md:col-span-2 border-t border-gray-100 pt-4 mt-2">
+                                    <h3 className="text-sm font-semibold text-gray-800 mb-1">App Update / Force Update</h3>
+                                    <p className="text-xs text-gray-500 mb-4">Controls the old-version update popup shown to users.</p>
+                                </div>
+                                <Input name="latest_version" label="Latest Version" description="Newest version available on the stores (e.g. 2.1.0)" />
+                                <Input name="min_version" label="Minimum Supported Version" description="Versions below this are forced to update" />
+                                <Toggle name="force_update" label="Force Update" description="If enabled, users below Minimum Supported Version cannot use the app until they update" />
+                                <Input name="android_url" label="Android Play Store URL" />
+                                <Input name="ios_url" label="iOS App Store URL" />
+
                                 <div className="md:col-span-2 rounded-lg border border-blue-100 bg-blue-50 p-4">
                                     <label className="text-sm font-semibold text-gray-800">Corporate Categories</label>
                                     <p className="mt-1 text-sm text-blue-900">{normalizeCsvValue(settings.corporate_categories) || 'No corporate categories enabled.'}</p>
@@ -181,8 +206,232 @@ export default function Index({ settings }) {
                             </button>
                         </div>
                     </form>
+                    )}
                 </div>
             </div>
         </AdminLayout>
+    );
+}
+
+const MAX_BANNER_SIZE_MB = 8;
+const MAX_BANNER_SIZE_BYTES = MAX_BANNER_SIZE_MB * 1024 * 1024;
+
+function HomeBanners({ banners = [] }) {
+    const [newFile, setNewFile] = useState(null);
+    const [newPreview, setNewPreview] = useState(null);
+    const [newText, setNewText] = useState('');
+    const [newFileError, setNewFileError] = useState(null);
+    const [processing, setProcessing] = useState(false);
+    const [replaceErrors, setReplaceErrors] = useState({});
+    const [textDrafts, setTextDrafts] = useState(() =>
+        Object.fromEntries(banners.map((banner) => [banner.id, banner.text ?? '']))
+    );
+    const [savingTextId, setSavingTextId] = useState(null);
+
+    const handleNewFileChange = (file) => {
+        if (file && file.size > MAX_BANNER_SIZE_BYTES) {
+            setNewFileError(`Image is too large. Maximum allowed size is ${MAX_BANNER_SIZE_MB} MB.`);
+            setNewFile(null);
+            setNewPreview(null);
+            return;
+        }
+
+        setNewFileError(null);
+        setNewFile(file);
+        setNewPreview(file ? URL.createObjectURL(file) : null);
+    };
+
+    const handleAdd = (e) => {
+        e.preventDefault();
+        if (!newFile) return;
+
+        const formData = new FormData();
+        formData.append('image', newFile);
+        formData.append('text', newText ?? '');
+
+        setProcessing(true);
+        router.post(route('admin.home-banners.store'), formData, {
+            forceFormData: true,
+            onSuccess: () => {
+                setNewFile(null);
+                setNewPreview(null);
+                setNewText('');
+            },
+            onFinish: () => setProcessing(false),
+        });
+    };
+
+    const handleTextUpdate = (banner, text) => {
+        const formData = new FormData();
+        formData.append('_method', 'put');
+        formData.append('text', text ?? '');
+
+        setSavingTextId(banner.id);
+        router.post(route('admin.home-banners.update', banner.id), formData, {
+            forceFormData: true,
+            preserveScroll: true,
+            onFinish: () => setSavingTextId(null),
+        });
+    };
+
+    const handleImageReplace = (banner, file) => {
+        if (!file) return;
+
+        if (file.size > MAX_BANNER_SIZE_BYTES) {
+            setReplaceErrors((prev) => ({
+                ...prev,
+                [banner.id]: `Image is too large. Maximum allowed size is ${MAX_BANNER_SIZE_MB} MB.`,
+            }));
+            return;
+        }
+
+        setReplaceErrors((prev) => ({ ...prev, [banner.id]: null }));
+
+        const formData = new FormData();
+        formData.append('_method', 'put');
+        formData.append('image', file);
+
+        router.post(route('admin.home-banners.update', banner.id), formData, {
+            forceFormData: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handleRemove = (banner) => {
+        if (!window.confirm('Remove this banner?')) return;
+
+        router.delete(route('admin.home-banners.destroy', banner.id), {
+            preserveScroll: true,
+        });
+    };
+
+    const handleMove = (index, direction) => {
+        const newOrder = [...banners];
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= newOrder.length) return;
+
+        [newOrder[index], newOrder[targetIndex]] = [newOrder[targetIndex], newOrder[index]];
+
+        router.post(route('admin.home-banners.reorder'), {
+            ids: newOrder.map((b) => b.id),
+        }, {
+            preserveScroll: true,
+        });
+    };
+
+    return (
+        <div>
+            <div className="mb-4">
+                <h3 className="text-sm font-semibold text-gray-800">Home Screen Banner Slider</h3>
+                <p className="text-xs text-gray-500">Add any number of images shown in the rotating banner on the customer app home screen. Tapping any banner takes the user to the category selection screen.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {banners.map((banner, index) => (
+                    <div key={banner.id} className="flex flex-col gap-2">
+                        <div className="aspect-video w-full rounded-lg border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
+                            <img src={banner.image_url} alt={`Banner ${index + 1}`} className="w-full h-full object-cover" />
+                        </div>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleImageReplace(banner, e.target.files?.[0] ?? null)}
+                            className="text-xs"
+                        />
+                        {replaceErrors[banner.id] && (
+                            <p className="text-xs text-red-600">{replaceErrors[banner.id]}</p>
+                        )}
+                        <input
+                            type="text"
+                            value={textDrafts[banner.id] ?? ''}
+                            onChange={(e) => setTextDrafts((prev) => ({
+                                ...prev,
+                                [banner.id]: e.target.value,
+                            }))}
+                            placeholder="Optional overlay text (e.g. Sell your scrap today!)"
+                            maxLength={120}
+                            className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:outline-none text-xs"
+                        />
+                        <div className="flex items-center justify-between gap-3">
+                            <p className="text-[11px] text-gray-500">
+                                Change text and click save.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => handleTextUpdate(banner, textDrafts[banner.id] ?? '')}
+                                disabled={savingTextId === banner.id}
+                                className="px-3 py-1.5 text-xs font-semibold text-white bg-primary rounded-md hover:bg-opacity-90 disabled:opacity-50"
+                            >
+                                {savingTextId === banner.id ? 'Saving...' : 'Save Text'}
+                            </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => handleMove(index, -1)}
+                                    disabled={index === 0}
+                                    className="text-xs font-semibold text-gray-500 hover:text-gray-700 disabled:opacity-30"
+                                >
+                                    ↑ Move up
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => handleMove(index, 1)}
+                                    disabled={index === banners.length - 1}
+                                    className="text-xs font-semibold text-gray-500 hover:text-gray-700 disabled:opacity-30"
+                                >
+                                    ↓ Move down
+                                </button>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handleRemove(banner)}
+                                className="text-xs font-semibold text-red-600 hover:underline"
+                            >
+                                Remove
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <form onSubmit={handleAdd} className="border-t border-gray-100 pt-6">
+                <h3 className="text-sm font-semibold text-gray-800 mb-2">Add New Banner</h3>
+                <div className="flex flex-col gap-3 max-w-md">
+                    <div className="aspect-video w-full rounded-lg border border-dashed border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center">
+                        {newPreview ? (
+                            <img src={newPreview} alt="New banner preview" className="w-full h-full object-cover" />
+                        ) : (
+                            <span className="text-xs text-gray-400">No image selected</span>
+                        )}
+                    </div>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleNewFileChange(e.target.files?.[0] ?? null)}
+                        className="text-xs"
+                    />
+                    {newFileError && (
+                        <p className="text-xs text-red-600">{newFileError}</p>
+                    )}
+                    <input
+                        type="text"
+                        value={newText}
+                        onChange={(e) => setNewText(e.target.value)}
+                        placeholder="Optional overlay text (e.g. Sell your scrap today!)"
+                        maxLength={120}
+                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:outline-none text-xs"
+                    />
+                    <button
+                        type="submit"
+                        disabled={processing || !newFile}
+                        className="px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-opacity-90 transition-all disabled:opacity-50 self-start"
+                    >
+                        {processing ? 'Adding...' : 'Add Banner'}
+                    </button>
+                </div>
+            </form>
+        </div>
     );
 }

@@ -10,7 +10,7 @@ class PickupRequest extends Model
 {
     use HasFactory, SoftDeletes, \App\Traits\BelongsToPartner;
 
-    protected $appends = ['shipping_charge', 'subtotal_amount'];
+    protected $appends = ['shipping_charge', 'subtotal_amount', 'payment_receipt_image_url'];
 
     public function getShippingChargeAttribute()
     {
@@ -20,6 +20,25 @@ class PickupRequest extends Model
     public function getSubtotalAmountAttribute()
     {
         return $this->metadata['pricing_breakdown']['subtotal_amount'] ?? $this->estimated_amount;
+    }
+
+    public function getPaymentReceiptImageUrlAttribute()
+    {
+        $path = $this->payment_receipt_image;
+
+        if (!$path) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        if (file_exists(public_path($path))) {
+            return asset($path);
+        }
+
+        return asset('storage/' . ltrim($path, '/'));
     }
 
     protected $fillable = [

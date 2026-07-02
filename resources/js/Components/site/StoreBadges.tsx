@@ -4,11 +4,15 @@ import googlePlayBadge from "@/assets/google-play-badge.png";
 const googlePlayUrl =
   "https://play.google.com/store/apps/details?id=com.abhyuthanam.scrapify&pcampaignid=web_share";
 
+const appStoreUrl = "https://apps.apple.com/us/app/scrapify/id6775160804";
+
 export function StoreBadges({ className = "" }: { className?: string }) {
   return (
     <div className={`flex flex-wrap items-center justify-center gap-6 py-4 ${className}`}>
       <a
-        href="#"
+        href={appStoreUrl}
+        target="_blank"
+        rel="noopener noreferrer"
         aria-label="Download Scrapify on the App Store"
         className="block transition-all hover:scale-105 active:scale-95"
       >

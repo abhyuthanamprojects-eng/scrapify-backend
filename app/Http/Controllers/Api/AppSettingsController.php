@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\CategoryType;
+use App\Models\HomeBanner;
 use App\Models\Warehouse;
 use App\Services\LocationService;
 use App\Traits\ApiResponseTrait;
@@ -145,6 +146,29 @@ class AppSettingsController extends Controller
             }
         }
 
+        // Dummy test customer (9999999999) can access all functionality
+        // regardless of location/pincode serviceability.
+        if ($user && $user->phone === '9999999999' && !$serviceAvailability['is_serviceable']) {
+            $fallbackWarehouse = Warehouse::where('status', true)->orderBy('id')->first();
+
+            $serviceAvailability = [
+                'is_serviceable' => true,
+                'service_type' => 'scrap_pickup',
+                'location_name' => $serviceAvailability['location_name'] ?: 'Test Location',
+                'pincode' => $resolvedPincode,
+                'matched_warehouse_id' => $fallbackWarehouse?->id,
+                'matched_warehouse_name' => $fallbackWarehouse?->name,
+                'matched_warehouses' => $fallbackWarehouse ? [[
+                    'id' => $fallbackWarehouse->id,
+                    'name' => $fallbackWarehouse->name,
+                    'code' => $fallbackWarehouse->code,
+                    'pincodes' => $fallbackWarehouse->service_pincodes ?? [],
+                    'distance_km' => null,
+                ]] : [],
+                'message' => trans('service.available'),
+            ];
+        }
+
         $data = [
             'language' => $user ? $user->language : App::getLocale(),
             'supported_languages' => AppSetting::get('supported_languages', ['en', 'hi', 'gu']),
@@ -163,8 +187,8 @@ class AppSettingsController extends Controller
                 'latest_version' => AppSetting::get('latest_version', '2.0.0'),
                 'min_version' => AppSetting::get('min_version', '1.0.0'),
                 'force_update' => (bool) AppSetting::get('force_update', false),
-                'android_url' => AppSetting::get('android_url', 'https://play.google.com/store/apps/details?id=com.scrapi5.scrapify'),
-                'ios_url' => AppSetting::get('ios_url', 'https://apps.apple.com/app/scrapify/id0000000000'),
+                'android_url' => AppSetting::get('android_url', 'https://play.google.com/store/apps/details?id=com.abhyuthanam.scrapify'),
+                'ios_url' => AppSetting::get('ios_url', 'https://apps.apple.com/us/app/scrapify/id6775160804'),
                 'pickup_boy_location_interval_seconds' => AppSetting::get('pickup_boy_location_interval_seconds', 30),
                 'location_update_interval_seconds' => AppSetting::get('pickup_boy_location_interval_seconds', 30),
                 'tracking_refresh_interval_seconds' => AppSetting::get('tracking_refresh_interval_seconds', 20),
@@ -187,6 +211,14 @@ class AppSettingsController extends Controller
                 'corporate_meeting_types' => AppSetting::get('corporate_meeting_types', ['in_person', 'google_meet', 'skype']),
                 'scrap_proof_images_required' => AppSetting::get('scrap_proof_images_required', true),
                 'scrap_proof_image_labels' => AppSetting::get('scrap_proof_image_labels', ['front', 'back', 'left', 'right']),
+                'home_banners' => HomeBanner::orderBy('sort_order')
+                    ->get()
+                    ->map(fn (HomeBanner $banner) => [
+                        'image_url' => $banner->image_url,
+                        'text' => $banner->text ?? '',
+                    ])
+                    ->values()
+                    ->all(),
             ],
             'service_availability' => $serviceAvailability,
         ];

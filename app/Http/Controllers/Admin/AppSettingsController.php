@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\CategoryType;
+use App\Models\HomeBanner;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -37,8 +38,8 @@ class AppSettingsController extends Controller
             'latest_version'=> AppSetting::get('latest_version', '2.0.0'),
             'min_version'   => AppSetting::get('min_version',    '1.0.0'),
             'force_update'  => (bool) AppSetting::get('force_update', false),
-            'android_url'   => AppSetting::get('android_url', 'https://play.google.com/store/apps/details?id=com.scrapi5.scrapify'),
-            'ios_url'       => AppSetting::get('ios_url',     'https://apps.apple.com/app/scrapify/id0000000000'),
+            'android_url'   => AppSetting::get('android_url', 'https://play.google.com/store/apps/details?id=com.abhyuthanam.scrapify'),
+            'ios_url'       => AppSetting::get('ios_url',     'https://apps.apple.com/us/app/scrapify/id6775160804'),
             'customer_support_number' => AppSetting::get('customer_support_number', '+91 00000 00000'),
             'support_phone' => AppSetting::get('support_phone', '+91 00000 00000'),
             'feedback_url' => AppSetting::get('feedback_url', 'https://scrapify.in/feedback'),
@@ -75,6 +76,7 @@ class AppSettingsController extends Controller
 
         return Inertia::render('Admin/AppSettings/Index', [
             'settings' => $flat,
+            'homeBanners' => HomeBanner::orderBy('sort_order')->get(['id', 'image_path', 'text', 'sort_order']),
         ]);
     }
 

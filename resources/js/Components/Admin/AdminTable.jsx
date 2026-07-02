@@ -8,10 +8,10 @@ export default function AdminTable({
     emptyIcon = <Package className="mx-auto mb-4 text-gray-400" size={48} />
 }) {
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-card-border overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200">
+                    <thead className="bg-primary/5 border-b border-card-border">
                         <tr>
                             {columns.map((column) => (
                                 <th

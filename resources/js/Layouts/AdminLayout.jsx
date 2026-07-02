@@ -34,7 +34,7 @@ export default function AdminLayout({ children }) {
 
             {/* Sidebar */}
             <div
-                className={`fixed z-30 inset-y-0 left-0 w-64 transition duration-300 transform bg-gradient-to-b from-white to-gray-50 border-r border-gray-200 overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 ${
+                className={`fixed z-30 inset-y-0 left-0 w-64 transition duration-300 transform bg-white border-r border-card-border overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 ${
                     showingSidebar ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'
                 }`}
             >
@@ -266,7 +266,7 @@ export default function AdminLayout({ children }) {
             </div>
 
             <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="flex justify-between items-center py-4 px-6 bg-white border-b border-gray-100 z-10 w-full relative">
+                <header className="flex justify-between items-center py-4 px-6 bg-white border-b border-card-border z-10 w-full relative shadow-sm">
                     <div className="flex items-center flex-1">
                         <button onClick={() => setShowingSidebar(true)} className="text-gray-500 focus:outline-none lg:hidden mr-4">
                             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -347,7 +347,7 @@ export default function AdminLayout({ children }) {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-bg-light">
                     <div className="w-full px-6 py-8 max-w-7xl mx-auto">
                          {flash.success && (
                             <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-5 py-4 rounded-xl relative shadow-sm animate-in slide-in-from-top" role="alert">

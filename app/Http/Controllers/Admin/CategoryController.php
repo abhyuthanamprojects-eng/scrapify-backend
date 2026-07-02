@@ -80,9 +80,11 @@ class CategoryController extends Controller
             'selected_attribute_ids.*' => 'integer|exists:attributes,id',
             'pricing_type' => 'required|in:per_kg,per_piece,per_capacity',
             'base_price' => 'required|numeric|min:0',
+            'carbon_per_unit' => 'nullable|numeric|min:0',
             'option_pricing_rules' => 'nullable|array',
             'option_pricing_rules.*.attribute_option_id' => 'required|exists:attribute_options,id',
             'option_pricing_rules.*.adjustment_percent' => 'required|numeric|min:-100|max:1000',
+            'option_pricing_rules.*.carbon_per_unit' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|max:2048',
         ]);
 
@@ -111,6 +113,7 @@ class CategoryController extends Controller
             'category_id' => $category->id,
             'pricing_type' => $validated['pricing_type'],
             'base_price' => $validated['base_price'],
+            'carbon_per_unit' => $validated['carbon_per_unit'] ?? 0,
             'min_quantity' => 1,
         ]);
 
@@ -148,6 +151,7 @@ class CategoryController extends Controller
                 'attribute_option_id' => $rule->attribute_option_id,
                 'adjustment_percent' => $rule->adjustment_value !== null ? (float) $rule->adjustment_value : 0,
                 'pricing_type' => $rule->pricing_type,
+                'carbon_per_unit' => $rule->carbon_per_unit !== null ? (float) $rule->carbon_per_unit : null,
             ])
             ->values();
 
@@ -184,9 +188,11 @@ class CategoryController extends Controller
             'selected_attribute_ids.*' => 'integer|exists:attributes,id',
             'pricing_type' => 'required|in:per_kg,per_piece,per_capacity',
             'base_price' => 'required|numeric|min:0',
+            'carbon_per_unit' => 'nullable|numeric|min:0',
             'option_pricing_rules' => 'nullable|array',
             'option_pricing_rules.*.attribute_option_id' => 'required|exists:attribute_options,id',
             'option_pricing_rules.*.adjustment_percent' => 'required|numeric|min:-100|max:1000',
+            'option_pricing_rules.*.carbon_per_unit' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|max:2048',
             'remove_image' => 'nullable|boolean',
         ]);
@@ -225,6 +231,7 @@ class CategoryController extends Controller
             [
                 'pricing_type' => $validated['pricing_type'],
                 'base_price' => $validated['base_price'],
+                'carbon_per_unit' => $validated['carbon_per_unit'] ?? 0,
                 'min_quantity' => 1,
             ]
         );
@@ -272,6 +279,9 @@ class CategoryController extends Controller
                 'attribute_option_id' => (int) $row['attribute_option_id'],
                 'adjustment_percent' => (float) $row['adjustment_percent'],
                 'pricing_type' => $row['pricing_type'] ?? $defaultPricingType,
+                'carbon_per_unit' => isset($row['carbon_per_unit']) && $row['carbon_per_unit'] !== ''
+                    ? (float) $row['carbon_per_unit']
+                    : null,
             ])
             ->unique('attribute_option_id')
             ->values();
@@ -300,6 +310,7 @@ class CategoryController extends Controller
                     'base_price' => 0,
                     'adjustment_type' => 'percentage',
                     'adjustment_value' => $row['adjustment_percent'],
+                    'carbon_per_unit' => $row['carbon_per_unit'],
                     'min_quantity' => 1,
                     'status' => true,
                 ]
