@@ -381,6 +381,57 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
                                         </div>
                                     </div>
 
+                                    {/* Payment Proof */}
+                                    {(currentPickup.payment_status === 'completed' || currentPickup.status === 'completed') && (
+                                        <div className="mt-6 pt-6 border-t border-gray-100">
+                                            <h3 className="text-sm font-bold text-gray-800 uppercase mb-4 tracking-wider font-roboto">Payment Information</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-green-50/20 rounded-xl border border-green-100 p-6">
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Payment Status</label>
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 capitalize">
+                                                            {currentPickup.payment_status || 'completed'}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Reference ID / Txn Number</label>
+                                                        <p className="text-sm font-bold text-gray-800 font-mono select-all">
+                                                            {currentPickup.payment_reference || 'N/A'}
+                                                        </p>
+                                                    </div>
+                                                    {currentPickup.payment_completed_at && (
+                                                        <div>
+                                                            <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Paid At</label>
+                                                            <p className="text-sm font-semibold text-gray-700">
+                                                                {new Date(currentPickup.payment_completed_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                                                            </p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {currentPickup.payment_receipt_image_url && (
+                                                    <div className="space-y-2">
+                                                        <label className="text-[10px] text-gray-400 uppercase font-bold block mb-1">Receipt / Payment Proof</label>
+                                                        <div className="relative group max-w-sm rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white aspect-[4/3]">
+                                                            <img 
+                                                                src={currentPickup.payment_receipt_image_url} 
+                                                                alt="Payment Receipt" 
+                                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                            />
+                                                            <a 
+                                                                href={currentPickup.payment_receipt_image_url} 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer" 
+                                                                className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-semibold text-xs transition-opacity duration-300"
+                                                            >
+                                                                View Full Receipt
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Price Logs */}
                                     {showLogs && priceLogs && (
                                         <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-xl space-y-2">

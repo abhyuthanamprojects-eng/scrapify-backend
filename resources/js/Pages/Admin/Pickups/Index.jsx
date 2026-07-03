@@ -109,26 +109,30 @@ export default function Index({ pickups, filters }) {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead>
                                 <tr className="bg-gray-50">
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Scheduled At</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Warehouse</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Booking Amount</th>
-                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Final Amount</th>
-                                    <th className="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Scheduled At</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Warehouse</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Booking Amount</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Final Amount</th>
+                                    <th className="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {pickups.data.map((pickup) => (
-                                    <tr key={pickup.id} className="hover:bg-gray-50 transition">
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">#{pickup.id}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-semibold text-gray-800">{pickup.customer?.name}</div>
+                                    <tr 
+                                        key={pickup.id} 
+                                        onClick={() => router.visit(route('admin.pickups.show', pickup.id))}
+                                        className="hover:bg-gray-50 transition cursor-pointer"
+                                    >
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">#{pickup.id}</td>
+                                        <td className="px-4 py-4">
+                                            <div className="text-sm font-semibold text-gray-800 break-words max-w-[150px]">{pickup.customer?.name}</div>
                                             <div className="text-xs text-gray-500">{pickup.customer?.phone}</div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-4 py-4 whitespace-nowrap">
                                             <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                                                 pickup.request_type === 'donation' ? 'bg-green-100 text-green-700' : 
                                                 pickup.request_type === 'corporate' ? 'bg-blue-100 text-blue-700' : 
@@ -137,20 +141,20 @@ export default function Index({ pickups, filters }) {
                                                 {pickup.request_type}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(pickup.scheduled_at)}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(pickup.scheduled_at)}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap">
                                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[pickup.status] || 'bg-gray-100 text-gray-800'}`}>
                                                 {pickup.status.replace('_', ' ')}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{pickup.warehouse?.name || '-'}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
+                                        <td className="px-4 py-4 text-sm text-gray-500 max-w-[200px] break-words">{pickup.warehouse?.name || '-'}</td>
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-700">
                                             {pickup.estimated_amount !== null && pickup.estimated_amount !== undefined ? `₹${pickup.estimated_amount}` : '-'}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-800">
+                                        <td className="px-4 py-4 whitespace-nowrap text-sm font-bold text-gray-800">
                                             {pickup.final_amount !== null && pickup.final_amount !== undefined && !['pending', 'assigned', 'accepted', 'on_the_way', 'arrived', 'verifying', 'reschedule_requested', 'rescheduled', 'cancelled'].includes(pickup.status) ? `₹${pickup.final_amount}` : '-'}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <td className="px-4 py-4 whitespace-nowrap text-right text-sm font-medium" onClick={(e) => e.stopPropagation()}>
                                             <Link href={route('admin.pickups.show', pickup.id)} className="text-primary font-bold hover:underline">
                                                 View
                                             </Link>

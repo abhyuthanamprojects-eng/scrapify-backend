@@ -62,6 +62,8 @@ const benefits = [
 
 function PartnerPage() {
   const [aadhaarFile, setAadhaarFile] = useState<File | null>(null);
+  const [panFile, setPanFile] = useState<File | null>(null);
+  const [gstFile, setGstFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -97,31 +99,48 @@ function PartnerPage() {
       toast.error("Aadhaar photo must be under 5 MB");
       return;
     }
+    if (!panFile) {
+      toast.error("Please upload your PAN card photo");
+      return;
+    }
+    if (panFile.size > 5 * 1024 * 1024) {
+      toast.error("PAN photo must be under 5 MB");
+      return;
+    }
+    if (gstFile && gstFile.size > 5 * 1024 * 1024) {
+      toast.error("GST document must be under 5 MB");
+      return;
+    }
 
     setSubmitting(true);
     try {
-      const apiPayload = {
-        full_name: data.fullName,
-        business_name: data.businessName,
-        phone: data.mobile,
-        email: data.email,
-        city: data.city,
-        state: data.state,
-        pincode: data.pincode,
-        address: data.address,
-        aadhaar_number: data.aadhaar,
-        pan_number: data.pan,
-        gst_number: data.gst || null,
-        opening_location_name: data.city,
-      };
+      const apiPayload = new FormData();
+      apiPayload.append("full_name", data.fullName);
+      apiPayload.append("business_name", data.businessName);
+      apiPayload.append("phone", data.mobile);
+      apiPayload.append("email", data.email);
+      apiPayload.append("city", data.city);
+      apiPayload.append("state", data.state);
+      apiPayload.append("pincode", data.pincode);
+      apiPayload.append("address", data.address);
+      apiPayload.append("aadhaar_number", data.aadhaar);
+      apiPayload.append("pan_number", data.pan);
+      if (data.gst) {
+        apiPayload.append("gst_number", data.gst);
+      }
+      apiPayload.append("opening_location_name", data.city);
+      apiPayload.append("aadhaar_file", aadhaarFile);
+      apiPayload.append("pan_file", panFile);
+      if (gstFile) {
+        apiPayload.append("gst_file", gstFile);
+      }
 
       const res = await fetch("/api/channel-partner/registration/request", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(apiPayload),
+        body: apiPayload,
       });
 
       const result = await res.json();
@@ -141,6 +160,8 @@ function PartnerPage() {
       setSubmitted(true);
       formRef.current?.reset();
       setAadhaarFile(null);
+      setPanFile(null);
+      setGstFile(null);
     } catch (err) {
       toast.error("Network error. Please check your connection and try again.");
     } finally {
@@ -348,6 +369,56 @@ function PartnerPage() {
                     accept="image/png,image/jpeg,application/pdf"
                     className="sr-only"
                     onChange={(e) => setAadhaarFile(e.target.files?.[0] ?? null)}
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-semibold">
+                    PAN Card Photo <span className="text-destructive">*</span>
+                  </Label>
+                  <label
+                    htmlFor="panFile"
+                    className="mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-md border border-dashed border-input bg-background px-3 py-2.5 text-sm hover:border-primary transition-colors"
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      <Upload className="h-4 w-4 text-primary-deep shrink-0" />
+                      <span className="truncate text-muted-foreground">
+                        {panFile ? panFile.name : "Upload JPG/PNG/PDF (max 5 MB)"}
+                      </span>
+                    </span>
+                    {panFile && <CheckCircle2 className="h-4 w-4 text-primary-deep shrink-0" />}
+                  </label>
+                  <input
+                    id="panFile"
+                    type="file"
+                    accept="image/png,image/jpeg,application/pdf"
+                    className="sr-only"
+                    onChange={(e) => setPanFile(e.target.files?.[0] ?? null)}
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-sm font-semibold">
+                    GST Document (Optional)
+                  </Label>
+                  <label
+                    htmlFor="gstFile"
+                    className="mt-2 flex cursor-pointer items-center justify-between gap-3 rounded-md border border-dashed border-input bg-background px-3 py-2.5 text-sm hover:border-primary transition-colors"
+                  >
+                    <span className="flex items-center gap-2 truncate">
+                      <Upload className="h-4 w-4 text-primary-deep shrink-0" />
+                      <span className="truncate text-muted-foreground">
+                        {gstFile ? gstFile.name : "Upload JPG/PNG/PDF (max 5 MB)"}
+                      </span>
+                    </span>
+                    {gstFile && <CheckCircle2 className="h-4 w-4 text-primary-deep shrink-0" />}
+                  </label>
+                  <input
+                    id="gstFile"
+                    type="file"
+                    accept="image/png,image/jpeg,application/pdf"
+                    className="sr-only"
+                    onChange={(e) => setGstFile(e.target.files?.[0] ?? null)}
                   />
                 </div>
               </div>

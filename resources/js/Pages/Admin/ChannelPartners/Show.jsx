@@ -129,17 +129,59 @@ export default function Show({ partner }) {
                     <div className="bg-white shadow rounded-lg p-6">
                         <h3 className="text-lg font-bold border-b pb-2 mb-4">Identity & KYC</h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-gray-50 p-4 rounded border border-gray-200">
-                                <p className="text-xs text-gray-500 uppercase tracking-wider">Aadhaar Number</p>
-                                <p className="text-lg font-mono font-bold">{partner.aadhaar_number}</p>
+                            <div className="bg-gray-50 p-4 rounded border border-gray-200 flex flex-col justify-between">
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase tracking-wider">Aadhaar Number</p>
+                                    <p className="text-lg font-mono font-bold">{partner.aadhaar_number}</p>
+                                </div>
+                                {partner.aadhaar_file ? (
+                                    <div className="mt-3 pt-2 border-t border-gray-200">
+                                        <a href={`/${partner.aadhaar_file}`} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1">
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                            View Aadhaar File
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <div className="mt-3 pt-2 border-t border-gray-200">
+                                        <span className="text-xs text-gray-400 italic">No document file</span>
+                                    </div>
+                                )}
                             </div>
-                            <div className="bg-gray-50 p-4 rounded border border-gray-200">
-                                <p className="text-xs text-gray-500 uppercase tracking-wider">PAN Number</p>
-                                <p className="text-lg font-mono font-bold uppercase">{partner.pan_number}</p>
+                            <div className="bg-gray-50 p-4 rounded border border-gray-200 flex flex-col justify-between">
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase tracking-wider">PAN Number</p>
+                                    <p className="text-lg font-mono font-bold uppercase">{partner.pan_number}</p>
+                                </div>
+                                {partner.pan_file ? (
+                                    <div className="mt-3 pt-2 border-t border-gray-200">
+                                        <a href={`/${partner.pan_file}`} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1">
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                            View PAN File
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <div className="mt-3 pt-2 border-t border-gray-200">
+                                        <span className="text-xs text-gray-400 italic">No document file</span>
+                                    </div>
+                                )}
                             </div>
-                            <div className="bg-gray-50 p-4 rounded border border-gray-200">
-                                <p className="text-xs text-gray-500 uppercase tracking-wider">GST Number</p>
-                                <p className="text-lg font-mono font-bold uppercase">{partner.gst_number || 'N/A'}</p>
+                            <div className="bg-gray-50 p-4 rounded border border-gray-200 flex flex-col justify-between">
+                                <div>
+                                    <p className="text-xs text-gray-500 uppercase tracking-wider">GST Number</p>
+                                    <p className="text-lg font-mono font-bold uppercase">{partner.gst_number || 'N/A'}</p>
+                                </div>
+                                {partner.gst_file ? (
+                                    <div className="mt-3 pt-2 border-t border-gray-200">
+                                        <a href={`/${partner.gst_file}`} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1">
+                                            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                                            View GST File
+                                        </a>
+                                    </div>
+                                ) : (
+                                    <div className="mt-3 pt-2 border-t border-gray-200">
+                                        <span className="text-xs text-gray-400 italic">No document file</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

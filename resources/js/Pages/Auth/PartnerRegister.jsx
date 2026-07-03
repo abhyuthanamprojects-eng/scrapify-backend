@@ -12,8 +12,11 @@ export default function PartnerRegister({ states }) {
         email: '',
         business_name: '',
         aadhaar_number: '',
+        aadhaar_file: null,
         pan_number: '',
+        pan_file: null,
         gst_number: '',
+        gst_file: null,
         address: '',
         city: '',
         state: '',
@@ -89,15 +92,50 @@ export default function PartnerRegister({ states }) {
                         </div>
 
                         <div>
+                            <InputLabel htmlFor="aadhaar_file" value="Aadhaar Card Photo / PDF" />
+                            <input 
+                                type="file" 
+                                id="aadhaar_file" 
+                                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" 
+                                onChange={e => setData('aadhaar_file', e.target.files[0])} 
+                                required
+                            />
+                            <InputError message={errors.aadhaar_file} className="mt-2" />
+                        </div>
+
+                        <div>
                             <InputLabel htmlFor="pan_number" value="PAN Card Number" />
                             <TextInput id="pan_number" className="mt-1 block w-full uppercase" value={data.pan_number} onChange={(e) => setData('pan_number', e.target.value.toUpperCase())} required maxLength="10" />
                             <InputError message={errors.pan_number} className="mt-2" />
                         </div>
 
                         <div>
+                            <InputLabel htmlFor="pan_file" value="PAN Card Photo / PDF" />
+                            <input 
+                                type="file" 
+                                id="pan_file" 
+                                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" 
+                                onChange={e => setData('pan_file', e.target.files[0])} 
+                                required
+                            />
+                            <InputError message={errors.pan_file} className="mt-2" />
+                        </div>
+
+                        <div>
                             <InputLabel htmlFor="gst_number" value="GST Number (Optional)" />
                             <TextInput id="gst_number" className="mt-1 block w-full uppercase" value={data.gst_number} onChange={(e) => setData('gst_number', e.target.value.toUpperCase())} />
                             <InputError message={errors.gst_number} className="mt-2" />
+                        </div>
+
+                        <div>
+                            <InputLabel htmlFor="gst_file" value="GST Document (Optional)" />
+                            <input 
+                                type="file" 
+                                id="gst_file" 
+                                className="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" 
+                                onChange={e => setData('gst_file', e.target.files[0])} 
+                            />
+                            <InputError message={errors.gst_file} className="mt-2" />
                         </div>
                     </div>
                 </div>

@@ -84,11 +84,15 @@ class PickupRequest extends Model
         'price_locked_at',
         'final_amount_modified_by',
         'payment_receipt_image',
+        'payment_status',
+        'payment_reference',
     ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
         'price_locked_at' => 'datetime',
+        'payment_completed_at' => 'datetime',
+        'completed_at' => 'datetime',
         'metadata' => 'array',
     ];
 

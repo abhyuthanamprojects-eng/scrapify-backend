@@ -37,13 +37,39 @@ class PartnerRegistrationController extends Controller
             'opening_location_name' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'aadhaar_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'pan_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'gst_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
 
-        ChannelPartner::create($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('aadhaar_file')) {
+            $file = $request->file('aadhaar_file');
+            $filename = 'aadhaar_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/kyc'), $filename);
+            $data['aadhaar_file'] = 'uploads/kyc/' . $filename;
+        }
+
+        if ($request->hasFile('pan_file')) {
+            $file = $request->file('pan_file');
+            $filename = 'pan_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/kyc'), $filename);
+            $data['pan_file'] = 'uploads/kyc/' . $filename;
+        }
+
+        if ($request->hasFile('gst_file')) {
+            $file = $request->file('gst_file');
+            $filename = 'gst_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('uploads/kyc'), $filename);
+            $data['gst_file'] = 'uploads/kyc/' . $filename;
+        }
+
+        ChannelPartner::create($data);
 
         return Inertia::render('Auth/PartnerRegisterSuccess');
     }

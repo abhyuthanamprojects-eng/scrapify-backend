@@ -14,7 +14,11 @@ class TestPushNotification extends Notification
 
     public function via(object $notifiable): array
     {
-        return [FcmChannel::class];
+        $credentialsFile = config('fcm.credentials.file');
+        if ($credentialsFile && file_exists($credentialsFile)) {
+            return [FcmChannel::class];
+        }
+        return [];
     }
 
     public function toFcm(object $notifiable): FcmMessage
