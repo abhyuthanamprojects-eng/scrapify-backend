@@ -34,7 +34,8 @@ class PickupStatusNotification extends Notification
     {
         $channels = ['database'];
 
-        if ($notifiable->fcm_token) {
+        $credentialsFile = config('fcm.credentials.file');
+        if ($notifiable->fcm_token && $credentialsFile && file_exists($credentialsFile)) {
             $channels[] = FcmChannel::class;
         }
 

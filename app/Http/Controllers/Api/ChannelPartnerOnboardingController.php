@@ -35,6 +35,9 @@ class ChannelPartnerOnboardingController extends Controller
             'opening_location_name' => 'required|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'aadhaar_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'pan_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
+            'gst_file' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:5120',
         ]);
 
         if ($validator->fails()) {
@@ -44,7 +47,30 @@ class ChannelPartnerOnboardingController extends Controller
         try {
             \Illuminate\Support\Facades\DB::beginTransaction();
 
-            $partner = ChannelPartner::create(array_merge($request->all(), [
+            $data = $request->all();
+
+            if ($request->hasFile('aadhaar_file')) {
+                $file = $request->file('aadhaar_file');
+                $filename = 'aadhaar_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/kyc'), $filename);
+                $data['aadhaar_file'] = 'uploads/kyc/' . $filename;
+            }
+
+            if ($request->hasFile('pan_file')) {
+                $file = $request->file('pan_file');
+                $filename = 'pan_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/kyc'), $filename);
+                $data['pan_file'] = 'uploads/kyc/' . $filename;
+            }
+
+            if ($request->hasFile('gst_file')) {
+                $file = $request->file('gst_file');
+                $filename = 'gst_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('uploads/kyc'), $filename);
+                $data['gst_file'] = 'uploads/kyc/' . $filename;
+            }
+
+            $partner = ChannelPartner::create(array_merge($data, [
                 'registration_status' => 'pending',
             ]));
 
@@ -53,7 +79,7 @@ class ChannelPartnerOnboardingController extends Controller
                 'entity_type' => 'channel_partner_registration',
                 'entity_id' => $partner->id,
                 'request_type' => 'create',
-                'payload' => $request->all(),
+                'payload' => $partner->toArray(),
                 'status' => 'pending',
             ]);
 
