@@ -14,9 +14,9 @@ export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       { title: "Contact Us — Scrapify | Get in Touch" },
-      { name: "description", content: "Reach the Scrapify team for support, partnerships or feedback. Call, email or send us a message." },
+      { name: "description", content: "Contact Scrapify — your local kabadi wala online. Call or WhatsApp for doorstep scrap, raddi & ewaste pickup, partnerships or support." },
       { property: "og:title", content: "Contact Scrapify" },
-      { property: "og:description", content: "Get in touch with India's smartest doorstep scrap pickup service." },
+      { property: "og:description", content: "Get in touch with India's smartest doorstep scrap, kabadi & ewaste pickup service." },
     ],
   }),
   component: ContactPage,

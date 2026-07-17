@@ -18,13 +18,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Scrapify is India's smartest doorstep scrap collection app. Book a free pickup, get paid instantly via UPI. Powered by Abhyuthanam Industries Pvt. Ltd.",
+          "Scrapify — your local kabadi wala online. Sell scrap, raddi, old newspaper, ewaste, metal & plastic scrap from home. Doorstep kawadi pickup, instant UPI payment. Powered by Abhyuthanam Industries Pvt. Ltd.",
       },
       { property: "og:title", content: "Scrapify — Turn your scrap into cash in minutes" },
       {
         property: "og:description",
         content:
-          "On-demand professional scrap collection. कबाड़ हटाओ, कैश पाओ — book a pickup in seconds.",
+          "Local kawadi at your doorstep — sell kabadi, raddi, ewaste & scrap online. कबाड़ हटाओ, कैश पाओ — book a pickup in seconds.",
       },
       { property: "og:type", content: "website" },
     ],

@@ -31,6 +31,9 @@ Route::get('/terms', function () {
 Route::get('/cancellation', function () {
     return view('frontend');
 });
+Route::get('/warehouses', function () {
+    return view('frontend');
+});
 
 // Channel Partner Registration
 Route::get('register/partner', [\App\Http\Controllers\Auth\PartnerRegistrationController::class, 'create'])->name('partner.register');

@@ -17,7 +17,7 @@ export const Route = createFileRoute("/partner")({
       {
         name: "description",
         content:
-          "Join Scrapify's collection partner network. Submit your Aadhaar, PAN and GST details to start earning by collecting scrap in your area.",
+          "Become a Scrapify kabadi collection partner. Earn by collecting scrap, raddi & ewaste in your area — local kawadi wala network with daily payouts.",
       },
       { property: "og:title", content: "Become a Scrapify Partner" },
       {

@@ -55,7 +55,20 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col md:flex-row items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground">
+        <div className="mt-10 border-t border-border pt-6">
+          <h2 className="text-sm font-semibold text-navy">Scrapify — Your Local Kabadi Wala, Now Online</h2>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            Scrapify (कबाड़ हटाओ, कैश पाओ) is India's smartest way to sell scrap online. No more waiting for the
+            local kawadi wala — book a doorstep scrap pickup in seconds and get paid instantly via UPI. We buy all
+            kinds of kabadi and raddi: old newspapers, books and paper scrap, iron and metal scrap, plastic scrap,
+            e-waste like old laptops, mobiles, keyboards and electronics, appliances, and more. Our verified kabadi
+            collection partners bring certified weighing scales to your home, so you always get fair market rates.
+            Whether you search for "kabadi wala near me", "scrap dealer near me", "sell raddi online" or "ewaste
+            pickup", Scrapify is your one-stop local kawadi service — clean home, cleaner planet.
+          </p>
+        </div>
+
+        <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} Scrapify. All rights reserved.</p>
           <p>Made with ♻ in India</p>
         </div>

@@ -9,9 +9,9 @@ export const Route = createFileRoute("/warehouses")({
   head: () => ({
     meta: [
       { title: "Our Warehouses — Scrapify | Nationwide Collection Network" },
-      { name: "description", content: "Explore Scrapify's network of professional scrap collection warehouses. Find a facility near you for secure and sustainable recycling." },
+      { name: "description", content: "Find a Scrapify scrap warehouse near you — local kabadi collection centres for scrap, raddi, metal, plastic & ewaste recycling across India." },
       { property: "og:title", content: "Scrapify Warehouses" },
-      { property: "og:description", content: "India's smartest doorstep scrap pickup network has professional processing hubs across major cities." },
+      { property: "og:description", content: "India's smartest doorstep scrap & kabadi pickup network — professional recycling hubs across major cities." },
     ],
   }),
   component: WarehousesPage,
