@@ -33,7 +33,7 @@ export const Route = createRootRoute({
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Scrapify — कबाड़ हटाओ, कैश पाओ" },
       { name: "description", content: "India's smartest doorstep scrap pickup. Sell scrap, kabadi, raddi online — local kawadi wala at your door. Book free pickup, get paid instantly." },
-      { name: "keywords", content: "scrap pickup, sell scrap online, kabadi, kawadi, kabadiwala, kawadi wala, local kawadi, local kabadi, scrap kawadi, kabad, raddi, raddiwala, scrap dealer near me, scrap buyer, online kabadi, doorstep scrap pickup, sell old newspaper, sell old electronics, e-waste pickup, metal scrap, iron scrap, plastic scrap, paper scrap, कबाड़, कबाड़ी, रद्दी, कबाड़ीवाला, स्क्रैप" },
+      { name: "keywords", content: "scrap pickup, sell scrap online, kabadi, kawadi, kabadiwala, kawadi wala, local kawadi, local kabadi, scrap kawadi, kabad, raddi, raddiwala, scrap dealer near me, scrap buyer, online kabadi, doorstep scrap pickup, sell old newspaper, sell old electronics, e-waste pickup, ewaste, e waste, sell ewaste online, ewaste recycling, electronic waste, metal scrap, iron scrap, plastic scrap, paper scrap, कबाड़, कबाड़ी, रद्दी, कबाड़ीवाला, स्क्रैप" },
       { name: "author", content: "Scrapify" },
       { property: "og:title", content: "Scrapify — कबाड़ हटाओ, कैश पाओ" },
       { property: "og:description", content: "India's smartest doorstep scrap pickup. Book free pickup, get paid instantly." },

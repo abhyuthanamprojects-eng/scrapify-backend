@@ -1,6 +1,6 @@
 {
   "/Users/amitsinha/Devzign/Laravel/scrapify-backend/resources/js/Frontend/styles.css": {
-    "file": "assets/styles-CKCDJh5U.css",
+    "file": "assets/styles-CfV3d8P2.css",
     "src": "/Users/amitsinha/Devzign/Laravel/scrapify-backend/resources/js/Frontend/styles.css",
     "isEntry": true
   },
@@ -155,7 +155,7 @@
     "isEntry": true
   },
   "resources/js/Frontend/styles.css": {
-    "file": "assets/styles-CKCDJh5U.css",
+    "file": "assets/styles-CfV3d8P2.css",
     "src": "/Users/amitsinha/Devzign/Laravel/scrapify-backend/resources/js/Frontend/styles.css",
     "isEntry": true
   },
@@ -1315,7 +1315,7 @@
     "src": "resources/js/assets/scrapify-logo-05.svg"
   },
   "resources/js/frontend.tsx": {
-    "file": "assets/frontend-CY1evNzi.js",
+    "file": "assets/frontend-RdYNnOj_.js",
     "name": "frontend",
     "src": "resources/js/frontend.tsx",
     "isEntry": true,
@@ -1326,14 +1326,14 @@
       "_users-BLcEXZKG.js"
     ],
     "css": [
-      "assets/styles-CKCDJh5U.css"
+      "assets/styles-CfV3d8P2.css"
     ],
     "assets": [
       "assets/scrapify-logo-05-CViyOaNf.svg",
       "assets/scrapify-logo-04-CP_x-Ued.svg",
       "assets/app-store-badge-q8XwkoWc.png",
       "assets/google-play-badge-Ca7ynUnn.png",
-      "assets/styles-CKCDJh5U.css"
+      "assets/styles-CfV3d8P2.css"
     ]
   }
 }
