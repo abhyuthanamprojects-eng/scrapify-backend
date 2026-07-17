@@ -6,6 +6,8 @@
         <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
 
         <title>Scrapify — कबाड़ हटाओ, कैश पाओ | Doorstep Scrap Pickup</title>
+        <meta name="description" content="India's smartest doorstep scrap pickup. Sell scrap, kabadi, raddi online — local kawadi wala at your door. Book free pickup, get paid instantly.">
+        <meta name="keywords" content="scrap pickup, sell scrap online, kabadi, kawadi, kabadiwala, kawadi wala, local kawadi, local kabadi, scrap kawadi, kabad, raddi, raddiwala, scrap dealer near me, scrap buyer, online kabadi, doorstep scrap pickup, sell old newspaper, sell old electronics, e-waste pickup, metal scrap, iron scrap, plastic scrap, paper scrap, कबाड़, कबाड़ी, रद्दी, कबाड़ीवाला, स्क्रैप">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
