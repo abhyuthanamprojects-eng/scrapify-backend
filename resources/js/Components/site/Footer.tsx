@@ -70,6 +70,17 @@ export function Footer() {
 
         <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-3 border-t border-border pt-6 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} Scrapify. All rights reserved.</p>
+          <p>
+            Developed by{" "}
+            <a
+              href="https://devzign.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium hover:text-primary-deep"
+            >
+              devzign.com (Devzign Technologies)
+            </a>
+          </p>
           <p>Made with ♻ in India</p>
         </div>
       </div>
