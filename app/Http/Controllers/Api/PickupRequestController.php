@@ -287,6 +287,13 @@ class PickupRequestController extends Controller
         try {
             $warehouse = $this->resolveWarehouseByPincode($pincode, $lat, $lng);
 
+            if (!$warehouse) {
+                $defaultPincode = AppSetting::get('default_serviceable_pincode', '382330');
+                if ($defaultPincode && $defaultPincode !== Warehouse::normalizePincode($pincode)) {
+                    $warehouse = $this->resolveWarehouseByPincode($defaultPincode, $lat, $lng);
+                }
+            }
+
             if (!$warehouse && $user->phone === '9999999999') {
                 $warehouse = Warehouse::where('status', true)->orderBy('id')->first();
             }

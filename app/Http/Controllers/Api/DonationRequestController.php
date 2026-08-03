@@ -161,6 +161,13 @@ class DonationRequestController extends Controller
         try {
             $warehouse = $this->findDonationWarehouseByPincode($pincode, $lat, $lng);
 
+            if (!$warehouse) {
+                $defaultPincode = AppSetting::get('default_serviceable_pincode', '382330');
+                if ($defaultPincode && $defaultPincode !== Warehouse::normalizePincode($pincode)) {
+                    $warehouse = $this->findDonationWarehouseByPincode($defaultPincode, $lat, $lng);
+                }
+            }
+
             if (!$warehouse && $user->phone === '9999999999') {
                 $warehouse = Warehouse::where('status', true)
                     ->where('accepts_donation', true)

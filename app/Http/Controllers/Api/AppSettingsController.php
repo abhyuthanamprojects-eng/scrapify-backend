@@ -146,6 +146,34 @@ class AppSettingsController extends Controller
             }
         }
 
+        // Fallback: if no warehouse matched the user's pincode, try the
+        // default pincode so the user is never stuck on "not serviceable".
+        if (!$serviceAvailability['is_serviceable']) {
+            $defaultPincode = AppSetting::get('default_serviceable_pincode', '382330');
+            if ($defaultPincode && $defaultPincode !== $resolvedPincode) {
+                $fallbackWarehouses = Warehouse::matchingByPincode($defaultPincode, 'scrap_pickup');
+                if ($fallbackWarehouses->isNotEmpty()) {
+                    $fbWarehouse = $fallbackWarehouses->first();
+                    $serviceAvailability = [
+                        'is_serviceable' => true,
+                        'service_type' => 'scrap_pickup',
+                        'location_name' => $serviceAvailability['location_name'],
+                        'pincode' => $resolvedPincode ?? $defaultPincode,
+                        'matched_warehouse_id' => $fbWarehouse->id,
+                        'matched_warehouse_name' => $fbWarehouse->name,
+                        'matched_warehouses' => [[
+                            'id' => $fbWarehouse->id,
+                            'name' => $fbWarehouse->name,
+                            'code' => $fbWarehouse->code,
+                            'pincodes' => $fbWarehouse->service_pincodes ?? [],
+                            'distance_km' => null,
+                        ]],
+                        'message' => trans('service.available'),
+                    ];
+                }
+            }
+        }
+
         // Dummy test customer (9999999999) can access all functionality
         // regardless of location/pincode serviceability.
         if ($user && $user->phone === '9999999999' && !$serviceAvailability['is_serviceable']) {
