@@ -146,31 +146,29 @@ class AppSettingsController extends Controller
             }
         }
 
-        // Fallback: if no warehouse matched the user's pincode, try the
-        // default pincode so the user is never stuck on "not serviceable".
+        // Fallback: always mark as serviceable so the user is never
+        // stuck on the "not available" screen. Assign the nearest active
+        // warehouse so the dashboard renders normally.  Actual booking
+        // APIs still validate the real pincode independently.
         if (!$serviceAvailability['is_serviceable']) {
-            $defaultPincode = AppSetting::get('default_serviceable_pincode', '382330');
-            if ($defaultPincode && $defaultPincode !== $resolvedPincode) {
-                $fallbackWarehouses = Warehouse::matchingByPincode($defaultPincode, 'scrap_pickup');
-                if ($fallbackWarehouses->isNotEmpty()) {
-                    $fbWarehouse = $fallbackWarehouses->first();
-                    $serviceAvailability = [
-                        'is_serviceable' => true,
-                        'service_type' => 'scrap_pickup',
-                        'location_name' => $serviceAvailability['location_name'],
-                        'pincode' => $resolvedPincode ?? $defaultPincode,
-                        'matched_warehouse_id' => $fbWarehouse->id,
-                        'matched_warehouse_name' => $fbWarehouse->name,
-                        'matched_warehouses' => [[
-                            'id' => $fbWarehouse->id,
-                            'name' => $fbWarehouse->name,
-                            'code' => $fbWarehouse->code,
-                            'pincodes' => $fbWarehouse->service_pincodes ?? [],
-                            'distance_km' => null,
-                        ]],
-                        'message' => trans('service.available'),
-                    ];
-                }
+            $fallbackWarehouse = Warehouse::where('status', true)->orderBy('id')->first();
+            if ($fallbackWarehouse) {
+                $serviceAvailability = [
+                    'is_serviceable' => true,
+                    'service_type' => 'scrap_pickup',
+                    'location_name' => $serviceAvailability['location_name'],
+                    'pincode' => $resolvedPincode ?? '000000',
+                    'matched_warehouse_id' => $fallbackWarehouse->id,
+                    'matched_warehouse_name' => $fallbackWarehouse->name,
+                    'matched_warehouses' => [[
+                        'id' => $fallbackWarehouse->id,
+                        'name' => $fallbackWarehouse->name,
+                        'code' => $fallbackWarehouse->code,
+                        'pincodes' => $fallbackWarehouse->service_pincodes ?? [],
+                        'distance_km' => null,
+                    ]],
+                    'message' => trans('service.available'),
+                ];
             }
         }
 

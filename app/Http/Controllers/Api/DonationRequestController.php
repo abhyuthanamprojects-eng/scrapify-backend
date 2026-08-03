@@ -161,13 +161,6 @@ class DonationRequestController extends Controller
         try {
             $warehouse = $this->findDonationWarehouseByPincode($pincode, $lat, $lng);
 
-            if (!$warehouse) {
-                $defaultPincode = AppSetting::get('default_serviceable_pincode', '382330');
-                if ($defaultPincode && $defaultPincode !== Warehouse::normalizePincode($pincode)) {
-                    $warehouse = $this->findDonationWarehouseByPincode($defaultPincode, $lat, $lng);
-                }
-            }
-
             if (!$warehouse && $user->phone === '9999999999') {
                 $warehouse = Warehouse::where('status', true)
                     ->where('accepts_donation', true)
@@ -178,7 +171,7 @@ class DonationRequestController extends Controller
             if (!$warehouse) {
                 DB::rollBack();
                 return $this->validationErrorResponse([
-                    'warehouse' => ['No warehouse is currently enabled for donation bookings in your area.'],
+                    'warehouse' => [trans('service.location_not_serviceable', [], 'en') ?: 'Donation service is not available at your location yet. Please try a different address or contact support.'],
                 ]);
             }
 
