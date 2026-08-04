@@ -53,12 +53,25 @@ trait ApiResponseTrait
      */
     public function validationErrorResponse($errors, string $messageKey = 'validation.failed', int $code = 422): JsonResponse
     {
+        // Extract first field error message for better UX
+        $firstErrorMessage = trans($messageKey);
+        if (is_array($errors) || ($errors instanceof \Illuminate\Contracts\Support\Messagebag)) {
+            $errorArray = is_array($errors) ? $errors : $errors->toArray();
+            if (!empty($errorArray)) {
+                $firstField = array_key_first($errorArray);
+                $firstFieldErrors = $errorArray[$firstField];
+                if (is_array($firstFieldErrors) && !empty($firstFieldErrors)) {
+                    $firstErrorMessage = $firstFieldErrors[0];
+                }
+            }
+        }
+
         return response()->json([
             'status' => false,
             'success' => false,
             'code' => $code,
-            'message' => trans($messageKey),
-            'message_text' => trans($messageKey),
+            'message' => $firstErrorMessage,
+            'message_text' => $firstErrorMessage,
             'data' => null,
             'errors' => $errors,
         ], $code);
