@@ -39,10 +39,17 @@ class WarehouseController extends Controller
             $query->where('status', $request->status);
         }
 
+        $statsQuery = clone $query;
         $warehouses = $query->latest()->paginate(10)->withQueryString();
+        $stats = [
+            'total' => (clone $statsQuery)->count(),
+            'active' => (clone $statsQuery)->where('status', true)->count(),
+            'inactive' => (clone $statsQuery)->where('status', false)->count(),
+        ];
 
         return Inertia::render('Admin/Warehouses/Index', [
             'warehouses' => $warehouses,
+            'stats' => $stats,
             'filters' => $request->only(['search', 'state_id', 'city_id', 'status']),
             'states' => \App\Models\State::with('cities')->where('status', true)->get(),
         ]);

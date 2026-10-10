@@ -8,7 +8,7 @@ import AdminCard from '@/Components/Admin/AdminCard';
 import { AdminActionButton } from '@/Components/Admin/AdminButton';
 import { MapPin, Package, Code2, Activity, Plus, CheckCircle, XCircle } from 'lucide-react';
 
-export default function Index({ warehouses, filters, states }) {
+export default function Index({ warehouses, stats, filters, states }) {
     const { auth } = usePage().props;
     const isAdmin = auth.user.roles.some(r => r.name === 'admin');
 
@@ -65,21 +65,21 @@ export default function Index({ warehouses, filters, states }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <AdminCard
                     title="Total Warehouses"
-                    value={warehouses.total?.toLocaleString() || '0'}
+                    value={stats.total.toLocaleString()}
                     icon={<Package className="text-white" size={24} />}
                     color="green"
                     subtext="Based on current filters"
                 />
                 <AdminCard
                     title="Active Warehouses"
-                    value={warehouses.data.filter(w => w.status).length}
+                    value={stats.active.toLocaleString()}
                     icon={<CheckCircle className="text-white" size={24} />}
                     color="green"
                     subtext="Currently active"
                 />
                 <AdminCard
                     title="Inactive Warehouses"
-                    value={warehouses.data.filter(w => !w.status).length}
+                    value={stats.inactive.toLocaleString()}
                     icon={<XCircle className="text-white" size={24} />}
                     color="red"
                     subtext="Deactivated"

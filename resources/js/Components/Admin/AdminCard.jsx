@@ -23,16 +23,16 @@ export default function AdminCard({
     };
 
     return (
-        <div className={`rounded-2xl border p-6 ${colorClasses[color]}`}>
+        <div className={`rounded-2xl border p-4 sm:p-5 ${colorClasses[color]}`}>
             <div className="flex items-start justify-between">
                 <div className="flex-1">
                     <p className="text-sm font-medium opacity-80">{title}</p>
-                    <p className="text-3xl font-bold mt-2">{value}</p>
+                    <p className="text-2xl font-bold mt-1.5">{value}</p>
                     {subtext && (
-                        <p className="text-xs opacity-70 mt-2">{subtext}</p>
+                        <p className="text-xs opacity-70 mt-1.5">{subtext}</p>
                     )}
                     {trend && (
-                        <div className="flex items-center gap-1 mt-3 text-xs font-semibold">
+                        <div className="flex items-center gap-1 mt-2 text-xs font-semibold">
                             <span className={trend.direction === 'up' ? 'text-green-600' : 'text-red-600'}>
                                 {trend.direction === 'up' ? '↑' : '↓'} {trend.value}%
                             </span>
@@ -41,7 +41,7 @@ export default function AdminCard({
                     )}
                 </div>
                 {icon && (
-                    <div className={`p-3 rounded-lg ${iconColorClasses[color]}`}>
+                    <div className={`p-2.5 rounded-lg ${iconColorClasses[color]}`}>
                         {icon}
                     </div>
                 )}

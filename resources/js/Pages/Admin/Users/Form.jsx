@@ -74,7 +74,7 @@ export default function Form({ user, roles, states, warehouses = [] }) {
                     {/* Top Accent Bar */}
                     <div className="h-2 bg-gradient-to-r from-primary/40 via-primary to-primary/40"></div>
                     
-                    <div className="p-8 md:p-10 space-y-12">
+                    <div className="p-5 sm:p-6 space-y-6">
                         {/* Section: Identity */}
                         <section>
                             <div className="flex items-center gap-3 mb-8">
@@ -291,7 +291,7 @@ export default function Form({ user, roles, states, warehouses = [] }) {
                                     </div>
                                     
                                     {data.roles.includes('pickup_boy') && (
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8 pt-8 border-t border-indigo-100/50">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6 pt-6 border-t border-indigo-100/50">
                                             <div className="space-y-1.5">
                                                 <InputLabel htmlFor="daily_capacity" value="Daily Pickup Capacity" className="text-indigo-900/60 ml-1" />
                                                 <TextInput
@@ -378,7 +378,7 @@ export default function Form({ user, roles, states, warehouses = [] }) {
                     </div>
 
                     {/* Form Footer */}
-                    <div className="bg-gray-50/50 p-8 md:px-10 flex items-center justify-between border-t border-gray-100">
+                    <div className="bg-gray-50/50 p-5 sm:px-6 flex items-center justify-between border-t border-gray-100">
                         <p className="text-xs text-gray-400 font-medium italic">
                             All information is encrypted and stored securely.
                         </p>
@@ -401,7 +401,7 @@ export default function Form({ user, roles, states, warehouses = [] }) {
         </div>
 
             {isEditing && (
-                <div className="max-w-2xl mt-8 mb-12">
+                <div className="max-w-2xl mt-6 mb-8">
                     <AddressManager user={user} states={states} />
                 </div>
             )}

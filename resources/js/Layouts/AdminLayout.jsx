@@ -23,7 +23,7 @@ export default function AdminLayout({ children }) {
     const isPaymentAdmin = user.roles.some(r => r.name === 'payment_admin');
 
     return (
-        <div className="flex h-screen bg-bg-light font-roboto text-gray-800">
+        <div className="admin-panel flex h-screen bg-bg-light font-roboto text-gray-800">
             {/* Sidebar Overlay for Mobile */}
             <div
                 className={`fixed z-20 inset-0 bg-black opacity-50 transition-opacity lg:hidden ${
@@ -38,14 +38,14 @@ export default function AdminLayout({ children }) {
                     showingSidebar ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'
                 }`}
             >
-                <div className="flex items-center justify-center mt-7 mb-8 px-5">
+                <div className="flex items-center justify-center mt-5 mb-5 px-4">
                     <a href="/" className="flex items-center group">
                         <ApplicationLogo className="w-auto h-12 object-contain" />
                     </a>
                 </div>
 
-                <nav className="mt-4 pb-10 flex flex-col gap-1">
-                    <div className="px-6 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-[0.16em]">Main menu</div>
+                <nav className="mt-2 pb-6 flex flex-col gap-0.5">
+                    <div className="px-5 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-[0.16em]">Main menu</div>
                     
                     <SidebarLink href={route('dashboard')} active={route().current('dashboard')}>
                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -117,7 +117,7 @@ export default function AdminLayout({ children }) {
 
                     {isAdmin && (
                         <>
-                            <div className="px-6 py-2 mt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Product</div>
+                            <div className="px-5 py-1.5 mt-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Product</div>
 
                             <SidebarLink href={route('admin.categories.index')} active={route().current('admin.categories.*')}>
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -152,7 +152,7 @@ export default function AdminLayout({ children }) {
                     )}
 
                     {isAdmin && (
-                        <div className="px-6 py-2 mt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin</div>
+                        <div className="px-5 py-1.5 mt-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin</div>
                     )}
 
                     {isAdmin && (
@@ -238,7 +238,7 @@ export default function AdminLayout({ children }) {
                                 <span className="mx-3">App Settings</span>
                             </SidebarLink>
 
-                            <div className="px-6 py-2 mt-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Content</div>
+                            <div className="px-5 py-1.5 mt-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Content</div>
 
                             <SidebarLink href={route('admin.pages.index')} active={route().current('admin.pages.*')}>
                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -266,7 +266,7 @@ export default function AdminLayout({ children }) {
             </div>
 
             <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="flex justify-between items-center py-4 px-6 bg-white/95 border-b border-card-border/70 z-10 w-full relative shadow-[0_2px_12px_rgba(31,92,57,0.04)]">
+                <header className="flex justify-between items-center py-3 px-5 bg-white/95 border-b border-card-border/70 z-10 w-full relative shadow-[0_2px_12px_rgba(31,92,57,0.04)]">
                     <div className="flex items-center flex-1">
                         <button onClick={() => setShowingSidebar(true)} className="text-gray-500 focus:outline-none lg:hidden mr-4">
                             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -281,13 +281,13 @@ export default function AdminLayout({ children }) {
                                     <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
                                 </svg>
                             </span>
-                            <input type="text" className="w-full py-2.5 pl-10 pr-4 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-green-100 focus:outline-none transition-all" placeholder="Search data, users, or reports" />
+                            <input type="text" className="w-full py-2 pl-10 pr-4 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-green-100 focus:outline-none transition-all" placeholder="Search data, users, or reports" />
                         </div>
                     </div>
 
-                    <div className="flex items-center pl-6 ml-auto gap-4">
+                    <div className="flex items-center pl-5 ml-auto gap-3">
                         {/* Notifications */}
-                        <Link href={route('admin.logs.index')} className="flex items-center text-gray-500 hover:text-primary focus:outline-none relative transition-colors p-2.5 hover:bg-green-50 rounded-xl" title="View Activity Logs">
+                        <Link href={route('admin.logs.index')} className="flex items-center text-gray-500 hover:text-primary focus:outline-none relative transition-colors p-2 hover:bg-green-50 rounded-xl" title="View Activity Logs">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
                         </Link>
@@ -348,9 +348,9 @@ export default function AdminLayout({ children }) {
                 </header>
 
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-bg-light">
-                    <div className="w-full px-5 sm:px-7 py-7 sm:py-9 max-w-[1500px] mx-auto">
+                    <div className="w-full px-4 sm:px-5 lg:px-6 py-5 sm:py-6 max-w-[1600px] mx-auto">
                          {flash.success && (
-                            <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-5 py-4 rounded-xl relative shadow-sm animate-in slide-in-from-top" role="alert">
+                            <div className="mb-3 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl relative shadow-sm animate-in slide-in-from-top" role="alert">
                                 <div className="flex items-center gap-3">
                                     <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                                     <span className="block sm:inline font-medium">{flash.success}</span>
@@ -358,7 +358,7 @@ export default function AdminLayout({ children }) {
                             </div>
                         )}
                          {flash.error && (
-                             <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl relative shadow-sm animate-in slide-in-from-top" role="alert">
+                             <div className="mb-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl relative shadow-sm animate-in slide-in-from-top" role="alert">
                                 <div className="flex items-center gap-3">
                                     <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
                                     <span className="block sm:inline font-medium">{flash.error}</span>

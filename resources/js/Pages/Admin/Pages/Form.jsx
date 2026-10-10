@@ -38,7 +38,7 @@ export default function Form({ page = null }) {
                 </Link>
             </div>
 
-            <div className="max-w-4xl bg-white shadow-md rounded-lg overflow-hidden p-8">
+            <div className="max-w-4xl bg-white shadow-md rounded-lg overflow-hidden p-5 sm:p-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <InputLabel htmlFor="title" value="Page Title" />

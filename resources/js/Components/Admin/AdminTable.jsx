@@ -16,7 +16,7 @@ export default function AdminTable({
                             {columns.map((column) => (
                                 <th
                                     key={column.key}
-                                    className="px-8 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                                    className="px-5 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
                                     style={{
                                         width: column.width || 'auto',
                                         textAlign: column.align || 'left'
@@ -34,7 +34,7 @@ export default function AdminTable({
                                     {columns.map((column) => (
                                         <td
                                             key={column.key}
-                                            className="px-8 py-5"
+                                            className="px-5 py-3.5"
                                             style={{ textAlign: column.align || 'left' }}
                                         >
                                             {column.render
@@ -48,7 +48,7 @@ export default function AdminTable({
                             <tr>
                                 <td
                                     colSpan={columns.length}
-                                    className="text-center py-16"
+                                    className="text-center py-10"
                                 >
                                     <div>
                                         {emptyIcon}
@@ -68,15 +68,15 @@ export function AdminTablePagination({ links }) {
     if (!links || links.length <= 1) return null;
 
     return (
-        <div className="mt-8 flex justify-center">
-            <div className="flex gap-2">
+        <div className="mt-5 flex justify-center">
+            <div className="flex gap-1.5">
                 {links.map((link, i) => (
                     link.url ? (
                         <Link
                             key={i}
                             href={link.url}
                             dangerouslySetInnerHTML={{ __html: link.label }}
-                            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                            className={`px-3.5 py-1.5 rounded-lg font-medium transition-all ${
                                 link.active
                                     ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md'
                                     : 'bg-white text-gray-700 border border-gray-300 hover:border-green-500 hover:text-green-600'
@@ -86,7 +86,7 @@ export function AdminTablePagination({ links }) {
                         <span
                             key={i}
                             dangerouslySetInnerHTML={{ __html: link.label }}
-                            className="px-4 py-2 rounded-lg text-gray-300 cursor-not-allowed bg-gray-50 border border-gray-200"
+                            className="px-3.5 py-1.5 rounded-lg text-gray-300 cursor-not-allowed bg-gray-50 border border-gray-200"
                         />
                     )
                 ))}

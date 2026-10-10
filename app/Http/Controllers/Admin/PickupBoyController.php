@@ -59,7 +59,14 @@ class PickupBoyController extends Controller
             });
         }
 
+        $statsQuery = clone $query;
         $pickupBoys = $query->latest()->paginate(15)->withQueryString();
+        $stats = [
+            'total' => (clone $statsQuery)->count(),
+            'active' => (clone $statsQuery)->where('status', true)->count(),
+            'available' => (clone $statsQuery)->where('is_available', true)->count(),
+            'online' => (clone $statsQuery)->where('is_online', true)->count(),
+        ];
         $pickupBoys->getCollection()->transform(function($boy) {
             $boy->is_online = $boy->is_online;
             $boy->is_capacity_full = $boy->is_capacity_full;
@@ -68,6 +75,7 @@ class PickupBoyController extends Controller
 
         return Inertia::render('Admin/PickupBoys/Index', [
             'pickupBoys' => $pickupBoys,
+            'stats' => $stats,
             'filters' => $request->only(['search', 'state_id', 'city_id', 'status', 'is_online', 'is_available']),
             'states' => State::with(['cities' => function($q) {
                 $q->where('status', true);
