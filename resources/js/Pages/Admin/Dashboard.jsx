@@ -12,9 +12,20 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
         <AdminLayout>
             <Head title="Admin Dashboard" />
 
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-7">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+                    <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-primary/70">Overview</p>
+                        <h1 className="mt-1 text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Dashboard</h1>
+                        <p className="mt-1 text-sm text-gray-500">A quick view of your Scrapify operations.</p>
+                    </div>
+                    <Link href={route('admin.pickups.index')} className="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-white border border-card-border text-sm font-semibold text-primary hover:bg-green-50 transition-colors shadow-sm">
+                        View booking requests <span className="ml-2">→</span>
+                    </Link>
+                </div>
+
                 {isPickupBoy && (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-wrap items-center justify-between gap-3">
+                    <div className="bg-white rounded-2xl shadow-sm border border-card-border/70 p-4 flex flex-wrap items-center justify-between gap-3">
                         <div>
                             <h2 className="text-sm font-semibold text-gray-700">Pickup Performance</h2>
                             <p className="text-xs text-gray-500">Showing {periodLabel} data</p>
@@ -43,7 +54,7 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
                 
                 {/* Top Stats Grid */}
                 {/* Top Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5">
                     {[
                         ['Total Customers', stats.total_customers, 'Partner/customer records'],
                         ['Total Pickups', stats.total_pickups, 'All pickup requests'],
@@ -52,16 +63,20 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
                         ['Pending Settlement', stats.pending_settlement, 'Awaiting payout'],
                         ['Paid Settlement', stats.paid_settlement, 'Paid payouts'],
                     ].filter((card) => card[1] !== null && card[1] !== undefined).map(([title, value, caption]) => (
-                        <div key={title} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col relative justify-center">
-                            <h3 className="text-gray-500 font-medium mb-4 whitespace-nowrap">{title}</h3>
-                            <h2 className="text-3xl font-bold text-gray-800 mb-2">{value}</h2>
-                            <p className="text-sm text-gray-400">{caption}</p>
+                        <div key={title} className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(31,92,57,0.05)] border border-card-border/60 p-5 flex flex-col relative justify-center min-h-[150px] hover:-translate-y-0.5 transition-transform">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="h-10 w-10 rounded-xl bg-green-50 text-primary flex items-center justify-center text-sm font-bold">{title.charAt(0)}</div>
+                                <span className="text-xs text-gray-400">View</span>
+                            </div>
+                            <h2 className="mt-5 text-3xl font-bold text-gray-900">{value}</h2>
+                            <h3 className="mt-1 text-sm font-semibold text-primary">{title}</h3>
+                            <p className="mt-1 text-xs text-gray-400">{caption}</p>
                         </div>
                     ))}
 
                     {/* Total Users */}
                     {stats.users_count !== null && (
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col relative justify-center">
+                        <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(31,92,57,0.05)] border border-card-border/60 p-5 flex flex-col relative justify-center min-h-[150px]">
                             <div className="flex justify-between items-start mb-4">
                                 <h3 className="text-gray-500 font-medium whitespace-nowrap">Total Users</h3>
                                 <Link href={route('admin.users.index')} className="text-gray-400 hover:text-gray-600">
@@ -76,7 +91,7 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
                     )}
 
                     {/* Pending Pickups */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col relative justify-center">
+                    <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(31,92,57,0.05)] border border-card-border/60 p-5 flex flex-col relative justify-center min-h-[150px]">
                         <div className="flex justify-between items-start mb-4">
                             <h3 className="text-gray-500 font-medium whitespace-nowrap">Pending Pickups</h3>
                             <Link href={route('admin.pickups.index', { status: 'pending' })} className="text-gray-400 hover:text-gray-600">
@@ -127,7 +142,7 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
 
                 {/* Secondary Operational Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center gap-6">
+                    <div className="bg-white rounded-2xl shadow-sm border border-card-border/60 p-5 flex items-center gap-5">
                         <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl">
                             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
@@ -138,7 +153,7 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center gap-6">
+                    <div className="bg-white rounded-2xl shadow-sm border border-card-border/60 p-5 flex items-center gap-5">
                         <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl">
                             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                         </div>
@@ -149,7 +164,7 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center gap-6">
+                    <div className="bg-white rounded-2xl shadow-sm border border-card-border/60 p-5 flex items-center gap-5">
                         <div className="p-4 bg-orange-50 text-orange-600 rounded-2xl">
                             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                         </div>
@@ -162,7 +177,7 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
                 </div>
 
                 {/* Table Section */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-2 overflow-hidden">
+                <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(31,92,57,0.05)] border border-card-border/60 mt-2 overflow-hidden">
                     <div className="px-6 py-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex flex-wrap gap-2 items-center">
                             <h3 className="font-bold text-gray-800">Recent Booking Requests</h3>
@@ -175,7 +190,7 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
                     <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-[#e8f5e9] text-primary text-sm">
+                                <tr className="bg-green-50/70 text-primary text-sm">
                                     <th className="px-6 py-4 font-semibold whitespace-nowrap">Request Id</th>
                                     <th className="px-6 py-4 font-semibold">User</th>
                                     <th className="px-6 py-4 font-semibold">Scheduled Date</th>

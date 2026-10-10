@@ -214,6 +214,92 @@ class PickupController extends Controller
         return back()->with('success', 'Warehouse assigned successfully.');
     }
 
+    /**
+     * Allow an administrator to correct or advance a pickup through any
+     * supported legacy pickup status from the web admin panel.
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        abort_unless(auth()->user()->hasRole('admin'), 403);
+
+        $validated = $request->validate([
+            'status' => [
+                'required',
+                'string',
+                'in:pending,created,assigned,accepted,on_the_way,arrived,reached_location,verifying,pickup_started,picked_up,pickup_completed,completed,delivered_to_warehouse,cancelled,rescheduled,reschedule_requested',
+            ],
+            'notes' => 'nullable|string|max:1000',
+        ]);
+
+        $pickup = PickupRequest::with('assignment')->findOrFail($id);
+        $oldStatus = $pickup->status;
+        $newStatus = $validated['status'];
+
+        if ($oldStatus === $newStatus && blank($validated['notes'] ?? null)) {
+            return back()->with('error', 'The pickup is already in that status.');
+        }
+
+        DB::transaction(function () use ($pickup, $oldStatus, $newStatus, $validated) {
+            $updates = ['status' => $newStatus];
+
+            $timestampFields = [
+                'pickup_started' => 'pickup_started_at',
+                'pickup_completed' => 'pickup_completed_at',
+                'delivered_to_warehouse' => 'warehouse_received_at',
+                'completed' => 'completed_at',
+            ];
+
+            if (isset($timestampFields[$newStatus])) {
+                $field = $timestampFields[$newStatus];
+                if (!$pickup->{$field}) {
+                    $updates[$field] = now();
+                }
+            }
+
+            $pickup->update($updates);
+
+            // Keep the assignment state in sync where the assignment enum
+            // supports the same value. Pending/created are pickup-level
+            // states, so an existing assignment remains assigned.
+            $assignmentStatuses = [
+                'assigned', 'accepted', 'rejected', 'on_the_way', 'arrived',
+                'reached_location', 'verifying', 'pickup_started', 'picked_up',
+                'pickup_completed', 'completed', 'delivered_to_warehouse',
+                'cancelled', 'rescheduled', 'reschedule_requested', 'reassigned',
+            ];
+
+            $assignment = $pickup->assignment;
+            if ($assignment && in_array($newStatus, $assignmentStatuses, true)) {
+                $assignment->update([
+                    'status' => $newStatus,
+                    'completed_at' => in_array($newStatus, ['completed', 'pickup_completed'], true)
+                        ? ($assignment->completed_at ?: now())
+                        : $assignment->completed_at,
+                ]);
+            }
+
+            \App\Models\PickupStatusLog::create([
+                'pickup_request_id' => $pickup->id,
+                'status' => $newStatus,
+                'notes' => trim(sprintf(
+                    'Status changed by admin from %s to %s.%s',
+                    str_replace('_', ' ', $oldStatus),
+                    str_replace('_', ' ', $newStatus),
+                    filled($validated['notes'] ?? null) ? ' ' . $validated['notes'] : ''
+                )),
+                'created_by' => auth()->id(),
+            ]);
+        });
+
+        ActivityLogger::log('update_pickup_status', 'admin', "Pickup #{$pickup->id} status changed to {$newStatus}", [
+            'pickup_id' => $pickup->id,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+        ]);
+
+        return back()->with('success', 'Pickup status updated successfully.');
+    }
+
     public function autoAssign(Request $request, \App\Services\PickupAssignmentService $service)
     {
         $pendingPickups = PickupRequest::where('status', 'pending')

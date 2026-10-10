@@ -23,7 +23,7 @@ export default function AdminLayout({ children }) {
     const isPaymentAdmin = user.roles.some(r => r.name === 'payment_admin');
 
     return (
-        <div className="flex h-screen bg-bg-light font-roboto">
+        <div className="flex h-screen bg-bg-light font-roboto text-gray-800">
             {/* Sidebar Overlay for Mobile */}
             <div
                 className={`fixed z-20 inset-0 bg-black opacity-50 transition-opacity lg:hidden ${
@@ -34,18 +34,18 @@ export default function AdminLayout({ children }) {
 
             {/* Sidebar */}
             <div
-                className={`fixed z-30 inset-y-0 left-0 w-64 transition duration-300 transform bg-white border-r border-card-border overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 ${
+                className={`fixed z-30 inset-y-0 left-0 w-64 transition duration-300 transform bg-white border-r border-card-border/80 overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 ${
                     showingSidebar ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'
                 }`}
             >
-                <div className="flex items-center justify-center mt-6 mb-8">
+                <div className="flex items-center justify-center mt-7 mb-8 px-5">
                     <a href="/" className="flex items-center group">
-                        <ApplicationLogo className="w-auto h-12" />
+                        <ApplicationLogo className="w-auto h-12 object-contain" />
                     </a>
                 </div>
 
                 <nav className="mt-4 pb-10 flex flex-col gap-1">
-                    <div className="px-6 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Main menu</div>
+                    <div className="px-6 py-2 text-[10px] font-bold text-gray-400 uppercase tracking-[0.16em]">Main menu</div>
                     
                     <SidebarLink href={route('dashboard')} active={route().current('dashboard')}>
                          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -266,7 +266,7 @@ export default function AdminLayout({ children }) {
             </div>
 
             <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="flex justify-between items-center py-4 px-6 bg-white border-b border-card-border z-10 w-full relative shadow-sm">
+                <header className="flex justify-between items-center py-4 px-6 bg-white/95 border-b border-card-border/70 z-10 w-full relative shadow-[0_2px_12px_rgba(31,92,57,0.04)]">
                     <div className="flex items-center flex-1">
                         <button onClick={() => setShowingSidebar(true)} className="text-gray-500 focus:outline-none lg:hidden mr-4">
                             <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -281,19 +281,19 @@ export default function AdminLayout({ children }) {
                                     <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
                                 </svg>
                             </span>
-                            <input type="text" className="w-full py-2 pl-10 pr-4 text-gray-700 bg-gray-100 border border-gray-200 rounded-lg focus:bg-white focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none transition-all" placeholder="Search data, users, or reports" />
+                            <input type="text" className="w-full py-2.5 pl-10 pr-4 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-green-100 focus:outline-none transition-all" placeholder="Search data, users, or reports" />
                         </div>
                     </div>
 
                     <div className="flex items-center pl-6 ml-auto gap-4">
                         {/* Notifications */}
-                        <Link href={route('admin.logs.index')} className="flex items-center text-gray-600 hover:text-green-600 focus:outline-none relative transition-colors p-2 hover:bg-green-50 rounded-lg" title="View Activity Logs">
+                        <Link href={route('admin.logs.index')} className="flex items-center text-gray-500 hover:text-primary focus:outline-none relative transition-colors p-2.5 hover:bg-green-50 rounded-xl" title="View Activity Logs">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                             <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
                         </Link>
 
                         {/* Theme Toggle (Mock) */}
-                        <button className="flex items-center text-gray-600 hover:text-green-600 focus:outline-none bg-gray-100 rounded-lg p-2 border border-gray-200 transition-all hover:border-green-300 hover:bg-green-50">
+                        <button className="flex items-center text-gray-600 hover:text-primary focus:outline-none bg-gray-50 rounded-xl p-2 border border-gray-200 transition-all hover:border-green-300 hover:bg-green-50">
                              <div className="bg-white rounded-full p-1 shadow-sm">
                                 <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                              </div>
@@ -348,7 +348,7 @@ export default function AdminLayout({ children }) {
                 </header>
 
                 <main className="flex-1 overflow-x-hidden overflow-y-auto bg-bg-light">
-                    <div className="w-full px-6 py-8 max-w-7xl mx-auto">
+                    <div className="w-full px-5 sm:px-7 py-7 sm:py-9 max-w-[1500px] mx-auto">
                          {flash.success && (
                             <div className="mb-4 bg-green-50 border border-green-200 text-green-700 px-5 py-4 rounded-xl relative shadow-sm animate-in slide-in-from-top" role="alert">
                                 <div className="flex items-center gap-3">

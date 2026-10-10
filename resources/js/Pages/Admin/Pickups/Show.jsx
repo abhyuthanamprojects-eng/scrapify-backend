@@ -8,6 +8,24 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
     const { auth } = usePage().props;
     const canAssign = auth.user.roles.some(r => ['admin', 'warehouse'].includes(r.name));
     const isAdmin = auth.user.roles.some(r => r.name === 'admin');
+    const pickupStatuses = [
+        ['pending', 'Pending'],
+        ['created', 'Created'],
+        ['assigned', 'Assigned'],
+        ['accepted', 'Accepted'],
+        ['on_the_way', 'On the Way'],
+        ['arrived', 'Arrived'],
+        ['reached_location', 'Reached Location'],
+        ['verifying', 'Verifying'],
+        ['pickup_started', 'Pickup Started'],
+        ['picked_up', 'Picked Up'],
+        ['pickup_completed', 'Pickup Completed'],
+        ['delivered_to_warehouse', 'Delivered to Warehouse'],
+        ['completed', 'Completed'],
+        ['cancelled', 'Cancelled'],
+        ['rescheduled', 'Rescheduled'],
+        ['reschedule_requested', 'Reschedule Requested'],
+    ];
 
     const [priceLogs, setPriceLogs] = useState(null);
     const [showLogs, setShowLogs] = useState(false);
@@ -17,10 +35,15 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
     const [priceErr, setPriceErr] = useState(null);
     const [priceBusy, setPriceBusy] = useState(false);
     const [currentPickup, setCurrentPickup] = useState(pickup);
+    const { data: statusData, setData: setStatusData, post: postStatus, processing: statusProcessing, errors: statusErrors } = useForm({
+        status: pickup.status,
+        notes: '',
+    });
 
     useEffect(() => {
         setCurrentPickup(pickup);
         setNewAmount(pickup.final_amount || pickup.estimated_amount || 0);
+        setStatusData('status', pickup.status);
     }, [pickup]);
     const corporateEntries = pickup.metadata?.corporate_category_items || [];
     const corporateQuoteRequired = pickup.request_type === 'corporate' && pickup.estimated_amount === null;
@@ -124,12 +147,26 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
         });
     };
 
+    const updatePickupStatus = (e) => {
+        e.preventDefault();
+        postStatus(route('admin.pickups.update-status', pickup.id), {
+            preserveScroll: true,
+            onSuccess: () => setStatusData('notes', ''),
+        });
+    };
+
     const statusColors = {
         pending: 'bg-gray-100 text-gray-800',
         assigned: 'bg-blue-100 text-blue-800',
         accepted: 'bg-indigo-100 text-indigo-800',
         picked_up: 'bg-purple-100 text-purple-800',
         delivered_to_warehouse: 'bg-teal-100 text-teal-800',
+        on_the_way: 'bg-yellow-100 text-yellow-800',
+        arrived: 'bg-yellow-100 text-yellow-800',
+        reached_location: 'bg-yellow-100 text-yellow-800',
+        verifying: 'bg-orange-100 text-orange-800',
+        pickup_started: 'bg-orange-100 text-orange-800',
+        pickup_completed: 'bg-purple-100 text-purple-800',
         completed: 'bg-green-100 text-green-800',
         reschedule_requested: 'bg-orange-100 text-orange-800 font-bold',
         cancelled: 'bg-red-100 text-red-800',
@@ -160,6 +197,37 @@ export default function Show({ pickup, pickupBoys, warehouses }) {
                         <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${statusColors[pickup.status] || 'bg-gray-100 text-gray-800'}`}>
                             {pickup.status.replace(/_/g, ' ')}
                         </span>
+
+                        {isAdmin && (
+                            <form onSubmit={updatePickupStatus} className="flex items-center gap-2 ml-2">
+                                <select
+                                    value={statusData.status}
+                                    onChange={e => setStatusData('status', e.target.value)}
+                                    className="px-2.5 py-1.5 rounded-lg border-gray-200 text-xs font-semibold text-gray-700 focus:border-primary focus:ring-primary"
+                                    disabled={statusProcessing}
+                                    aria-label="Update pickup status"
+                                >
+                                    {pickupStatuses.map(([value, label]) => (
+                                        <option key={value} value={value}>{label}</option>
+                                    ))}
+                                </select>
+                                <input
+                                    value={statusData.notes}
+                                    onChange={e => setStatusData('notes', e.target.value)}
+                                    placeholder="Optional note"
+                                    className="w-32 px-2.5 py-1.5 rounded-lg border-gray-200 text-xs focus:border-primary focus:ring-primary"
+                                    disabled={statusProcessing}
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={statusProcessing || statusData.status === pickup.status}
+                                    className="px-3 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-opacity-90 disabled:opacity-50"
+                                >
+                                    {statusProcessing ? 'Saving...' : 'Update'}
+                                </button>
+                            </form>
+                        )}
+                        {statusErrors.status && <p className="text-xs text-red-600">{statusErrors.status}</p>}
                         
                         {pickup.status === 'picked_up' && (
                             <button onClick={receiveAtWarehouse} disabled={processing} className="px-4 py-1.5 bg-teal-600 text-white text-xs font-bold rounded-full hover:bg-teal-700 transition-colors disabled:opacity-50 shadow-sm">
