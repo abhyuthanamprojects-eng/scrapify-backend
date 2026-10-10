@@ -2,6 +2,15 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link } from '@inertiajs/react';
 
 export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
+    const metricIcons = {
+        'Total Customers': '/images/admin/3d/customers.png',
+        'Total Pickups': '/images/admin/3d/pickups.png',
+        'Assigned Pickups': '/images/admin/3d/pickups.png',
+        'Delivered to Warehouse': '/images/admin/3d/warehouse.png',
+        'Pending Settlement': '/images/admin/3d/settlement.png',
+        'Paid Settlement': '/images/admin/3d/settlement.png',
+    };
+
     const periodLabel = selectedPeriod === 'today'
         ? 'Today'
         : selectedPeriod === 'overall'
@@ -65,7 +74,9 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
                     ].filter((card) => card[1] !== null && card[1] !== undefined).map(([title, value, caption]) => (
                         <div key={title} className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(31,92,57,0.05)] border border-card-border/60 p-5 flex flex-col relative justify-center min-h-[150px] hover:-translate-y-0.5 transition-transform">
                             <div className="flex items-start justify-between gap-3">
-                                <div className="h-10 w-10 rounded-xl bg-green-50 text-primary flex items-center justify-center text-sm font-bold">{title.charAt(0)}</div>
+                                <div className="h-14 w-14 rounded-2xl bg-green-50/70 flex items-center justify-center overflow-hidden">
+                                    <img src={metricIcons[title]} alt="" className="h-16 w-16 object-contain drop-shadow-sm" />
+                                </div>
                                 <span className="text-xs text-gray-400">View</span>
                             </div>
                             <h2 className="mt-5 text-3xl font-bold text-gray-900">{value}</h2>
@@ -78,7 +89,10 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
                     {stats.users_count !== null && (
                         <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(31,92,57,0.05)] border border-card-border/60 p-5 flex flex-col relative justify-center min-h-[150px]">
                             <div className="flex justify-between items-start mb-4">
-                                <h3 className="text-gray-500 font-medium whitespace-nowrap">Total Users</h3>
+                                <div className="flex items-center gap-2">
+                                    <img src="/images/admin/3d/customers.png" alt="" className="h-9 w-9 object-contain" />
+                                    <h3 className="text-gray-500 font-medium whitespace-nowrap">Total Users</h3>
+                                </div>
                                 <Link href={route('admin.users.index')} className="text-gray-400 hover:text-gray-600">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                                 </Link>
@@ -93,7 +107,10 @@ export default function Dashboard({ stats, selectedPeriod, isPickupBoy }) {
                     {/* Pending Pickups */}
                     <div className="bg-white rounded-2xl shadow-[0_8px_24px_rgba(31,92,57,0.05)] border border-card-border/60 p-5 flex flex-col relative justify-center min-h-[150px]">
                         <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-gray-500 font-medium whitespace-nowrap">Pending Pickups</h3>
+                            <div className="flex items-center gap-2">
+                                <img src="/images/admin/3d/pickups.png" alt="" className="h-9 w-9 object-contain" />
+                                <h3 className="text-gray-500 font-medium whitespace-nowrap">Pending Pickups</h3>
+                            </div>
                             <Link href={route('admin.pickups.index', { status: 'pending' })} className="text-gray-400 hover:text-gray-600">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
                             </Link>
