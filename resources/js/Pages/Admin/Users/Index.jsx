@@ -5,7 +5,7 @@ import AdminFilters, { AdminFilterInput, AdminFilterSelect } from '@/Components/
 import AdminTable, { AdminTablePagination } from '@/Components/Admin/AdminTable';
 import AdminCard from '@/Components/Admin/AdminCard';
 import { AdminActionButton } from '@/Components/Admin/AdminButton';
-import { Users, Plus, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, CheckCircle, XCircle } from 'lucide-react';
 
 export default function Index({ users, filters, roles, states }) {
     const { auth } = usePage().props;
@@ -56,7 +56,7 @@ export default function Index({ users, filters, roles, states }) {
             <AdminHeader
                 title="User Management"
                 subtitle="Manage all users and their roles in the system"
-                icon={<Users className="text-green-600" size={24} />}
+                icon={<img src="/images/admin/3d/customers.png" alt="" className="h-10 w-10 object-contain" />}
                 action={{
                     label: 'Add New User',
                     href: route('admin.users.create'),
@@ -69,7 +69,7 @@ export default function Index({ users, filters, roles, states }) {
                 <AdminCard
                     title="Total Users"
                     value={users.total?.toLocaleString() || '0'}
-                    icon={<Users className="text-white" size={24} />}
+                    icon={<img src="/images/admin/3d/customers.png" alt="" className="h-12 w-12 object-contain" />}
                     color="green"
                     subtext="Based on current filters"
                 />

@@ -1,8 +1,11 @@
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import TextInput from '@/Components/TextInput';
+import AdminHeader from '@/Components/Admin/AdminHeader';
+import AdminFilters, { AdminFilterInput, AdminFilterSelect } from '@/Components/Admin/AdminFilters';
+import AdminCard from '@/Components/Admin/AdminCard';
+import { ClipboardList, CheckCircle, Clock3 } from 'lucide-react';
 
-export default function Index({ entries, filters }) {
+export default function Index({ entries, filters, stats, states }) {
     const handleSearch = (e) => {
         router.get(route('admin.waitlist.index'), {
             ...filters,
@@ -49,42 +52,74 @@ export default function Index({ entries, filters }) {
         <AdminLayout>
             <Head title="Waitlist" />
 
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-semibold text-gray-800">Waitlist Management</h1>
-                <a 
-                    href={route('admin.waitlist.export')} 
-                    className="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 transition ease-in-out duration-150"
-                >
-                    Export CSV
-                </a>
+            <AdminHeader
+                title="Waitlist Management"
+                subtitle="Track requests from customers outside active service areas"
+                icon={<img src="/images/admin/3d/waitlist.png" alt="" className="h-10 w-10 object-contain" />}
+                action={{
+                    label: 'Export CSV',
+                    onClick: () => { window.location.href = route('admin.waitlist.export'); },
+                    icon: <ClipboardList size={18} />,
+                }}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <AdminCard
+                    title="Total Waitlist"
+                    value={stats.total.toLocaleString()}
+                    icon={<img src="/images/admin/3d/waitlist.png" alt="" className="h-12 w-12 object-contain" />}
+                    color="green"
+                    subtext="All submitted requests"
+                />
+                <AdminCard
+                    title="New Requests"
+                    value={stats.new.toLocaleString()}
+                    icon={<Clock3 className="text-white" size={24} />}
+                    color="blue"
+                    subtext="Awaiting first contact"
+                />
+                <AdminCard
+                    title="Closed Requests"
+                    value={stats.closed.toLocaleString()}
+                    icon={<CheckCircle className="text-white" size={24} />}
+                    color="purple"
+                    subtext="Completed waitlist records"
+                />
             </div>
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden p-6 mb-6">
-                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                    <div className="w-full md:w-1/3">
-                        <TextInput
-                            placeholder="Search by name, city or phone..."
-                            className="w-full"
-                            value={filters.search || ''}
-                            onChange={handleSearch}
-                        />
-                    </div>
-                    <div className="w-full md:w-auto flex gap-4">
-                        <select
-                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                            value={filters.status || ''}
-                            onChange={(e) => handleFilterChange('status', e.target.value)}
-                        >
-                            <option value="">All Status</option>
-                            <option value="new">New</option>
-                            <option value="contacted">Contacted</option>
-                            <option value="planned">Planned</option>
-                            <option value="launched">Launched</option>
-                            <option value="closed">Closed</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+            <AdminFilters>
+                <AdminFilterInput
+                    label="Search"
+                    placeholder="Search by name, city or phone..."
+                    value={filters.search || ''}
+                    onChange={handleSearch}
+                    colSpan="md:col-span-5"
+                />
+                <AdminFilterSelect
+                    label="Status"
+                    options={[
+                        { value: '', label: 'All Status' },
+                        { value: 'new', label: 'New' },
+                        { value: 'contacted', label: 'Contacted' },
+                        { value: 'planned', label: 'Planned' },
+                        { value: 'launched', label: 'Launched' },
+                        { value: 'closed', label: 'Closed' },
+                    ]}
+                    value={filters.status || ''}
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                    colSpan="md:col-span-2"
+                />
+                <AdminFilterSelect
+                    label="State"
+                    options={[
+                        { value: '', label: 'All States' },
+                        ...states.map((state) => ({ value: state, label: state })),
+                    ]}
+                    value={filters.state || ''}
+                    onChange={(e) => handleFilterChange('state', e.target.value)}
+                    colSpan="md:col-span-2"
+                />
+            </AdminFilters>
 
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">

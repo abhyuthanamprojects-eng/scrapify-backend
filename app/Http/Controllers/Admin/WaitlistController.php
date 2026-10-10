@@ -11,6 +11,7 @@ class WaitlistController extends Controller
 {
     public function index(Request $request)
     {
+        $allEntries = Waitlist::query();
         $query = Waitlist::query();
 
         if ($request->search) {
@@ -25,11 +26,33 @@ class WaitlistController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->state) {
+            $query->where('state', $request->state);
+        }
+
         $entries = $query->latest()->paginate(15)->withQueryString();
+
+        $stats = [
+            'total' => (clone $allEntries)->count(),
+            'new' => (clone $allEntries)->where('status', 'new')->count(),
+            'contacted' => (clone $allEntries)->where('status', 'contacted')->count(),
+            'planned' => (clone $allEntries)->where('status', 'planned')->count(),
+            'launched' => (clone $allEntries)->where('status', 'launched')->count(),
+            'closed' => (clone $allEntries)->where('status', 'closed')->count(),
+        ];
+
+        $states = Waitlist::query()
+            ->whereNotNull('state')
+            ->where('state', '!=', '')
+            ->distinct()
+            ->orderBy('state')
+            ->pluck('state');
 
         return Inertia::render('Admin/Waitlist/Index', [
             'entries' => $entries,
-            'filters' => $request->only(['search', 'status']),
+            'filters' => $request->only(['search', 'status', 'state']),
+            'stats' => $stats,
+            'states' => $states,
         ]);
     }
 
