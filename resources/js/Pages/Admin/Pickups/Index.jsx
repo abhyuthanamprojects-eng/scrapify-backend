@@ -1,6 +1,8 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import TextInput from '@/Components/TextInput';
+import AdminCard from '@/Components/Admin/AdminCard';
+import { CheckCircle2, Clock3, PackageSearch, Recycle } from 'lucide-react';
 
 const statusColors = {
     pending: 'bg-gray-100 text-gray-800',
@@ -28,7 +30,7 @@ const formatDate = (dateString) => {
     });
 };
 
-export default function Index({ pickups, filters }) {
+export default function Index({ pickups, filters, summary }) {
     const handleFilter = (key, value) => {
         router.get(route('admin.pickups.index'), {
             ...filters,
@@ -58,11 +60,23 @@ export default function Index({ pickups, filters }) {
                 </button>
              </div>
 
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <AdminCard title="Total Requests" value={summary.all.toLocaleString()} icon={<PackageSearch className="text-white" size={24} />} color="blue" subtext="All accessible requests" />
+                <AdminCard title="Pending Scrap" value={summary.pending_scrap.toLocaleString()} icon={<Recycle className="text-white" size={24} />} color="orange" subtext="Scrap awaiting assignment" />
+                <AdminCard title="Pending All" value={summary.pending.toLocaleString()} icon={<Clock3 className="text-white" size={24} />} color="purple" subtext="Awaiting action" />
+                <AdminCard title="Completed" value={summary.completed.toLocaleString()} icon={<CheckCircle2 className="text-white" size={24} />} color="green" subtext="Successfully completed" />
+             </div>
+
              <div className="bg-white shadow-sm border border-gray-100 rounded-xl overflow-hidden mb-6">
                 <div className="p-6">
                     <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
                         <div className="flex flex-wrap gap-2">
-                             {['all', 'scrap', 'donation', 'corporate'].map((t) => (
+                             {[
+                                ['all', 'All', summary.all],
+                                ['scrap', 'Scrap', summary.scrap],
+                                ['donation', 'Donation', summary.donation],
+                                ['corporate', 'Corporate', summary.corporate],
+                             ].map(([t, label, count]) => (
                                 <button
                                     key={t}
                                     onClick={() => handleFilter('request_type', t === 'all' ? '' : t)}
@@ -72,7 +86,12 @@ export default function Index({ pickups, filters }) {
                                         : 'text-gray-500 hover:bg-gray-50'
                                     }`}
                                 >
-                                    {t}
+                                    {label}
+                                    <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${
+                                        (filters.request_type === t || (!filters.request_type && t === 'all'))
+                                            ? 'bg-white/20 text-white'
+                                            : 'bg-gray-100 text-gray-500'
+                                    }`}>{count}</span>
                                 </button>
                             ))}
                         </div>

@@ -23,7 +23,7 @@ export default function Show({ message }) {
                 </Link>
             </div>
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden p-8 max-w-4xl">
+            <div className="bg-white shadow-md rounded-lg overflow-hidden p-5 sm:p-6 max-w-4xl">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 border-b pb-8">
                     <div>
                         <h3 className="text-sm font-medium text-gray-400 uppercase tracking-wider mb-2">Sender Information</h3>

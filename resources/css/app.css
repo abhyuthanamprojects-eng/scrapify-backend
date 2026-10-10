@@ -3,5 +3,81 @@
 @source "../js";
 @source "../views";
 
+/* Keep legacy admin screens compact while they migrate to the shared components. */
+@layer components {
+    .admin-panel main .p-6 {
+        padding: 1.25rem;
+    }
+
+    .admin-panel main .p-8 {
+        padding: 1.5rem;
+    }
+
+    .admin-panel main .px-6 {
+        padding-inline: 1.25rem;
+    }
+
+    .admin-panel main .px-8 {
+        padding-inline: 1.5rem;
+    }
+
+    .admin-panel main .py-5 {
+        padding-block: 0.875rem;
+    }
+
+    .admin-panel main .py-6 {
+        padding-block: 1.25rem;
+    }
+
+    .admin-panel main .py-8 {
+        padding-block: 1.5rem;
+    }
+
+    .admin-panel main .py-12 {
+        padding-block: 2rem;
+    }
+
+    .admin-panel main .gap-6 {
+        gap: 1rem;
+    }
+
+    .admin-panel main .gap-7,
+    .admin-panel main .gap-8 {
+        gap: 1.25rem;
+    }
+
+    .admin-panel main .mb-6 {
+        margin-bottom: 1rem;
+    }
+
+    .admin-panel main .mb-8 {
+        margin-bottom: 1.25rem;
+    }
+
+    .admin-panel main .mt-6 {
+        margin-top: 1rem;
+    }
+
+    .admin-panel main .mt-8 {
+        margin-top: 1.25rem;
+    }
+
+    .admin-panel main .space-y-6 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 1rem;
+    }
+
+    .admin-panel main .space-y-8 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 1.25rem;
+    }
+
+    .admin-panel main .space-y-12 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 1.5rem;
+    }
+
+    .admin-panel main .pb-20 {
+        padding-bottom: 3rem;
+    }
+}
+
 
 

@@ -2,8 +2,11 @@ import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import TextInput from '@/Components/TextInput';
 import PrimaryButton from '@/Components/PrimaryButton';
+import AdminHeader from '@/Components/Admin/AdminHeader';
+import AdminCard from '@/Components/Admin/AdminCard';
+import { Activity, CheckCircle, MapPin, Users } from 'lucide-react';
 
-export default function Index({ pickupBoys, filters, states }) {
+export default function Index({ pickupBoys, stats, filters, states }) {
     
     const handleSearch = (e) => {
         router.get(route('admin.pickup-boys.index'), {
@@ -42,8 +45,17 @@ export default function Index({ pickupBoys, filters, states }) {
         <AdminLayout>
             <Head title="Pickup Boys Management" />
 
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-semibold text-gray-800">Pickup Boys (Agents)</h1>
+            <AdminHeader
+                title="Pickup Boys"
+                subtitle="Monitor agents, availability, and daily pickup capacity"
+                icon={<img src="/images/admin/3d/pickups.png" alt="" className="h-10 w-10 object-contain" />}
+            />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <AdminCard title="Total Agents" value={stats.total.toLocaleString()} icon={<Users className="text-white" size={24} />} color="blue" subtext="Matching current filters" />
+                <AdminCard title="Active Accounts" value={stats.active.toLocaleString()} icon={<CheckCircle className="text-white" size={24} />} color="green" subtext="Ready accounts" />
+                <AdminCard title="Available Now" value={stats.available.toLocaleString()} icon={<MapPin className="text-white" size={24} />} color="purple" subtext="Available for assignments" />
+                <AdminCard title="Online Now" value={stats.online.toLocaleString()} icon={<Activity className="text-white" size={24} />} color="orange" subtext="Currently online" />
             </div>
 
             <div className="bg-white shadow-md rounded-lg overflow-hidden p-6 mb-6">

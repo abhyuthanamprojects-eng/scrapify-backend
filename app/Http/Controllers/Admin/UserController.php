@@ -44,10 +44,18 @@ class UserController extends Controller
             });
         }
 
+        $statsQuery = clone $query;
         $users = $query->latest()->paginate(10)->withQueryString();
+
+        $stats = [
+            'total' => (clone $statsQuery)->count(),
+            'active' => (clone $statsQuery)->where('status', true)->count(),
+            'inactive' => (clone $statsQuery)->where('status', false)->count(),
+        ];
 
         return Inertia::render('Admin/Users/Index', [
             'users' => $users,
+            'stats' => $stats,
             'filters' => $request->only(['search', 'role', 'status', 'state_id', 'city_id']),
             'roles' => Role::all()->pluck('name'),
             'states' => \App\Models\State::with(['cities' => function($q) {

@@ -47,6 +47,18 @@ class PickupController extends Controller
             });
         }
 
+        $summaryQuery = clone $query;
+
+        $summary = [
+            'all' => (clone $summaryQuery)->count(),
+            'scrap' => (clone $summaryQuery)->where('request_type', 'scrap')->count(),
+            'donation' => (clone $summaryQuery)->where('request_type', 'donation')->count(),
+            'corporate' => (clone $summaryQuery)->where('request_type', 'corporate')->count(),
+            'pending' => (clone $summaryQuery)->where('status', 'pending')->count(),
+            'pending_scrap' => (clone $summaryQuery)->where('request_type', 'scrap')->where('status', 'pending')->count(),
+            'completed' => (clone $summaryQuery)->where('status', 'completed')->count(),
+        ];
+
         if ($request->status) {
             $query->where('status', $request->status);
         }
@@ -88,6 +100,7 @@ class PickupController extends Controller
 
         return Inertia::render('Admin/Pickups/Index', [
             'pickups' => $query->latest()->paginate(10)->withQueryString(),
+            'summary' => $summary,
             'filters' => $request->only(['search', 'status', 'request_type', 'from_date', 'to_date', 'pickup_boy_id']),
             'pickupBoys' => $user->hasRole('admin|channel_partner') ? User::role('pickup_boy')->when($user->hasRole('channel_partner'), fn($q) => $q->where('channel_partner_id', $user->channel_partner_id))->get(['id', 'name']) : [],
         ]);

@@ -45,15 +45,15 @@ export default function PaymentsIndex({ payments, filters }) {
         <AdminLayout>
             <Head title="Payments Management" />
 
-            <div className="py-6">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+            <div className="py-4">
+                <div className="w-full">
                     <h1 className="text-2xl font-semibold text-gray-900">Payments Management</h1>
                     <p className="mt-2 text-sm text-gray-600">
                         View all items received at the warehouse and track their payment statuses.
                     </p>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-6">
+                <div className="w-full mt-4">
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                         {/* Filters */}
                         <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-4 justify-between items-center bg-gray-50/50">

@@ -7,7 +7,7 @@ import AdminCard from '@/Components/Admin/AdminCard';
 import { AdminActionButton } from '@/Components/Admin/AdminButton';
 import { Plus, CheckCircle, XCircle } from 'lucide-react';
 
-export default function Index({ users, filters, roles, states }) {
+export default function Index({ users, stats, filters, roles, states }) {
     const { auth } = usePage().props;
 
     const handleDelete = (id) => {
@@ -68,21 +68,21 @@ export default function Index({ users, filters, roles, states }) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <AdminCard
                     title="Total Users"
-                    value={users.total?.toLocaleString() || '0'}
+                    value={stats.total.toLocaleString()}
                     icon={<img src="/images/admin/3d/customers.png" alt="" className="h-12 w-12 object-contain" />}
                     color="green"
                     subtext="Based on current filters"
                 />
                 <AdminCard
                     title="Active Users"
-                    value={users.data.filter(u => u.status).length}
+                    value={stats.active.toLocaleString()}
                     icon={<CheckCircle className="text-white" size={24} />}
                     color="green"
                     subtext="Currently active"
                 />
                 <AdminCard
                     title="Inactive Users"
-                    value={users.data.filter(u => !u.status).length}
+                    value={stats.inactive.toLocaleString()}
                     icon={<XCircle className="text-white" size={24} />}
                     color="red"
                     subtext="Deactivated"
