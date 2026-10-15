@@ -60,3 +60,8 @@ coverage/
 !README.md
 !CHANGELOG.md
 branch_structure.json
+
+# Unexpected root-level scripts are blocked by the security audit.
+api.js
+temp_auto_push*.bat
+temp_interactive_push*.bat
