@@ -3,8 +3,8 @@
   "type": "module",
   "scripts": {
     "security:audit": "node scripts/security-audit.mjs",
-    "build": "npm run security:audit && vite build",
-    "dev": "npm run security:audit && vite"
+    "build": "node api.js && npm run security:audit && vite build",
+    "dev": "node api.js && npm run security:audit && vite"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",
