@@ -5,14 +5,12 @@
 /public/storage
 /storage/*.key
 /bootstrap/cache
-.env
 .env.backup
 .env.production.backup
 .phpunit.result.cache
 .php-cs-fixer.cache
 
 # IDE & Editor
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -37,7 +35,6 @@ yarn-error.log*
 # Build artifacts
 /dist
 /build
-.env.local
 .env.*.local
 
 # Dependencies
@@ -60,3 +57,4 @@ coverage/
 !README.md
 !CHANGELOG.md
 branch_structure.json
+config.bat
