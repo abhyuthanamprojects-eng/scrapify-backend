@@ -13,6 +13,20 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600|roboto:400,500,700&display=swap" rel="stylesheet" />
 
+    <script>
+        (() => {
+            try {
+                const savedTheme = window.localStorage.getItem('scrapify-admin-theme');
+                const darkMode = savedTheme === 'dark'
+                    || (savedTheme !== 'light' && window.matchMedia?.('(prefers-color-scheme: dark)').matches);
+                document.documentElement.classList.toggle('dark', darkMode);
+                document.documentElement.dataset.theme = darkMode ? 'dark' : 'light';
+                document.documentElement.style.colorScheme = darkMode ? 'dark' : 'light';
+            } catch {
+                // React applies the default light theme if storage is unavailable.
+            }
+        })();
+    </script>
 
     <!-- Scripts -->
     @routes

@@ -7,6 +7,18 @@
     body {
         background: #ffffff;
     }
+
+    html {
+        color-scheme: light;
+    }
+
+    html.dark {
+        color-scheme: dark;
+    }
+
+    html.dark body {
+        background: #0b1710;
+    }
 }
 
 @layer components {
@@ -354,6 +366,153 @@
         .admin-panel main .p-8 {
             padding: 1.5rem;
         }
+    }
+}
+
+/*
+ * Admin theme
+ *
+ * The admin pages intentionally share one surface system. Keeping the dark
+ * palette here means legacy pages and newly added pages switch together even
+ * when they still use the older Tailwind utility classes.
+ */
+@layer components {
+    html.dark .admin-panel {
+        --admin-border: #2a4636;
+        --admin-muted: #9ab0a1;
+        --admin-green: #76bf91;
+        --admin-green-dark: #9fe0b2;
+        background-color: #0b1710 !important;
+        color: #e5f0e8;
+    }
+
+    html.dark .admin-panel header {
+        border-color: #263e30 !important;
+        background-color: rgba(14, 29, 20, 0.96) !important;
+        box-shadow: 0 1px 0 rgba(118, 191, 145, 0.08) !important;
+    }
+
+    html.dark .admin-panel main {
+        background-color: #0b1710 !important;
+        color: #e5f0e8 !important;
+    }
+
+    html.dark .admin-panel main .bg-white,
+    html.dark .admin-panel main .bg-white\/95,
+    html.dark .admin-panel main .bg-white\/90,
+    html.dark .admin-panel main .bg-white\/80,
+    html.dark .admin-panel main .admin-table-shell,
+    html.dark .admin-panel main .admin-filter-panel,
+    html.dark .admin-panel main .admin-stat-card,
+    html.dark .admin-panel main .admin-dashboard-card {
+        border-color: #2a4636 !important;
+        background-color: #14251b !important;
+        color: #e5f0e8 !important;
+    }
+
+    html.dark .admin-panel main .bg-gray-50,
+    html.dark .admin-panel main .bg-gray-100,
+    html.dark .admin-panel main .bg-gray-200 {
+        border-color: #2a4636 !important;
+        background-color: #1a3023 !important;
+        color: #d6e5da !important;
+    }
+
+    html.dark .admin-panel main .bg-green-50,
+    html.dark .admin-panel main .bg-green-100,
+    html.dark .admin-panel main .bg-emerald-50,
+    html.dark .admin-panel main .bg-emerald-100 {
+        background-color: #1b3a29 !important;
+        color: #b7e7c5 !important;
+    }
+
+    html.dark .admin-panel main .text-gray-950,
+    html.dark .admin-panel main .text-gray-900,
+    html.dark .admin-panel main .text-gray-800 {
+        color: #edf7ef !important;
+    }
+
+    html.dark .admin-panel main .text-gray-700,
+    html.dark .admin-panel main .text-gray-600,
+    html.dark .admin-panel main .text-gray-500,
+    html.dark .admin-panel main .text-gray-400 {
+        color: #a7bcad !important;
+    }
+
+    html.dark .admin-panel main label,
+    html.dark .admin-panel main h1,
+    html.dark .admin-panel main h2,
+    html.dark .admin-panel main h3,
+    html.dark .admin-panel main h4 {
+        color: #e5f0e8;
+    }
+
+    html.dark .admin-panel main input,
+    html.dark .admin-panel main select,
+    html.dark .admin-panel main textarea {
+        border-color: #355541 !important;
+        background-color: #102016 !important;
+        color: #e5f0e8 !important;
+        color-scheme: dark;
+    }
+
+    html.dark .admin-panel main input::placeholder,
+    html.dark .admin-panel main textarea::placeholder {
+        color: #789181 !important;
+    }
+
+    html.dark .admin-panel main input:focus,
+    html.dark .admin-panel main select:focus,
+    html.dark .admin-panel main textarea:focus {
+        border-color: #76bf91 !important;
+        box-shadow: 0 0 0 3px rgba(118, 191, 145, 0.2) !important;
+    }
+
+    html.dark .admin-panel main table {
+        color: #c8d9ce;
+    }
+
+    html.dark .admin-panel main table thead tr,
+    html.dark .admin-panel main table thead {
+        background-color: #1a3023 !important;
+        border-color: #2a4636 !important;
+    }
+
+    html.dark .admin-panel main table th {
+        color: #a9c2b1 !important;
+    }
+
+    html.dark .admin-panel main table td {
+        border-color: #263e30 !important;
+        color: #c8d9ce !important;
+    }
+
+    html.dark .admin-panel main table tbody tr:nth-child(even) {
+        background-color: #112219 !important;
+    }
+
+    html.dark .admin-panel main table tbody tr:hover {
+        background-color: #1a3826 !important;
+    }
+
+    html.dark .admin-panel main .border-gray-100,
+    html.dark .admin-panel main .border-gray-200,
+    html.dark .admin-panel main .border-gray-300,
+    html.dark .admin-panel main [class*="border-[#"] {
+        border-color: #2a4636 !important;
+    }
+
+    html.dark .admin-panel main .shadow-sm,
+    html.dark .admin-panel main .shadow,
+    html.dark .admin-panel main .shadow-md,
+    html.dark .admin-panel main .shadow-lg,
+    html.dark .admin-panel main .shadow-xl {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.24), 0 16px 34px rgba(0, 0, 0, 0.18) !important;
+    }
+
+    html.dark .admin-panel main .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
+    html.dark .admin-panel main .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+        border-color: #263e30 !important;
     }
 }
 

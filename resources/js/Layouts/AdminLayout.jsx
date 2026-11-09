@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import {
     Activity, Banknote, Bell, CalendarDays, ChevronDown, ClipboardCheck,
@@ -23,11 +23,28 @@ function NavigationSection({ label, items, onNavigate }) {
     return <div className="mb-5"><p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#789184]">{label}</p><div className="space-y-1">{items.map((item) => <NavigationItem key={item.label} {...item} onClick={onNavigate} />)}</div></div>;
 }
 
+const THEME_STORAGE_KEY = 'scrapify-admin-theme';
+
+function getInitialDarkMode() {
+    if (typeof window === 'undefined') return false;
+
+    try {
+        const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+        if (savedTheme === 'dark') return true;
+        if (savedTheme === 'light') return false;
+    } catch {
+        // Fall back to the system preference when storage is unavailable.
+    }
+
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+}
+
 export default function AdminLayout({ children }) {
     const { auth, flash = {} } = usePage().props;
     const user = auth.user;
     const [showingSidebar, setShowingSidebar] = useState(false);
     const [showingUserMenu, setShowingUserMenu] = useState(false);
+    const [darkMode, setDarkMode] = useState(getInitialDarkMode);
     const hasRole = (role) => user.roles?.some((item) => item.name === role);
     const isAdmin = hasRole('admin');
     const isWarehouse = hasRole('warehouse');
@@ -36,6 +53,19 @@ export default function AdminLayout({ children }) {
     const isPaymentAdmin = hasRole('payment_admin');
     const initials = user.name?.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase() || 'AU';
     const closeSidebar = () => setShowingSidebar(false);
+
+    useEffect(() => {
+        const root = document.documentElement;
+        root.classList.toggle('dark', darkMode);
+        root.dataset.theme = darkMode ? 'dark' : 'light';
+        root.style.colorScheme = darkMode ? 'dark' : 'light';
+
+        try {
+            window.localStorage.setItem(THEME_STORAGE_KEY, darkMode ? 'dark' : 'light');
+        } catch {
+            // The theme still works for the current session if storage is blocked.
+        }
+    }, [darkMode]);
 
     const navigation = [
         { label: 'Main menu', items: [
@@ -98,7 +128,16 @@ export default function AdminLayout({ children }) {
                     <div className="relative flex min-w-0 flex-1"><Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#93a198]" size={18} /><input type="search" placeholder="Search data, users, or reports" className="h-11 w-full max-w-[620px] rounded-xl border border-[#e1eae4] bg-[#f7faf8] pl-11 pr-4 text-sm text-[#26372d] outline-none transition placeholder:text-[#9aa9a0] focus:border-primary focus:bg-white focus:ring-4 focus:ring-green-100" /></div>
                     <div className="flex items-center gap-2 sm:gap-3">
                         <Link href={route('admin.logs.index')} className="relative rounded-xl p-2.5 text-[#62746a] transition hover:bg-green-50 hover:text-primary" title="Activity logs"><Bell size={19} /><span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#e26d65] ring-2 ring-white" /></Link>
-                        <button type="button" className="hidden items-center gap-1 rounded-xl border border-[#e1eae4] bg-[#f7faf8] p-2.5 text-[#62746a] sm:flex" title="Theme options"><Sun size={16} /><Moon size={15} className="text-[#a4b0a9]" /></button>
+                        <button
+                            type="button"
+                            onClick={() => setDarkMode((value) => !value)}
+                            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                            aria-pressed={darkMode}
+                            className="hidden items-center gap-1 rounded-xl border border-[#e1eae4] bg-[#f7faf8] p-2.5 text-[#62746a] transition hover:border-primary hover:text-primary dark:border-[#31503e] dark:bg-[#16291f] dark:text-[#c3d8ca] dark:hover:border-[#76bf91] dark:hover:text-[#9fe0b2] sm:flex"
+                            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                        >
+                            {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+                        </button>
                         <div className="relative border-l border-[#e5ece7] pl-2 sm:pl-3"><button type="button" onClick={() => setShowingUserMenu((value) => !value)} className="flex items-center gap-2 rounded-xl px-1.5 py-1.5 transition hover:bg-green-50"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e6f1ea] text-xs font-bold text-primary">{initials}</span><span className="hidden text-left sm:block"><span className="block max-w-[120px] truncate text-xs font-semibold text-[#26372d]">{user.name}</span><span className="block text-[10px] text-[#87978d]">{isAdmin ? 'Super Admin' : 'Admin user'}</span></span><ChevronDown size={15} className="hidden text-[#8b9a91] sm:block" /></button>
                             {showingUserMenu && <><button type="button" aria-label="Close user menu" className="fixed inset-0 z-40 h-full w-full cursor-default" onClick={() => setShowingUserMenu(false)} /><div className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-xl border border-[#e1eae4] bg-white p-1.5 shadow-xl"><Link href={route('profile.edit')} onClick={() => setShowingUserMenu(false)} className="block rounded-lg px-3 py-2 text-sm font-medium text-[#425449] hover:bg-green-50 hover:text-primary">Profile</Link><Link href={route('logout')} method="post" as="button" onClick={() => setShowingUserMenu(false)} className="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-[#425449] hover:bg-red-50 hover:text-red-700">Log out</Link></div></>}
                         </div>
