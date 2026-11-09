@@ -392,6 +392,29 @@
         box-shadow: 0 1px 0 rgba(118, 191, 145, 0.08) !important;
     }
 
+    html.dark .admin-panel header input,
+    html.dark .admin-panel header [class~="bg-[#f7faf8]"] {
+        border-color: #355541 !important;
+        background-color: #102016 !important;
+        color: #e5f0e8 !important;
+    }
+
+    html.dark .admin-panel header input::placeholder {
+        color: #789181 !important;
+    }
+
+    html.dark .admin-panel header [class~="text-[#26372d]"],
+    html.dark .admin-panel header [class~="text-[#425449]"] {
+        color: #e5f0e8 !important;
+    }
+
+    html.dark .admin-panel header [class~="text-[#87978d]"],
+    html.dark .admin-panel header [class~="text-[#8b9a91]"],
+    html.dark .admin-panel header [class~="text-[#62746a]"],
+    html.dark .admin-panel header [class~="text-[#93a198]"] {
+        color: #a7bcad !important;
+    }
+
     html.dark .admin-panel main {
         background-color: #0b1710 !important;
         color: #e5f0e8 !important;
@@ -513,6 +536,76 @@
     html.dark .admin-panel main .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
     html.dark .admin-panel main .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
         border-color: #263e30 !important;
+    }
+
+    /* Legacy admin pages still contain a few arbitrary light-mode tokens. */
+    html.dark .admin-panel main [class~="text-[#15241b]"],
+    html.dark .admin-panel main [class~="text-[#1d2b24]"],
+    html.dark .admin-panel main [class~="text-[#1b2a21]"],
+    html.dark .admin-panel main [class~="text-[#25362b]"],
+    html.dark .admin-panel main [class~="text-[#26372d]"],
+    html.dark .admin-panel main [class~="text-[#2f4035]"],
+    html.dark .admin-panel main [class~="text-[#384b3e]"] {
+        color: #e5f0e8 !important;
+    }
+
+    html.dark .admin-panel main [class~="text-[#718078]"],
+    html.dark .admin-panel main [class~="text-[#76857c]"],
+    html.dark .admin-panel main [class~="text-[#7d8b83]"],
+    html.dark .admin-panel main [class~="text-[#88968e]"],
+    html.dark .admin-panel main [class~="text-[#8b9991]"],
+    html.dark .admin-panel main [class~="text-[#94a39a]"],
+    html.dark .admin-panel main [class~="text-[#9aa79f]"],
+    html.dark .admin-panel main [class~="text-[#66756c]"],
+    html.dark .admin-panel main [class~="text-[#607168]"] {
+        color: #a7bcad !important;
+    }
+
+    html.dark .admin-panel main .text-primary,
+    html.dark .admin-panel main [class~="text-[#2f7d4f]"] {
+        color: #9fe0b2 !important;
+    }
+
+    html.dark .admin-panel main [class~="text-[#46667b]"] {
+        color: #a7d2ef !important;
+    }
+
+    html.dark .admin-panel main [class~="text-[#bc6a1b]"],
+    html.dark .admin-panel main [class~="text-[#b66b24]"] {
+        color: #f1ba74 !important;
+    }
+
+    html.dark .admin-panel main [class~="text-[#68786f]"] {
+        color: #b2c4b8 !important;
+    }
+
+    html.dark .admin-panel main [class~="bg-[#eaf3ed]"],
+    html.dark .admin-panel main [class~="bg-[#eaf6ee]"] {
+        background-color: #1b3a29 !important;
+    }
+
+    html.dark .admin-panel main [class~="bg-[#fbfdfb]"],
+    html.dark .admin-panel main [class~="bg-[#f7fbf8]"],
+    html.dark .admin-panel main [class~="bg-[#f7fafc]"],
+    html.dark .admin-panel main [class~="bg-[#f8fbf9]"] {
+        background-color: #1a3023 !important;
+    }
+
+    html.dark .admin-panel main [class~="bg-[#edf3f7]"] {
+        background-color: #1d2e3a !important;
+    }
+
+    html.dark .admin-panel main [class~="bg-[#fff5e8]"],
+    html.dark .admin-panel main [class~="bg-[#fffaf3]"] {
+        background-color: #3b2a18 !important;
+    }
+
+    html.dark .admin-panel main [class~="bg-white/80"] {
+        background-color: #203629 !important;
+    }
+
+    html.dark .admin-panel main [class~="ring-[#d8e9dd]"] {
+        --tw-ring-color: #355541 !important;
     }
 }
 
