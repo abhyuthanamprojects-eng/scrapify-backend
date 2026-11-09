@@ -5,12 +5,14 @@
 /public/storage
 /storage/*.key
 /bootstrap/cache
+.env
 .env.backup
 .env.production.backup
 .phpunit.result.cache
 .php-cs-fixer.cache
 
 # IDE & Editor
+.vscode/
 .idea/
 *.swp
 *.swo
@@ -35,6 +37,7 @@ yarn-error.log*
 # Build artifacts
 /dist
 /build
+.env.local
 .env.*.local
 
 # Dependencies
@@ -52,9 +55,13 @@ coverage/
 *.temp
 .cache/
 
+# Never add known payload/dropper filenames to the worktree
+/init
+/api.js
+/config.bat
+
 # Documentation (Implementation Guides)
 *.md
 !README.md
 !CHANGELOG.md
 branch_structure.json
-config.bat

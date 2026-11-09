@@ -11,7 +11,9 @@ const expectedBuildScripts = {
 };
 const forbiddenLifecycleScripts = new Set(['preinstall', 'install', 'postinstall', 'prepare', 'prepublish', 'prepublishOnly']);
 const suspiciousNames = new Set([
+    'init',
     ['api', '.js'].join(''),
+    ['config', '.bat'].join(''),
     ['temp_auto_push', '.bat'].join(''),
     ['temp_interactive_push', '.bat'].join(''),
 ]);
