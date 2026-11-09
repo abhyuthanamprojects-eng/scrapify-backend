@@ -13,13 +13,13 @@ export default function AdminButton({
     ...props
 }) {
     const variantClasses = {
-        primary: 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-md hover:shadow-lg',
-        secondary: 'bg-white text-gray-700 border border-gray-300 hover:border-green-500 hover:text-green-600',
-        outline: 'border-2 border-green-600 text-green-600 hover:bg-green-50',
-        danger: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-md hover:shadow-lg',
-        success: 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-md hover:shadow-lg',
-        warning: 'bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white shadow-md hover:shadow-lg',
-        ghost: 'text-gray-700 hover:bg-gray-100',
+        primary: 'bg-primary hover:bg-primary-hover text-white shadow-sm',
+        secondary: 'bg-white text-gray-700 border border-gray-200 hover:border-primary hover:text-primary',
+        outline: 'border border-primary text-primary hover:bg-green-50',
+        danger: 'bg-red-600 hover:bg-red-700 text-white shadow-sm',
+        success: 'bg-primary hover:bg-primary-hover text-white shadow-sm',
+        warning: 'bg-primary hover:bg-primary-hover text-white shadow-sm',
+        ghost: 'text-gray-700 hover:bg-green-50 hover:text-primary',
     };
 
     const sizeClasses = {
@@ -73,11 +73,11 @@ export function AdminActionButton({
     disabled = false,
 }) {
     const actionStyles = {
-        view: 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200',
+        view: 'bg-green-50 text-primary hover:bg-green-100 border border-green-100',
         edit: 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200',
         delete: 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200',
-        copy: 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200',
-        download: 'bg-orange-50 text-orange-700 hover:bg-orange-100 border border-orange-200',
+        copy: 'bg-gray-50 text-gray-700 hover:bg-green-50 hover:text-primary border border-gray-200',
+        download: 'bg-green-50 text-primary hover:bg-green-100 border border-green-100',
     };
 
     const baseClass = `inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full transition-all duration-150 ${

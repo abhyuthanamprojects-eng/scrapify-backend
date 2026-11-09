@@ -60,8 +60,30 @@ class WaitlistController extends Controller
             return $this->validationErrorResponse($validator->errors());
         }
 
-        $waitlist = Waitlist::create($validator->validated());
+        $data = $validator->validated();
+        $existing = Waitlist::query()
+            ->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower(trim($data['name']))])
+            ->where('phone', $data['phone'])
+            ->whereRaw('LOWER(TRIM(city)) = ?', [mb_strtolower(trim($data['city']))])
+            ->where(function ($query) use ($data) {
+                if (blank($data['email'] ?? null)) {
+                    $query->whereNull('email')->orWhere('email', '');
+                } else {
+                    $query->whereRaw('LOWER(TRIM(email)) = ?', [mb_strtolower(trim($data['email']))]);
+                }
+            })
+            ->where(function ($query) use ($data) {
+                if (blank($data['state'] ?? null)) {
+                    $query->whereNull('state')->orWhere('state', '');
+                } else {
+                    $query->whereRaw('LOWER(TRIM(state)) = ?', [mb_strtolower(trim($data['state']))]);
+                }
+            })
+            ->latest('id')
+            ->first();
 
-        return $this->successResponse('waitlist.submitted_success', $waitlist, 201);
+        $waitlist = $existing ?: Waitlist::create($data);
+
+        return $this->successResponse('waitlist.submitted_success', $waitlist, $existing ? 200 : 201);
     }
 }

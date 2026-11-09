@@ -1,5 +1,7 @@
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminHeader from '@/Components/Admin/AdminHeader';
 import { Head, useForm, router } from '@inertiajs/react';
+import { Settings2 } from 'lucide-react';
 import { useState } from 'react';
 
 export default function Index({ settings, homeBanners = [] }) {
@@ -20,7 +22,7 @@ export default function Index({ settings, homeBanners = [] }) {
     };
 
     const Toggle = ({ name, label, description }) => (
-        <div className="flex items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+        <div className="flex min-h-[76px] items-center justify-between gap-4 rounded-xl border border-[#dfe9e2] bg-[#f7fbf8] p-4 transition hover:border-[#bad5c2] hover:bg-white">
             <div className="flex-1">
                 <label className="text-sm font-semibold text-gray-800 block">{label}</label>
                 <p className="text-xs text-gray-500">{description}</p>
@@ -28,16 +30,18 @@ export default function Index({ settings, homeBanners = [] }) {
             <button
                 type="button"
                 onClick={() => setData(name, !data[name])}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none ${data[name] ? 'bg-primary' : 'bg-gray-300'}`}
+                aria-pressed={Boolean(data[name])}
+                aria-label={`${label}: ${data[name] ? 'enabled' : 'disabled'}`}
+                className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-green-100 ${data[name] ? 'bg-primary' : 'bg-gray-300'}`}
             >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${data[name] ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${data[name] ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
         </div>
     );
 
     const Input = ({ name, label, type = "text", description, ...props }) => (
         <div className="flex flex-col gap-1">
-            <label className="text-sm font-semibold text-gray-800">{label}</label>
+            <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#526359]">{label}</label>
             <input
                 {...props}
                 type={type}
@@ -50,7 +54,7 @@ export default function Index({ settings, homeBanners = [] }) {
                     }
                     props.onKeyDown?.(e);
                 }}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-1 focus:ring-primary focus:outline-none text-sm"
+                className="h-11 w-full rounded-xl border-[#dfe9e2] bg-[#f8fbf9] px-4 text-sm text-[#26372d] focus:border-primary focus:bg-white focus:ring-4 focus:ring-green-100 focus:outline-none"
             />
             {description && <p className="text-xs text-gray-500">{description}</p>}
             {errors[name] && <p className="text-xs text-red-500 mt-1">{errors[name]}</p>}
@@ -61,61 +65,56 @@ export default function Index({ settings, homeBanners = [] }) {
         <AdminLayout>
             <Head title="App Settings" />
 
-            <div className="max-w-4xl mx-auto">
-                <div className="flex justify-between items-center mb-6">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-800">App Settings</h1>
-                        <p className="text-gray-500 text-sm">Manage mobile app feature flags and global configurations.</p>
-                    </div>
-                </div>
+            <div className="mx-auto w-full max-w-[1180px]">
+                <AdminHeader title="App Settings" subtitle="Manage mobile app feature flags and global configurations." icon={<Settings2 size={21} />} />
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div className="flex border-b border-gray-100">
+                <div className="overflow-hidden rounded-2xl border border-[#dfe9e2] bg-white shadow-[0_8px_24px_rgba(31,92,57,0.05)]">
+                    <div className="flex min-w-max overflow-x-auto border-b border-[#e5eee7] bg-[#fbfdfb] px-2 sm:px-3">
                         <button
                             type="button"
                             onClick={() => setActiveTab('features')}
-                            className={`px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'features' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`border-b-2 px-4 py-4 text-sm font-bold transition-colors sm:px-5 ${activeTab === 'features' ? 'border-primary text-primary' : 'border-transparent text-[#7a8980] hover:text-[#2f4035]'}`}
                         >
                             Feature Toggles
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('config')}
-                            className={`px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'config' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`border-b-2 px-4 py-4 text-sm font-bold transition-colors sm:px-5 ${activeTab === 'config' ? 'border-primary text-primary' : 'border-transparent text-[#7a8980] hover:text-[#2f4035]'}`}
                         >
                             General Config
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('intervals')}
-                            className={`px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'intervals' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`border-b-2 px-4 py-4 text-sm font-bold transition-colors sm:px-5 ${activeTab === 'intervals' ? 'border-primary text-primary' : 'border-transparent text-[#7a8980] hover:text-[#2f4035]'}`}
                         >
                             Performance & Intervals
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('msg91')}
-                            className={`px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'msg91' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`border-b-2 px-4 py-4 text-sm font-bold transition-colors sm:px-5 ${activeTab === 'msg91' ? 'border-primary text-primary' : 'border-transparent text-[#7a8980] hover:text-[#2f4035]'}`}
                         >
                             SMS Gateway
                         </button>
                         <button
                             type="button"
                             onClick={() => setActiveTab('banners')}
-                            className={`px-6 py-4 text-sm font-medium transition-colors ${activeTab === 'banners' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`border-b-2 px-4 py-4 text-sm font-bold transition-colors sm:px-5 ${activeTab === 'banners' ? 'border-primary text-primary' : 'border-transparent text-[#7a8980] hover:text-[#2f4035]'}`}
                         >
                             Home Banners
                         </button>
                     </div>
 
                     {activeTab === 'banners' && (
-                        <div className="p-6">
+                        <div className="p-5 sm:p-7">
                             <HomeBanners banners={homeBanners} />
                         </div>
                     )}
 
                     {activeTab !== 'banners' && (
-                    <form onSubmit={submit} className="p-6">
+                    <form onSubmit={submit} className="p-5 sm:p-7">
                         {activeTab === 'features' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <Toggle name="donation_enabled" label="Donations" description="Enable scrap donation feature in app" />
@@ -129,7 +128,7 @@ export default function Index({ settings, homeBanners = [] }) {
                         )}
 
                         {activeTab === 'config' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <Input name="app_version" label="App Version" description="Current stable version (e.g. 1.0.5)" />
                                 <Input name="customer_support_number" label="Customer Support Number" />
                                 <Input name="support_phone" label="Secondary Support Phone" />
@@ -161,7 +160,7 @@ export default function Index({ settings, homeBanners = [] }) {
                         )}
 
                         {activeTab === 'intervals' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <Input name="pickup_boy_location_interval_seconds" label="Location Update Interval" type="number" description="Seconds between pickup boy GPS updates" />
                                 <Input name="tracking_refresh_interval_seconds" label="Tracking Refresh Interval" type="number" description="Seconds for customer tracking map refresh" />
                                 <Input name="dashboard_refresh_interval_seconds" label="Dashboard Sync Interval" type="number" description="Seconds for data re-sync on mobile home" />
@@ -170,7 +169,7 @@ export default function Index({ settings, homeBanners = [] }) {
                         )}
 
                         {activeTab === 'msg91' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div className="md:col-span-2 p-4 bg-blue-50 border border-blue-100 rounded-lg">
                                     <p className="text-xs text-blue-700 font-medium">
                                         Configure your MSG91 (SMS Gateway) credentials here. These settings will override any values set in the environment files.
@@ -200,7 +199,7 @@ export default function Index({ settings, homeBanners = [] }) {
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="px-6 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-opacity-90 transition-all disabled:opacity-50"
+                                className="rounded-xl bg-primary px-5 py-3 text-sm font-bold text-white shadow-[0_6px_14px_rgba(47,125,79,0.18)] transition-all hover:bg-primary-hover disabled:opacity-50"
                             >
                                 {processing ? 'Saving...' : 'Save Changes'}
                             </button>

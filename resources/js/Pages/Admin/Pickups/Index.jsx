@@ -1,8 +1,7 @@
 import AdminLayout from '@/Layouts/AdminLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import TextInput from '@/Components/TextInput';
 import AdminCard from '@/Components/Admin/AdminCard';
-import { CheckCircle2, Clock3, PackageSearch, Recycle } from 'lucide-react';
+import AdminFilters, { AdminFilterInput, AdminFilterSelect } from '@/Components/Admin/AdminFilters';
 
 const statusColors = {
     pending: 'bg-gray-100 text-gray-800',
@@ -61,15 +60,15 @@ export default function Index({ pickups, filters, summary }) {
              </div>
 
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <AdminCard title="Total Requests" value={summary.all.toLocaleString()} icon={<PackageSearch className="text-white" size={24} />} color="blue" subtext="All accessible requests" />
-                <AdminCard title="Pending Scrap" value={summary.pending_scrap.toLocaleString()} icon={<Recycle className="text-white" size={24} />} color="orange" subtext="Scrap awaiting assignment" />
-                <AdminCard title="Pending All" value={summary.pending.toLocaleString()} icon={<Clock3 className="text-white" size={24} />} color="purple" subtext="Awaiting action" />
-                <AdminCard title="Completed" value={summary.completed.toLocaleString()} icon={<CheckCircle2 className="text-white" size={24} />} color="green" subtext="Successfully completed" />
+                <AdminCard title="Total Requests" value={summary.all.toLocaleString()} icon={<img src="/images/admin/3d/pickups.png" alt="" className="h-9 w-9 object-contain" />} color="blue" subtext="All accessible requests" />
+                <AdminCard title="Pending Scrap" value={summary.pending_scrap.toLocaleString()} icon={<img src="/images/admin/3d/waitlist.png" alt="" className="h-9 w-9 object-contain" />} color="orange" subtext="Scrap awaiting assignment" />
+                <AdminCard title="Pending All" value={summary.pending.toLocaleString()} icon={<img src="/images/admin/3d/pickup-agent.png" alt="" className="h-9 w-9 object-contain" />} color="purple" subtext="Awaiting action" />
+                <AdminCard title="Completed" value={summary.completed.toLocaleString()} icon={<img src="/images/admin/3d/active-users.png" alt="" className="h-9 w-9 object-contain" />} color="green" subtext="Successfully completed" />
              </div>
 
-             <div className="bg-white shadow-sm border border-gray-100 rounded-xl overflow-hidden mb-6">
-                <div className="p-6">
-                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
+             <div className="admin-table-shell overflow-hidden">
+                <div className="p-4 sm:p-5">
+                    <div className="mb-5 flex flex-col gap-4">
                         <div className="flex flex-wrap gap-2">
                              {[
                                 ['all', 'All', summary.all],
@@ -96,32 +95,33 @@ export default function Index({ pickups, filters, summary }) {
                             ))}
                         </div>
 
-                        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                            <TextInput
+                        <AdminFilters>
+                            <AdminFilterInput
+                                colSpan="md:col-span-4"
                                 placeholder="Search ID, name..."
-                                className="w-full md:w-64"
                                 value={filters.search || ''}
                                 onChange={e => handleFilter('search', e.target.value)}
                             />
-                            <select
-                                className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm w-full md:w-48"
+                            <AdminFilterSelect
+                                colSpan="md:col-span-2"
                                 value={filters.status || ''}
                                 onChange={e => handleFilter('status', e.target.value)}
-                            >
-                                <option value="">All Statuses</option>
-                                <option value="pending">Pending</option>
-                                <option value="assigned">Assigned</option>
-                                <option value="accepted">Accepted</option>
-                                <option value="on_the_way">On the Way</option>
-                                <option value="arrived">Arrived</option>
-                                <option value="verifying">Verifying</option>
-                                <option value="picked_up">Picked Up</option>
-                                <option value="completed">Completed</option>
-                                <option value="reschedule_requested">Reschedule Requested</option>
-                                <option value="rescheduled">Rescheduled</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
-                        </div>
+                                options={[
+                                    { value: '', label: 'All Statuses' },
+                                    { value: 'pending', label: 'Pending' },
+                                    { value: 'assigned', label: 'Assigned' },
+                                    { value: 'accepted', label: 'Accepted' },
+                                    { value: 'on_the_way', label: 'On the Way' },
+                                    { value: 'arrived', label: 'Arrived' },
+                                    { value: 'verifying', label: 'Verifying' },
+                                    { value: 'picked_up', label: 'Picked Up' },
+                                    { value: 'completed', label: 'Completed' },
+                                    { value: 'reschedule_requested', label: 'Reschedule Requested' },
+                                    { value: 'rescheduled', label: 'Rescheduled' },
+                                    { value: 'cancelled', label: 'Cancelled' },
+                                ]}
+                            />
+                        </AdminFilters>
                     </div>
 
                     <div className="overflow-x-auto">

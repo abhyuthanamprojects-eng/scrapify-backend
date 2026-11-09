@@ -3,7 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 import AdminHeader from '@/Components/Admin/AdminHeader';
 import AdminFilters, { AdminFilterInput, AdminFilterSelect } from '@/Components/Admin/AdminFilters';
 import AdminCard from '@/Components/Admin/AdminCard';
-import { ClipboardList, CheckCircle, Clock3 } from 'lucide-react';
+import { ClipboardList } from 'lucide-react';
 
 export default function Index({ entries, filters, stats, states }) {
     const handleSearch = (e) => {
@@ -74,14 +74,14 @@ export default function Index({ entries, filters, stats, states }) {
                 <AdminCard
                     title="New Requests"
                     value={stats.new.toLocaleString()}
-                    icon={<Clock3 className="text-white" size={24} />}
+                    icon={<img src="/images/admin/3d/pickups.png" alt="" className="h-12 w-12 object-contain" />}
                     color="blue"
                     subtext="Awaiting first contact"
                 />
                 <AdminCard
                     title="Closed Requests"
                     value={stats.closed.toLocaleString()}
-                    icon={<CheckCircle className="text-white" size={24} />}
+                    icon={<img src="/images/admin/3d/settlement.png" alt="" className="h-12 w-12 object-contain" />}
                     color="purple"
                     subtext="Completed waitlist records"
                 />
@@ -121,7 +121,7 @@ export default function Index({ entries, filters, stats, states }) {
                 />
             </AdminFilters>
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="admin-table-shell overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>

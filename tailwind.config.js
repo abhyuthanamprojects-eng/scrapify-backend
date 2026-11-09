@@ -23,12 +23,12 @@ export default {
             colors: {
                 primary: '#2F7D4F',
                 'primary-hover': '#1F5C39',
-                'bg-light': '#FBF8F1',
+                'bg-light': '#F7FAF8',
                 'sidebar-bg': '#ffffff',
                 'card-bg': '#ffffff',
                 'scrapify-green': '#2F7D4F',
                 'scrapify-blue': '#1E3A5F',
-                'card-border': '#D6DDD2',
+                'card-border': '#DDE8E0',
                 green: {
                     50: '#E8F1EB',
                     100: '#D7EADD',

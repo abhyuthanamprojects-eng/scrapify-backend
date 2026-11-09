@@ -1,8 +1,7 @@
 import React from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import PrimaryButton from '@/Components/PrimaryButton';
-import DangerButton from '@/Components/DangerButton';
+import AdminHeader from '@/Components/Admin/AdminHeader';
 
 export default function Index({ types }) {
     const { flash } = usePage().props;
@@ -17,14 +16,14 @@ export default function Index({ types }) {
         <AdminLayout>
             <Head title="Category Types" />
 
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-semibold text-gray-800">Category Types</h1>
-                <Link href={route('admin.category-types.create')}>
-                    <PrimaryButton>Add Category Type</PrimaryButton>
-                </Link>
-            </div>
+            <AdminHeader
+                title="Category Types"
+                subtitle="Organize categories into reusable operational groups"
+                icon={<img src="/images/admin/3d/customers.png" alt="" className="h-10 w-10 object-contain" />}
+                action={{ label: 'Add Category Type', href: route('admin.category-types.create'), icon: '+' }}
+            />
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="admin-table-shell overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>

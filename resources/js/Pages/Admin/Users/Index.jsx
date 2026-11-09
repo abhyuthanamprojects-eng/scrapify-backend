@@ -5,7 +5,7 @@ import AdminFilters, { AdminFilterInput, AdminFilterSelect } from '@/Components/
 import AdminTable, { AdminTablePagination } from '@/Components/Admin/AdminTable';
 import AdminCard from '@/Components/Admin/AdminCard';
 import { AdminActionButton } from '@/Components/Admin/AdminButton';
-import { Plus, CheckCircle, XCircle } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 export default function Index({ users, stats, filters, roles, states }) {
     const { auth } = usePage().props;
@@ -65,7 +65,7 @@ export default function Index({ users, stats, filters, roles, states }) {
             />
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
                 <AdminCard
                     title="Total Users"
                     value={stats.total.toLocaleString()}
@@ -76,14 +76,14 @@ export default function Index({ users, stats, filters, roles, states }) {
                 <AdminCard
                     title="Active Users"
                     value={stats.active.toLocaleString()}
-                    icon={<CheckCircle className="text-white" size={24} />}
+                    icon={<img src="/images/admin/3d/active-users.png" alt="" className="h-12 w-12 object-contain mix-blend-multiply" />}
                     color="green"
                     subtext="Currently active"
                 />
                 <AdminCard
                     title="Inactive Users"
                     value={stats.inactive.toLocaleString()}
-                    icon={<XCircle className="text-white" size={24} />}
+                    icon={<img src="/images/admin/3d/inactive-users.png" alt="" className="h-12 w-12 object-contain mix-blend-multiply" />}
                     color="red"
                     subtext="Deactivated"
                 />
@@ -95,7 +95,7 @@ export default function Index({ users, stats, filters, roles, states }) {
                     placeholder="Search by name, email or phone..."
                     value={filters.search || ''}
                     onChange={handleSearch}
-                    colSpan="md:col-span-5"
+                    colSpan="md:col-span-4"
                 />
                 <AdminFilterSelect
                     label="Status"

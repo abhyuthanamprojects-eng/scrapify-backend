@@ -25,7 +25,7 @@ class WaitlistManagementController extends Controller
     )]
     public function index(Request $request)
     {
-        $query = Waitlist::query();
+        $query = Waitlist::withoutDuplicates();
 
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -98,7 +98,7 @@ class WaitlistManagementController extends Controller
     )]
     public function export(Request $request)
     {
-        $query = Waitlist::query();
+        $query = Waitlist::withoutDuplicates();
 
         if ($request->has('status')) {
             $query->where('status', $request->status);

@@ -3,8 +3,280 @@
 @source "../js";
 @source "../views";
 
-/* Keep legacy admin screens compact while they migrate to the shared components. */
+@layer base {
+    body {
+        background: #ffffff;
+    }
+}
+
 @layer components {
+    .admin-panel {
+        --admin-border: #dde8e0;
+        --admin-muted: #66756c;
+        --admin-green: #2f7d4f;
+        --admin-green-dark: #1f5c39;
+    }
+
+    .admin-panel main {
+        color: #1f2a24;
+    }
+
+    .admin-panel main .bg-gray-50 {
+        background-color: #f3f8f4 !important;
+    }
+
+    .admin-panel main .bg-gray-100 {
+        background-color: #f5f8f6 !important;
+    }
+
+    .admin-panel main .bg-gray-200 {
+        background-color: #e7efe9 !important;
+    }
+
+    .admin-panel main .border-gray-100,
+    .admin-panel main .border-gray-200,
+    .admin-panel main .border-gray-300 {
+        border-color: #dfe9e2 !important;
+    }
+
+    .admin-panel main .text-gray-900 {
+        color: #1d2b24 !important;
+    }
+
+    .admin-panel main .text-gray-800 {
+        color: #2f4035 !important;
+    }
+
+    .admin-panel main .text-gray-700 {
+        color: #4e6255 !important;
+    }
+
+    .admin-panel main .text-gray-600,
+    .admin-panel main .text-gray-500 {
+        color: #718078 !important;
+    }
+
+    .admin-panel main .rounded-lg {
+        border-radius: 0.75rem;
+    }
+
+    .admin-panel main .shadow-sm,
+    .admin-panel main .shadow {
+        box-shadow: 0 2px 5px rgba(27, 52, 38, 0.04), 0 12px 28px rgba(31, 92, 57, 0.08) !important;
+    }
+
+    /* White cards need a visible edge and depth on the white canvas. */
+    .admin-panel main .bg-white.shadow-sm,
+    .admin-panel main .bg-white.shadow,
+    .admin-panel main .bg-white.shadow-md,
+    .admin-panel main .bg-white.shadow-lg,
+    .admin-panel main .bg-white.shadow-xl {
+        border-color: #d8e5dc !important;
+        box-shadow: 0 2px 5px rgba(27, 52, 38, 0.045), 0 12px 30px rgba(31, 92, 57, 0.085) !important;
+    }
+
+    .admin-panel main table tbody tr {
+        transition: background-color 160ms ease;
+    }
+
+    .admin-panel main table tbody tr:hover {
+        background-color: #f1f8f3 !important;
+    }
+
+    .admin-panel main table tbody tr:nth-child(even) {
+        background-color: #fbfdfb;
+    }
+
+    /* One table language across every admin list and detail screen. */
+    .admin-panel main table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        color: #4d5e53;
+    }
+
+    .admin-panel main table thead tr {
+        background-color: #f3f8f4;
+        border-bottom: 1px solid #e5eee7;
+    }
+
+    .admin-panel main table th {
+        padding: 0.875rem 1.25rem !important;
+        color: #718078 !important;
+        font-size: 0.625rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.13em !important;
+        line-height: 1.2;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .admin-panel main table td {
+        padding: 0.95rem 1.25rem !important;
+        border-bottom: 1px solid #edf2ee;
+        vertical-align: middle;
+    }
+
+    .admin-panel main table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .admin-table-shell {
+        border: 1px solid #d5e3d9;
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: 0 2px 5px rgba(27, 52, 38, 0.045), 0 14px 32px rgba(31, 92, 57, 0.09);
+    }
+
+    .admin-filter-panel {
+        border-color: #d5e3d9 !important;
+        box-shadow: 0 2px 5px rgba(27, 52, 38, 0.04), 0 10px 25px rgba(31, 92, 57, 0.075) !important;
+    }
+
+    .admin-stat-card,
+    .admin-dashboard-card {
+        border-color: #d5e3d9 !important;
+        box-shadow: 0 2px 5px rgba(27, 52, 38, 0.045), 0 12px 28px rgba(31, 92, 57, 0.085) !important;
+    }
+
+    .admin-stat-card:hover,
+    .admin-dashboard-card:hover {
+        box-shadow: 0 5px 10px rgba(27, 52, 38, 0.055), 0 18px 36px rgba(31, 92, 57, 0.14) !important;
+    }
+
+    .admin-panel main table td:first-child,
+    .admin-panel main table th:first-child {
+        padding-left: 1.25rem !important;
+    }
+
+    .admin-panel main table td:last-child,
+    .admin-panel main table th:last-child {
+        padding-right: 1.25rem !important;
+    }
+
+    .admin-panel main label {
+        color: #526359;
+        font-weight: 600;
+    }
+
+    .admin-panel main .bg-gradient-to-r,
+    .admin-panel main .bg-gradient-to-br,
+    .admin-panel main .bg-gradient-to-b,
+    .admin-panel main .bg-gradient-to-t {
+        background-image: none !important;
+    }
+
+    /* Legacy screens should use the same neutral/green surface palette. */
+    .admin-panel main .bg-blue-50,
+    .admin-panel main .bg-indigo-50,
+    .admin-panel main .bg-purple-50,
+    .admin-panel main .bg-orange-50,
+    .admin-panel main .bg-yellow-50,
+    .admin-panel main .bg-amber-50,
+    .admin-panel main .bg-blue-100,
+    .admin-panel main .bg-indigo-100,
+    .admin-panel main .bg-purple-100,
+    .admin-panel main .bg-orange-100,
+    .admin-panel main .bg-yellow-100,
+    .admin-panel main .bg-amber-100 {
+        background-color: #f0f5f2 !important;
+    }
+
+    .admin-panel main .bg-blue-500,
+    .admin-panel main .bg-indigo-500,
+    .admin-panel main .bg-purple-500,
+    .admin-panel main .bg-orange-500,
+    .admin-panel main .bg-yellow-500,
+    .admin-panel main .bg-amber-500,
+    .admin-panel main .bg-blue-600,
+    .admin-panel main .bg-indigo-600,
+    .admin-panel main .bg-purple-600,
+    .admin-panel main .bg-orange-600,
+    .admin-panel main .bg-yellow-600,
+    .admin-panel main .bg-amber-600 {
+        background-color: var(--admin-green) !important;
+    }
+
+    .admin-panel main .bg-teal-50,
+    .admin-panel main .bg-teal-100,
+    .admin-panel main .bg-cyan-50,
+    .admin-panel main .bg-cyan-100 {
+        background-color: #edf5ef !important;
+    }
+
+    .admin-panel main .text-teal-600,
+    .admin-panel main .text-teal-700,
+    .admin-panel main .text-cyan-600,
+    .admin-panel main .text-cyan-700 {
+        color: var(--admin-green) !important;
+    }
+
+    .admin-panel main .border-blue-200,
+    .admin-panel main .border-indigo-200,
+    .admin-panel main .border-purple-200,
+    .admin-panel main .border-orange-200,
+    .admin-panel main .border-yellow-200,
+    .admin-panel main .border-amber-200,
+    .admin-panel main .border-blue-300,
+    .admin-panel main .border-indigo-300,
+    .admin-panel main .border-purple-300,
+    .admin-panel main .border-orange-300,
+    .admin-panel main .border-yellow-300,
+    .admin-panel main .border-amber-300 {
+        border-color: var(--admin-border) !important;
+    }
+
+    .admin-panel main .text-blue-500,
+    .admin-panel main .text-indigo-500,
+    .admin-panel main .text-purple-500,
+    .admin-panel main .text-orange-500,
+    .admin-panel main .text-yellow-500,
+    .admin-panel main .text-amber-500,
+    .admin-panel main .text-blue-600,
+    .admin-panel main .text-indigo-600,
+    .admin-panel main .text-purple-600,
+    .admin-panel main .text-orange-600,
+    .admin-panel main .text-yellow-600,
+    .admin-panel main .text-amber-600,
+    .admin-panel main .text-blue-700,
+    .admin-panel main .text-indigo-700,
+    .admin-panel main .text-purple-700,
+    .admin-panel main .text-orange-700,
+    .admin-panel main .text-yellow-700,
+    .admin-panel main .text-amber-700,
+    .admin-panel main .text-blue-800,
+    .admin-panel main .text-indigo-800,
+    .admin-panel main .text-purple-800,
+    .admin-panel main .text-orange-800,
+    .admin-panel main .text-yellow-800,
+    .admin-panel main .text-amber-800 {
+        color: var(--admin-green) !important;
+    }
+
+    .admin-panel main .shadow-md,
+    .admin-panel main .shadow-lg,
+    .admin-panel main .shadow-xl {
+        box-shadow: 0 4px 16px rgba(31, 92, 57, 0.06) !important;
+    }
+
+    .admin-panel main input,
+    .admin-panel main select,
+    .admin-panel main textarea {
+        border-color: #d9e3dc;
+    }
+
+    .admin-panel main input:focus,
+    .admin-panel main select:focus,
+    .admin-panel main textarea:focus {
+        border-color: var(--admin-green);
+        box-shadow: 0 0 0 3px rgba(47, 125, 79, 0.12);
+        outline: none;
+    }
+
+    .admin-panel main table th {
+        letter-spacing: 0.06em;
+    }
+
     .admin-panel main .p-6 {
         padding: 1.25rem;
     }
@@ -76,6 +348,12 @@
 
     .admin-panel main .pb-20 {
         padding-bottom: 3rem;
+    }
+
+    @media (min-width: 1024px) {
+        .admin-panel main .p-8 {
+            padding: 1.5rem;
+        }
     }
 }
 

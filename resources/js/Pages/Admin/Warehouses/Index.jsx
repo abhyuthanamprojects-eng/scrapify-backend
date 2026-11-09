@@ -6,7 +6,7 @@ import AdminFilters, { AdminFilterInput, AdminFilterSelect } from '@/Components/
 import AdminTable, { AdminTablePagination } from '@/Components/Admin/AdminTable';
 import AdminCard from '@/Components/Admin/AdminCard';
 import { AdminActionButton } from '@/Components/Admin/AdminButton';
-import { MapPin, Package, Code2, Activity, Plus, CheckCircle, XCircle } from 'lucide-react';
+import { MapPin, Package, Code2, Activity, Plus } from 'lucide-react';
 
 export default function Index({ warehouses, stats, filters, states }) {
     const { auth } = usePage().props;
@@ -66,21 +66,21 @@ export default function Index({ warehouses, stats, filters, states }) {
                 <AdminCard
                     title="Total Warehouses"
                     value={stats.total.toLocaleString()}
-                    icon={<Package className="text-white" size={24} />}
+                    icon={<img src="/images/admin/3d/warehouse.png" alt="" className="h-12 w-12 object-contain" />}
                     color="green"
                     subtext="Based on current filters"
                 />
                 <AdminCard
                     title="Active Warehouses"
                     value={stats.active.toLocaleString()}
-                    icon={<CheckCircle className="text-white" size={24} />}
+                    icon={<img src="/images/admin/3d/active-users.png" alt="" className="h-12 w-12 object-contain" />}
                     color="green"
                     subtext="Currently active"
                 />
                 <AdminCard
                     title="Inactive Warehouses"
                     value={stats.inactive.toLocaleString()}
-                    icon={<XCircle className="text-white" size={24} />}
+                    icon={<img src="/images/admin/3d/inactive-users.png" alt="" className="h-12 w-12 object-contain" />}
                     color="red"
                     subtext="Deactivated"
                 />

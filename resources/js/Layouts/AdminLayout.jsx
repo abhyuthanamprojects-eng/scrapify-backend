@@ -1,373 +1,110 @@
 import { useState } from 'react';
-import { Link, usePage, router } from '@inertiajs/react';
-import SidebarLink from '@/Components/SidebarLink';
-import Dropdown from '@/Components/Dropdown';
-import DropdownLink from '@/Components/DropdownLink';
+import { Link, usePage } from '@inertiajs/react';
+import {
+    Activity, Banknote, Bell, CalendarDays, ChevronDown, ClipboardCheck,
+    ClipboardList, FileCheck2, FileText, Gift, Grid2X2, Handshake,
+    LayoutDashboard, LifeBuoy, ListChecks, LogOut, Mail, MapPinned, Menu,
+    Moon, PackageCheck, Search, Settings2, ShieldCheck, Sun, Tags, UserRound,
+    Users, WalletCards, Warehouse, X,
+} from 'lucide-react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
+function NavigationItem({ href, label, icon: Icon, active, onClick }) {
+    return (
+        <Link href={href} onClick={onClick} className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all ${active ? 'bg-primary text-white shadow-[0_8px_18px_rgba(47,125,79,0.26)]' : 'text-[#b8c9bf] hover:bg-white/10 hover:text-white'}`}>
+            <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${active ? 'bg-white/15' : 'bg-white/[0.04] group-hover:bg-white/10'}`}><Icon size={16} strokeWidth={active ? 2.4 : 2} /></span>
+            <span className="truncate">{label}</span>
+        </Link>
+    );
+}
+
+function NavigationSection({ label, items, onNavigate }) {
+    if (!items.length) return null;
+    return <div className="mb-5"><p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#789184]">{label}</p><div className="space-y-1">{items.map((item) => <NavigationItem key={item.label} {...item} onClick={onNavigate} />)}</div></div>;
+}
+
 export default function AdminLayout({ children }) {
+    const { auth, flash = {} } = usePage().props;
+    const user = auth.user;
     const [showingSidebar, setShowingSidebar] = useState(false);
-    const [showingUserDropdown, setShowingUserDropdown] = useState(false);
-    const user = usePage().props.auth.user;
-    const flash = usePage().props.flash || {};
+    const [showingUserMenu, setShowingUserMenu] = useState(false);
+    const hasRole = (role) => user.roles?.some((item) => item.name === role);
+    const isAdmin = hasRole('admin');
+    const isWarehouse = hasRole('warehouse');
+    const isPartner = hasRole('channel_partner');
+    const isPickupBoy = hasRole('pickup_boy');
+    const isPaymentAdmin = hasRole('payment_admin');
+    const initials = user.name?.split(' ').map((part) => part[0]).slice(0, 2).join('').toUpperCase() || 'AU';
+    const closeSidebar = () => setShowingSidebar(false);
 
-    const handleLogout = (e) => {
-        e.preventDefault();
-        router.post(route('logout'));
-    };
-
-    const isAdmin = user.roles.some(r => r.name === 'admin');
-    const isWarehouse = user.roles.some(r => r.name === 'warehouse');
-    const isPartner = user.roles.some(r => r.name === 'channel_partner');
-    const isPickupBoy = user.roles.some(r => r.name === 'pickup_boy');
-    const isPaymentAdmin = user.roles.some(r => r.name === 'payment_admin');
+    const navigation = [
+        { label: 'Main menu', items: [
+            { label: 'Dashboard', href: route('dashboard'), icon: LayoutDashboard, active: route().current('dashboard') },
+            ...(isAdmin ? [
+                { label: 'Users', href: route('admin.users.index'), icon: Users, active: route().current('admin.users.*') },
+                { label: 'Pickup Boys', href: route('admin.pickup-boys.index'), icon: UserRound, active: route().current('admin.pickup-boys.*') },
+                { label: 'Waitlist', href: route('admin.waitlist.index'), icon: ClipboardList, active: route().current('admin.waitlist.*') },
+            ] : []),
+            ...((isAdmin || isWarehouse || isPartner || isPickupBoy || isPaymentAdmin) ? [{ label: 'Booking Requests', href: route('admin.pickups.index'), icon: CalendarDays, active: route().current('admin.pickups.*') }] : []),
+            ...((isAdmin || isWarehouse || isPaymentAdmin) ? [{ label: 'Payments', href: route('admin.payments.index'), icon: WalletCards, active: route().current('admin.payments.*') }] : []),
+            ...(isPartner ? [
+                { label: 'Customers', href: route('admin.partner-customers.index'), icon: Users, active: route().current('admin.partner-customers.*') },
+                { label: 'Create Pickup', href: route('admin.partner-pickups.create'), icon: PackageCheck, active: route().current('admin.partner-pickups.*') },
+            ] : []),
+        ]},
+        { label: 'Product', items: isAdmin ? [
+            { label: 'Categories', href: route('admin.categories.index'), icon: Tags, active: route().current('admin.categories.*') },
+            { label: 'Category Types', href: route('admin.category-types.index'), icon: Grid2X2, active: route().current('admin.category-types.*') },
+            { label: 'Attributes', href: route('admin.attributes.index'), icon: ListChecks, active: route().current('admin.attributes.*') },
+            { label: 'Warehouses', href: route('admin.warehouses.index'), icon: Warehouse, active: route().current('admin.warehouses.*') },
+        ] : []},
+        { label: 'Administration', items: isAdmin ? [
+            { label: 'Partners', href: route('admin.partners.index'), icon: Handshake, active: route().current('admin.partners.*') },
+            { label: 'Partner Requests', href: route('admin.channel-partners.index'), icon: ShieldCheck, active: route().current('admin.channel-partners.*') },
+            { label: 'Onboarding Approvals', href: route('admin.approval-requests.index'), icon: ClipboardCheck, active: route().current('admin.approval-requests.*') },
+            { label: 'Settlements', href: route('admin.settlements.index'), icon: Banknote, active: route().current('admin.settlements.*') },
+            { label: 'Withdrawals', href: route('admin.withdrawals.index'), icon: WalletCards, active: route().current('admin.withdrawals.*') },
+            { label: 'Referrals & Rewards', href: route('admin.referrals.index'), icon: Gift, active: route().current('admin.referrals.*') },
+            { label: 'KYC Verification', href: route('admin.kyc.index'), icon: FileCheck2, active: route().current('admin.kyc.*') },
+            { label: 'Locations', href: route('admin.locations.index'), icon: MapPinned, active: route().current('admin.locations.*') },
+            { label: 'Activity Logs', href: route('admin.logs.index'), icon: Activity, active: route().current('admin.logs.*') },
+            { label: 'App Settings', href: route('admin.app-settings.index'), icon: Settings2, active: route().current('admin.app-settings.*') },
+        ] : []},
+        { label: 'Content', items: isAdmin ? [
+            { label: 'Static Pages', href: route('admin.pages.index'), icon: FileText, active: route().current('admin.pages.*') },
+            { label: 'Contact Queries', href: route('admin.contacts.index'), icon: Mail, active: route().current('admin.contacts.*') },
+            { label: 'Help & Support', href: route('admin.help-support.index'), icon: LifeBuoy, active: route().current('admin.help-support.*') },
+        ] : []},
+    ];
 
     return (
-        <div className="admin-panel flex h-screen bg-bg-light font-roboto text-gray-800">
-            {/* Sidebar Overlay for Mobile */}
-            <div
-                className={`fixed z-20 inset-0 bg-black opacity-50 transition-opacity lg:hidden ${
-                    showingSidebar ? 'block' : 'hidden'
-                }`}
-                onClick={() => setShowingSidebar(false)}
-            ></div>
-
-            {/* Sidebar */}
-            <div
-                className={`fixed z-30 inset-y-0 left-0 w-64 transition duration-300 transform bg-white border-r border-card-border/80 overflow-y-auto lg:translate-x-0 lg:static lg:inset-0 ${
-                    showingSidebar ? 'translate-x-0 ease-out' : '-translate-x-full ease-in'
-                }`}
-            >
-                <div className="flex items-center justify-center mt-5 mb-5 px-4">
-                    <a href="/" className="flex items-center group">
-                        <ApplicationLogo className="w-auto h-12 object-contain" />
-                    </a>
+        <div className="admin-panel flex min-h-screen bg-white font-roboto text-[#1d2b24]">
+            <div className={`fixed inset-0 z-40 bg-[#07150e]/60 backdrop-blur-sm transition-opacity lg:hidden ${showingSidebar ? 'opacity-100' : 'pointer-events-none opacity-0'}`} onClick={closeSidebar} />
+            <aside className={`fixed inset-y-0 left-0 z-50 flex w-[260px] -translate-x-full flex-col bg-[#11271e] text-white transition-transform duration-300 lg:static lg:translate-x-0 ${showingSidebar ? 'translate-x-0' : ''}`}>
+                <div className="flex h-[88px] items-center justify-between border-b border-white/10 px-5">
+                    <Link href={route('dashboard')} className="flex items-center gap-3" onClick={closeSidebar}>
+                        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-white shadow-[0_8px_20px_rgba(0,0,0,0.14)]"><ApplicationLogo className="h-9 w-auto object-contain" /></span>
+                        <span><span className="block text-sm font-bold tracking-tight">Scrapify</span><span className="mt-0.5 block text-[10px] font-medium uppercase tracking-[0.16em] text-[#8db49a]">Admin portal</span></span>
+                    </Link>
+                    <button type="button" onClick={closeSidebar} className="rounded-lg p-2 text-[#9bb5a5] hover:bg-white/10 lg:hidden"><X size={18} /></button>
                 </div>
+                <nav className="flex-1 overflow-y-auto px-3 py-5 [scrollbar-width:thin]">{navigation.map((section) => <NavigationSection key={section.label} {...section} onNavigate={closeSidebar} />)}</nav>
+                <div className="border-t border-white/10 p-3"><Link href={route('logout')} method="post" as="button" className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-[13px] font-semibold text-[#f2aaa2] transition hover:bg-white/10 hover:text-white"><span className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f2aaa2]/10"><LogOut size={16} /></span>Log out</Link></div>
+            </aside>
 
-                <nav className="mt-2 pb-6 flex flex-col gap-0.5">
-                    <div className="px-5 py-1.5 text-[10px] font-bold text-gray-400 uppercase tracking-[0.16em]">Main menu</div>
-                    
-                    <SidebarLink href={route('dashboard')} active={route().current('dashboard')}>
-                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                        </svg>
-                        <span className="mx-3">Dashboard</span>
-                    </SidebarLink>
-
-                    {isAdmin && (
-                        <>
-                            <SidebarLink href={route('admin.users.index')} active={route().current('admin.users.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                                <span className="mx-3">Users</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.pickup-boys.index')} active={route().current('admin.pickup-boys.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span className="mx-3">Pickup Boys</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.waitlist.index')} active={route().current('admin.waitlist.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                </svg>
-                                <span className="mx-3">Waitlist</span>
-                            </SidebarLink>
-                        </>
-                    )}
-
-                    {(isAdmin || isWarehouse || isPartner || isPickupBoy || isPaymentAdmin) && (
-                        <SidebarLink href={route('admin.pickups.index')} active={route().current('admin.pickups.*')}>
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                            <span className="mx-3">Booking Requests</span>
-                        </SidebarLink>
-                    )}
-
-                    {(isAdmin || isWarehouse || isPaymentAdmin) && (
-                        <SidebarLink href={route('admin.payments.index')} active={route().current('admin.payments.*')}>
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="mx-3">Payments</span>
-                        </SidebarLink>
-                    )}
-
-                    {isPartner && (
-                        <>
-                            <SidebarLink href={route('admin.partner-customers.index')} active={route().current('admin.partner-customers.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m6-6a4 4 0 11-8 0 4 4 0 018 0zm6 2a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span className="mx-3">Customers</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.partner-pickups.create')} active={route().current('admin.partner-pickups.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-                                </svg>
-                                <span className="mx-3">Create Pickup</span>
-                            </SidebarLink>
-                        </>
-                    )}
-
-                    {isAdmin && (
-                        <>
-                            <div className="px-5 py-1.5 mt-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Product</div>
-
-                            <SidebarLink href={route('admin.categories.index')} active={route().current('admin.categories.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                                </svg>
-                                <span className="mx-3">Categories</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.category-types.index')} active={route().current('admin.category-types.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                </svg>
-                                <span className="mx-3">Category Types</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.attributes.index')} active={route().current('admin.attributes.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                </svg>
-                                <span className="mx-3">Attributes</span>
-                            </SidebarLink>
-                        </>
-                    )}
-
-                    {(isAdmin || isWarehouse) && (
-                        <SidebarLink href={route('admin.warehouses.index')} active={route().current('admin.warehouses.*')}>
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                            <span className="mx-3">Warehouses</span>
-                        </SidebarLink>
-                    )}
-
-                    {isAdmin && (
-                        <div className="px-5 py-1.5 mt-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin</div>
-                    )}
-
-                    {isAdmin && (
-                        <>
-                            <SidebarLink href={route('admin.partners.index')} active={route().current('admin.partners.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                                <span className="mx-3">Partners</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.channel-partners.index')} active={route().current('admin.channel-partners.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                                </svg>
-                                <span className="mx-3">Partner Requests</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.approval-requests.index')} active={route().current('admin.approval-requests.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                                </svg>
-                                <span className="mx-3">Onboarding Approvals</span>
-                            </SidebarLink>
-                        </>
-                    )}
-
-                    {(isAdmin || isPartner) && (
-                        <SidebarLink href={route('admin.settlements.index')} active={route().current('admin.settlements.*')}>
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="mx-3">Settlements</span>
-                        </SidebarLink>
-                    )}
-
-                    {(isAdmin || isPaymentAdmin) && (
-                        <SidebarLink href={route('admin.withdrawals.index')} active={route().current('admin.withdrawals.*')}>
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            <span className="mx-3">Withdrawals</span>
-                        </SidebarLink>
-                    )}
-
-                    {isAdmin && (
-                        <>
-
-                            <SidebarLink href={route('admin.referrals.index')} active={route().current('admin.referrals.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                                </svg>
-                                <span className="mx-3">Referrals & Rewards</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.kyc.index')} active={route().current('admin.kyc.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <span className="mx-3">KYC Verification</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.locations.index')} active={route().current('admin.locations.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span className="mx-3">Locations</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.logs.index')} active={route().current('admin.logs.*')}>
-                                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                                </svg>
-                                <span className="mx-3">Activity Logs</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.app-settings.index')} active={route().current('admin.app-settings.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span className="mx-3">App Settings</span>
-                            </SidebarLink>
-
-                            <div className="px-5 py-1.5 mt-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Content</div>
-
-                            <SidebarLink href={route('admin.pages.index')} active={route().current('admin.pages.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <span className="mx-3">Static Pages</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.contacts.index')} active={route().current('admin.contacts.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                <span className="mx-3">Contact Queries</span>
-                            </SidebarLink>
-
-                            <SidebarLink href={route('admin.help-support.index')} active={route().current('admin.help-support.*')}>
-                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                                </svg>
-                                <span className="mx-3">Help & Support</span>
-                            </SidebarLink>
-                        </>
-                    )}
-                </nav>
-            </div>
-
-            <div className="flex-1 flex flex-col overflow-hidden">
-                <header className="flex justify-between items-center py-3 px-5 bg-white/95 border-b border-card-border/70 z-10 w-full relative shadow-[0_2px_12px_rgba(31,92,57,0.04)]">
-                    <div className="flex items-center flex-1">
-                        <button onClick={() => setShowingSidebar(true)} className="text-gray-500 focus:outline-none lg:hidden mr-4">
-                            <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 6H20M4 12H20M4 18H11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </button>
-                        
-                        {/* Search Bar */}
-                        <div className="hidden md:flex relative w-full max-w-xl">
-                            <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                                <svg className="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none">
-                                    <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path>
-                                </svg>
-                            </span>
-                            <input type="text" className="w-full py-2 pl-10 pr-4 text-gray-700 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:border-primary focus:ring-2 focus:ring-green-100 focus:outline-none transition-all" placeholder="Search data, users, or reports" />
-                        </div>
-                    </div>
-
-                    <div className="flex items-center pl-5 ml-auto gap-3">
-                        {/* Notifications */}
-                        <Link href={route('admin.logs.index')} className="flex items-center text-gray-500 hover:text-primary focus:outline-none relative transition-colors p-2 hover:bg-green-50 rounded-xl" title="View Activity Logs">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                            <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
-                        </Link>
-
-                        {/* Theme Toggle (Mock) */}
-                        <button className="flex items-center text-gray-600 hover:text-primary focus:outline-none bg-gray-50 rounded-xl p-2 border border-gray-200 transition-all hover:border-green-300 hover:bg-green-50">
-                             <div className="bg-white rounded-full p-1 shadow-sm">
-                                <svg className="w-4 h-4 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                             </div>
-                             <div className="p-1">
-                                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
-                             </div>
-                        </button>
-
-                        <div className="w-px h-6 bg-gray-200 mx-1"></div>
-
-                        {/* User Dropdown */}
-                        <div className="relative">
-                            <button 
-                                onClick={() => setShowingUserDropdown(!showingUserDropdown)} 
-                                className="flex items-center focus:outline-none cursor-pointer"
-                            >
-                                <img 
-                                    className="w-9 h-9 object-cover rounded-full border border-gray-200 hover:shadow-sm transition-shadow" 
-                                    src={user.profile_photo_url || `https://ui-avatars.com/api/?name=${user.name}&background=f4f7f6&color=4faa74`} 
-                                    alt={user.name} 
-                                />
-                            </button>
-
-                            {showingUserDropdown && (
-                                <>
-                                    {/* Click outside overlay */}
-                                    <div className="fixed inset-0 z-40" onClick={() => setShowingUserDropdown(false)}></div>
-                                    
-                                    {/* Dropdown Menu */}
-                                    <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white border border-gray-100 z-50 animate-in fade-in-50 zoom-in-95 duration-100">
-                                        <Link 
-                                            href={route('profile.edit')} 
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left font-medium"
-                                            onClick={() => setShowingUserDropdown(false)}
-                                        >
-                                            Profile
-                                        </Link>
-                                        <Link 
-                                            href={route('logout')} 
-                                            method="post" 
-                                            as="button" 
-                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left font-medium cursor-pointer"
-                                            onClick={() => setShowingUserDropdown(false)}
-                                        >
-                                            Log Out
-                                        </Link>
-                                    </div>
-                                </>
-                            )}
+            <div className="flex min-w-0 flex-1 flex-col">
+                <header className="sticky top-0 z-30 flex h-[78px] items-center gap-4 border-b border-[#e5ece7] bg-white/95 px-4 shadow-[0_1px_0_rgba(31,92,57,0.03)] backdrop-blur sm:px-6 lg:px-8">
+                    <button type="button" onClick={() => setShowingSidebar(true)} className="rounded-xl border border-[#e1eae4] p-2.5 text-[#617268] lg:hidden"><Menu size={19} /></button>
+                    <div className="relative flex min-w-0 flex-1"><Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#93a198]" size={18} /><input type="search" placeholder="Search data, users, or reports" className="h-11 w-full max-w-[620px] rounded-xl border border-[#e1eae4] bg-[#f7faf8] pl-11 pr-4 text-sm text-[#26372d] outline-none transition placeholder:text-[#9aa9a0] focus:border-primary focus:bg-white focus:ring-4 focus:ring-green-100" /></div>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <Link href={route('admin.logs.index')} className="relative rounded-xl p-2.5 text-[#62746a] transition hover:bg-green-50 hover:text-primary" title="Activity logs"><Bell size={19} /><span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#e26d65] ring-2 ring-white" /></Link>
+                        <button type="button" className="hidden items-center gap-1 rounded-xl border border-[#e1eae4] bg-[#f7faf8] p-2.5 text-[#62746a] sm:flex" title="Theme options"><Sun size={16} /><Moon size={15} className="text-[#a4b0a9]" /></button>
+                        <div className="relative border-l border-[#e5ece7] pl-2 sm:pl-3"><button type="button" onClick={() => setShowingUserMenu((value) => !value)} className="flex items-center gap-2 rounded-xl px-1.5 py-1.5 transition hover:bg-green-50"><span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#e6f1ea] text-xs font-bold text-primary">{initials}</span><span className="hidden text-left sm:block"><span className="block max-w-[120px] truncate text-xs font-semibold text-[#26372d]">{user.name}</span><span className="block text-[10px] text-[#87978d]">{isAdmin ? 'Super Admin' : 'Admin user'}</span></span><ChevronDown size={15} className="hidden text-[#8b9a91] sm:block" /></button>
+                            {showingUserMenu && <><button type="button" aria-label="Close user menu" className="fixed inset-0 z-40 h-full w-full cursor-default" onClick={() => setShowingUserMenu(false)} /><div className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-xl border border-[#e1eae4] bg-white p-1.5 shadow-xl"><Link href={route('profile.edit')} onClick={() => setShowingUserMenu(false)} className="block rounded-lg px-3 py-2 text-sm font-medium text-[#425449] hover:bg-green-50 hover:text-primary">Profile</Link><Link href={route('logout')} method="post" as="button" onClick={() => setShowingUserMenu(false)} className="block w-full rounded-lg px-3 py-2 text-left text-sm font-medium text-[#425449] hover:bg-red-50 hover:text-red-700">Log out</Link></div></>}
                         </div>
                     </div>
                 </header>
-
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-bg-light">
-                    <div className="w-full px-4 sm:px-5 lg:px-6 py-5 sm:py-6 max-w-[1600px] mx-auto">
-                         {flash.success && (
-                            <div className="mb-3 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl relative shadow-sm animate-in slide-in-from-top" role="alert">
-                                <div className="flex items-center gap-3">
-                                    <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                                    <span className="block sm:inline font-medium">{flash.success}</span>
-                                </div>
-                            </div>
-                        )}
-                         {flash.error && (
-                             <div className="mb-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl relative shadow-sm animate-in slide-in-from-top" role="alert">
-                                <div className="flex items-center gap-3">
-                                    <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
-                                    <span className="block sm:inline font-medium">{flash.error}</span>
-                                </div>
-                            </div>
-                        )}
-                        {children}
-                    </div>
-                </main>
+                <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto"><div className="mx-auto w-full max-w-[1540px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{flash.success && <div className="mb-5 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800" role="alert"><span className="h-2 w-2 rounded-full bg-primary" />{flash.success}</div>}{flash.error && <div className="mb-5 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800" role="alert"><span className="h-2 w-2 rounded-full bg-red-500" />{flash.error}</div>}{children}</div></main>
             </div>
         </div>
     );

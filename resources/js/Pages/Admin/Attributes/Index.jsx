@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
+import AdminHeader from '@/Components/Admin/AdminHeader';
+import AdminFilters, { AdminFilterInput, AdminFilterSelect } from '@/Components/Admin/AdminFilters';
 
 export default function Index({ attributes, filters, types }) {
     const handleSearch = (e) => {
@@ -33,39 +33,34 @@ export default function Index({ attributes, filters, types }) {
         <AdminLayout>
             <Head title="Attributes" />
 
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-semibold text-gray-800">Dynamic Attributes</h1>
-                <Link href={route('admin.attributes.create')}>
-                    <PrimaryButton>Add New Attribute</PrimaryButton>
-                </Link>
-            </div>
+            <AdminHeader
+                title="Dynamic Attributes"
+                subtitle="Define the fields and options used by category records"
+                icon={<img src="/images/admin/3d/customers.png" alt="" className="h-10 w-10 object-contain" />}
+                action={{ label: 'Add New Attribute', href: route('admin.attributes.create'), icon: '+' }}
+            />
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden p-6 mb-6">
-                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                    <div className="w-full md:w-1/3">
-                        <TextInput
-                            placeholder="Search by name or code..."
-                            className="w-full"
-                            value={filters.search || ''}
-                            onChange={handleSearch}
-                        />
-                    </div>
-                    <div className="w-full md:w-auto flex gap-4">
-                        <select
-                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                            value={filters.type || ''}
-                            onChange={(e) => handleFilterChange('type', e.target.value)}
-                        >
-                            <option value="">All Types</option>
-                            {types.map(type => (
-                                <option key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </div>
+            <AdminFilters>
+                <AdminFilterInput
+                    label="Search"
+                    placeholder="Search by name or code..."
+                    value={filters.search || ''}
+                    onChange={handleSearch}
+                    colSpan="md:col-span-6"
+                />
+                <AdminFilterSelect
+                    label="Type"
+                    value={filters.type || ''}
+                    onChange={(e) => handleFilterChange('type', e.target.value)}
+                    options={[
+                        { value: '', label: 'All Types' },
+                        ...types.map(type => ({ value: type, label: type.charAt(0).toUpperCase() + type.slice(1) })),
+                    ]}
+                    colSpan="md:col-span-3"
+                />
+            </AdminFilters>
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="admin-table-shell overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>

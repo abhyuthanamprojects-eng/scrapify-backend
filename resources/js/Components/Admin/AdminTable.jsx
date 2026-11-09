@@ -8,15 +8,15 @@ export default function AdminTable({
     emptyIcon = <Package className="mx-auto mb-4 text-gray-400" size={48} />
 }) {
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-card-border overflow-hidden">
+        <div className="admin-table-shell overflow-hidden rounded-2xl border bg-white">
             <div className="overflow-x-auto">
                 <table className="w-full">
-                    <thead className="bg-primary/5 border-b border-card-border">
+                    <thead className="border-b border-[#e5eee7] bg-[#f3f8f4]">
                         <tr>
                             {columns.map((column) => (
                                 <th
                                     key={column.key}
-                                    className="px-5 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                                    className="whitespace-nowrap px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.13em] text-[#718078]"
                                     style={{
                                         width: column.width || 'auto',
                                         textAlign: column.align || 'left'
@@ -27,14 +27,14 @@ export default function AdminTable({
                             ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-100">
                         {data && data.length > 0 ? (
                             data.map((row, rowIndex) => (
-                                <tr key={rowIndex} className="hover:bg-gray-50 transition-colors duration-150">
+                        <tr key={rowIndex} className="border-b border-[#edf2ee] transition-colors duration-150 last:border-b-0 hover:bg-[#f8fbf9]">
                                     {columns.map((column) => (
                                         <td
                                             key={column.key}
-                                            className="px-5 py-3.5"
+                                            className="px-5 py-3.5 text-sm text-[#4d5e53]"
                                             style={{ textAlign: column.align || 'left' }}
                                         >
                                             {column.render
@@ -48,11 +48,11 @@ export default function AdminTable({
                             <tr>
                                 <td
                                     colSpan={columns.length}
-                                    className="text-center py-10"
+                                    className="px-5 py-14 text-center"
                                 >
                                     <div>
                                         {emptyIcon}
-                                        <p className="text-gray-500 text-lg font-medium">{emptyMessage}</p>
+                                        <p className="text-sm font-medium text-[#7d8b83]">{emptyMessage}</p>
                                     </div>
                                 </td>
                             </tr>
@@ -78,8 +78,8 @@ export function AdminTablePagination({ links }) {
                             dangerouslySetInnerHTML={{ __html: link.label }}
                             className={`px-3.5 py-1.5 rounded-lg font-medium transition-all ${
                                 link.active
-                                    ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-md'
-                                    : 'bg-white text-gray-700 border border-gray-300 hover:border-green-500 hover:text-green-600'
+                                    ? 'bg-primary text-white shadow-sm'
+                                    : 'border border-gray-200 bg-white text-gray-700 hover:border-primary hover:text-primary'
                             }`}
                         />
                     ) : (

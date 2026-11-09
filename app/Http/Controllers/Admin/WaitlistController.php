@@ -11,8 +11,8 @@ class WaitlistController extends Controller
 {
     public function index(Request $request)
     {
-        $allEntries = Waitlist::query();
-        $query = Waitlist::query();
+        $allEntries = Waitlist::withoutDuplicates();
+        $query = Waitlist::withoutDuplicates();
 
         if ($request->search) {
             $query->where(function ($q) use ($request) {

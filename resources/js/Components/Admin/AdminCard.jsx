@@ -6,30 +6,22 @@ export default function AdminCard({
     subtext = null,
     trend = null
 }) {
-    const colorClasses = {
-        green: 'bg-gradient-to-br from-green-50 to-green-100 border-green-200 text-green-700',
-        blue: 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 text-blue-700',
-        red: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200 text-red-700',
-        purple: 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 text-purple-700',
-        orange: 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 text-orange-700',
-    };
-
-    const iconColorClasses = {
-        green: 'bg-green-200 text-green-700',
-        blue: 'bg-blue-200 text-blue-700',
-        red: 'bg-red-200 text-red-700',
-        purple: 'bg-purple-200 text-purple-700',
-        orange: 'bg-orange-200 text-orange-700',
-    };
+    const isDanger = color === 'red';
+    const colorClasses = isDanger
+        ? 'border-red-100 bg-white text-red-700'
+        : 'border-card-border bg-white text-primary';
+    const iconColorClasses = isDanger
+        ? 'bg-red-50 text-red-600 ring-red-100 [&>svg]:!text-red-600'
+        : 'bg-green-50 text-primary ring-green-100 [&>svg]:!text-primary';
 
     return (
-        <div className={`rounded-2xl border p-4 sm:p-5 ${colorClasses[color]}`}>
+        <div className={`admin-stat-card min-h-[142px] rounded-2xl border p-5 transition duration-200 hover:-translate-y-0.5 ${colorClasses}`}>
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                    <p className="text-sm font-medium opacity-80">{title}</p>
-                    <p className="text-2xl font-bold mt-1.5">{value}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-gray-500">{title}</p>
+                    <p className="mt-3 text-[30px] leading-8 font-bold tracking-tight text-gray-950">{value}</p>
                     {subtext && (
-                        <p className="text-xs opacity-70 mt-1.5">{subtext}</p>
+                        <p className="mt-2 text-xs text-gray-400">{subtext}</p>
                     )}
                     {trend && (
                         <div className="flex items-center gap-1 mt-2 text-xs font-semibold">
@@ -41,7 +33,7 @@ export default function AdminCard({
                     )}
                 </div>
                 {icon && (
-                    <div className={`p-2.5 rounded-lg ${iconColorClasses[color]}`}>
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-xl ring-1 ${iconColorClasses}`}>
                         {icon}
                     </div>
                 )}

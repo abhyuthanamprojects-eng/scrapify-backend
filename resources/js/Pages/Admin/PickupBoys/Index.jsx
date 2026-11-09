@@ -1,10 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import TextInput from '@/Components/TextInput';
-import PrimaryButton from '@/Components/PrimaryButton';
 import AdminHeader from '@/Components/Admin/AdminHeader';
 import AdminCard from '@/Components/Admin/AdminCard';
-import { Activity, CheckCircle, MapPin, Users } from 'lucide-react';
+import AdminFilters, { AdminFilterInput, AdminFilterSelect } from '@/Components/Admin/AdminFilters';
+import { AdminTablePagination } from '@/Components/Admin/AdminTable';
 
 export default function Index({ pickupBoys, stats, filters, states }) {
     
@@ -51,80 +50,23 @@ export default function Index({ pickupBoys, stats, filters, states }) {
                 icon={<img src="/images/admin/3d/pickups.png" alt="" className="h-10 w-10 object-contain" />}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <AdminCard title="Total Agents" value={stats.total.toLocaleString()} icon={<Users className="text-white" size={24} />} color="blue" subtext="Matching current filters" />
-                <AdminCard title="Active Accounts" value={stats.active.toLocaleString()} icon={<CheckCircle className="text-white" size={24} />} color="green" subtext="Ready accounts" />
-                <AdminCard title="Available Now" value={stats.available.toLocaleString()} icon={<MapPin className="text-white" size={24} />} color="purple" subtext="Available for assignments" />
-                <AdminCard title="Online Now" value={stats.online.toLocaleString()} icon={<Activity className="text-white" size={24} />} color="orange" subtext="Currently online" />
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <AdminCard title="Total Agents" value={stats.total.toLocaleString()} icon={<img src="/images/admin/3d/pickup-agent.png" alt="" className="h-12 w-12 object-contain mix-blend-multiply" />} color="green" subtext="Matching current filters" />
+                <AdminCard title="Active Accounts" value={stats.active.toLocaleString()} icon={<img src="/images/admin/3d/active-users.png" alt="" className="h-12 w-12 object-contain mix-blend-multiply" />} color="green" subtext="Ready accounts" />
+                <AdminCard title="Available Now" value={stats.available.toLocaleString()} icon={<img src="/images/admin/3d/pickups.png" alt="" className="h-12 w-12 object-contain" />} color="green" subtext="Available for assignments" />
+                <AdminCard title="Online Now" value={stats.online.toLocaleString()} icon={<img src="/images/admin/3d/active-users.png" alt="" className="h-12 w-12 object-contain mix-blend-multiply" />} color="green" subtext="Currently online" />
             </div>
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden p-6 mb-6">
-                <div className="flex flex-col md:flex-row gap-4 items-center justify-between flex-wrap">
-                    <div className="w-full md:w-1/4">
-                        <TextInput
-                            placeholder="Search by name, email or phone..."
-                            className="w-full"
-                            value={filters.search || ''}
-                            onChange={handleSearch}
-                        />
-                    </div>
-                    <div className="w-full md:w-auto flex flex-wrap gap-2">
-                        <select
-                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
-                            value={filters.status ?? ''}
-                            onChange={(e) => handleStatusFilter(e, 'status')}
-                        >
-                            <option value="">A/c Status (All)</option>
-                            <option value="1">Active Account</option>
-                            <option value="0">Inactive Account</option>
-                        </select>
+            <AdminFilters>
+                <AdminFilterInput label="Search" placeholder="Search by name, email or phone..." value={filters.search || ''} onChange={handleSearch} colSpan="md:col-span-4" />
+                <AdminFilterSelect label="Account status" options={[{ value: '', label: 'All accounts' }, { value: '1', label: 'Active account' }, { value: '0', label: 'Inactive account' }]} value={filters.status ?? ''} onChange={(e) => handleStatusFilter(e, 'status')} colSpan="md:col-span-2" />
+                <AdminFilterSelect label="Availability" options={[{ value: '', label: 'All availability' }, { value: '1', label: 'Available' }, { value: '0', label: 'Unavailable' }]} value={filters.is_available ?? ''} onChange={(e) => handleStatusFilter(e, 'is_available')} colSpan="md:col-span-2" />
+                <AdminFilterSelect label="Online status" options={[{ value: '', label: 'All online states' }, { value: '1', label: 'Online' }, { value: '0', label: 'Offline' }]} value={filters.is_online ?? ''} onChange={(e) => handleStatusFilter(e, 'is_online')} colSpan="md:col-span-2" />
+                <AdminFilterSelect label="State" options={[{ value: '', label: 'All states' }, ...states.map(state => ({ value: state.id, label: state.name }))]} value={filters.state_id || ''} onChange={handleStateFilter} colSpan="md:col-span-2" />
+                <AdminFilterSelect label="City" options={[{ value: '', label: 'All cities' }, ...availableCities.map(city => ({ value: city.id, label: city.name }))]} value={filters.city_id || ''} onChange={handleCityFilter} disabled={!filters.state_id} colSpan="md:col-span-2" />
+            </AdminFilters>
 
-                        <select
-                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
-                            value={filters.is_available ?? ''}
-                            onChange={(e) => handleStatusFilter(e, 'is_available')}
-                        >
-                            <option value="">Availability (All)</option>
-                            <option value="1">Available</option>
-                            <option value="0">Unavailable</option>
-                        </select>
-
-                        <select
-                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
-                            value={filters.is_online ?? ''}
-                            onChange={(e) => handleStatusFilter(e, 'is_online')}
-                        >
-                            <option value="">Online Status (All)</option>
-                            <option value="1">Online</option>
-                            <option value="0">Offline</option>
-                        </select>
-
-                        <select
-                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
-                            value={filters.state_id || ''}
-                            onChange={handleStateFilter}
-                        >
-                            <option value="">All States</option>
-                            {states.map(state => (
-                                <option key={state.id} value={state.id}>{state.name}</option>
-                            ))}
-                        </select>
-                        <select
-                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm disabled:opacity-50 text-sm disabled:bg-gray-100"
-                            value={filters.city_id || ''}
-                            onChange={handleCityFilter}
-                            disabled={!filters.state_id}
-                        >
-                            <option value="">All Cities</option>
-                            {availableCities.map(city => (
-                                <option key={city.id} value={city.id}>{city.name}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="admin-table-shell overflow-hidden rounded-2xl border border-[#dfe9e2] bg-white shadow-[0_6px_20px_rgba(31,92,57,0.04)]">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
@@ -208,7 +150,7 @@ export default function Index({ pickupBoys, stats, filters, states }) {
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <Link
                                         href={route('admin.pickup-boys.show', user.id)}
-                                        className="inline-flex items-center px-3 py-1.5 bg-primary text-white hover:bg-primary-dark rounded shadow-sm text-sm"
+                                    className="inline-flex items-center rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-primary-hover"
                                     >
                                         View Details & Track
                                     </Link>
@@ -225,28 +167,7 @@ export default function Index({ pickupBoys, stats, filters, states }) {
                 )}
             </div>
 
-            <div className="mt-6 flex justify-center">
-                <div className="flex gap-1 flex-wrap">
-                    {pickupBoys.links.map((link, i) => (
-                        link.url ? (
-                            <Link
-                                key={i}
-                                href={link.url}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                className={`px-3 py-1 border rounded ${
-                                    link.active ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 hover:bg-gray-50'
-                                }`}
-                            />
-                        ) : (
-                            <span
-                                key={i}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                className="px-3 py-1 border rounded text-gray-300 cursor-not-allowed bg-white"
-                            />
-                        )
-                    ))}
-                </div>
-            </div>
+            <AdminTablePagination links={pickupBoys.links} />
         </AdminLayout>
     );
 }

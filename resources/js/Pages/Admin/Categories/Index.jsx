@@ -1,8 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
-import PrimaryButton from '@/Components/PrimaryButton';
-import DangerButton from '@/Components/DangerButton';
-import TextInput from '@/Components/TextInput';
+import AdminHeader from '@/Components/Admin/AdminHeader';
+import AdminFilters, { AdminFilterInput, AdminFilterSelect } from '@/Components/Admin/AdminFilters';
 
 export default function Index({ categories, filters, types }) {
     const handleSearch = (e) => {
@@ -34,48 +33,41 @@ export default function Index({ categories, filters, types }) {
         <AdminLayout>
             <Head title="Categories" />
 
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-semibold text-gray-800">Categories</h1>
-                <Link href={route('admin.categories.create')}>
-                    <PrimaryButton>Add New Category</PrimaryButton>
-                </Link>
-            </div>
+            <AdminHeader
+                title="Categories"
+                subtitle="Manage the reusable categories used across bookings and inventory"
+                icon={<img src="/images/admin/3d/customers.png" alt="" className="h-10 w-10 object-contain" />}
+                action={{ label: 'Add New Category', href: route('admin.categories.create'), icon: '+' }}
+            />
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden p-6 mb-6">
-                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                    <div className="w-full md:w-1/3">
-                        <TextInput
-                            placeholder="Search by name or slug..."
-                            className="w-full"
-                            value={filters.search || ''}
-                            onChange={handleSearch}
-                        />
-                    </div>
-                    <div className="w-full md:w-auto flex gap-4">
-                        <select
-                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                            value={filters.category_type_id || ''}
-                            onChange={(e) => handleFilterChange('category_type_id', e.target.value)}
-                        >
-                            <option value="">All Types</option>
-                            {types?.map(type => (
-                                <option key={type.id} value={type.id}>{type.name?.en || type.name}</option>
-                            ))}
-                        </select>
-                        <select
-                            className="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
-                            value={filters.status ?? ''}
-                            onChange={(e) => handleFilterChange('status', e.target.value)}
-                        >
-                            <option value="">All Status</option>
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+            <AdminFilters>
+                <AdminFilterInput
+                    label="Search"
+                    placeholder="Search by name or slug..."
+                    value={filters.search || ''}
+                    onChange={handleSearch}
+                    colSpan="md:col-span-5"
+                />
+                <AdminFilterSelect
+                    label="Category type"
+                    value={filters.category_type_id || ''}
+                    onChange={(e) => handleFilterChange('category_type_id', e.target.value)}
+                    options={[
+                        { value: '', label: 'All Types' },
+                        ...(types?.map(type => ({ value: type.id, label: type.name?.en || type.name })) || []),
+                    ]}
+                    colSpan="md:col-span-3"
+                />
+                <AdminFilterSelect
+                    label="Status"
+                    value={filters.status ?? ''}
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                    options={[{ value: '', label: 'All Status' }, { value: '1', label: 'Active' }, { value: '0', label: 'Inactive' }]}
+                    colSpan="md:col-span-2"
+                />
+            </AdminFilters>
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="admin-table-shell overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                         <tr>
