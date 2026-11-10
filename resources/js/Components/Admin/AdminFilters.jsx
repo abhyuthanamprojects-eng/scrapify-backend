@@ -6,7 +6,7 @@ export default function AdminFilters({
     children
 }) {
     return (
-        <div className="admin-filter-panel mb-5 rounded-2xl border bg-white p-4 sm:p-5">
+        <div className="admin-filter-panel mb-5 rounded-2xl border border-[#dde8e0] bg-white p-4 shadow-[0_2px_12px_rgba(31,92,57,0.03)] sm:p-5">
             <div className="grid grid-cols-1 items-end gap-4 md:grid-cols-12">
                 {children}
             </div>
@@ -32,7 +32,7 @@ export function AdminFilterInput({
                 placeholder={placeholder}
                 value={value}
                 onChange={onChange}
-                className="h-11 w-full rounded-xl border-[#dfe9e2] bg-[#f8fbf9] px-3.5 text-sm text-[#26372d] placeholder:text-[#9aa9a0] focus:border-primary focus:bg-white focus:ring-4 focus:ring-green-100"
+                className="h-11 w-full rounded-xl border border-[#dfe9e2] bg-[#f8fbf9] px-3.5 text-sm text-[#26372d] placeholder:text-[#9aa9a0] transition-[border-color,background-color,box-shadow] duration-150 ease-out focus:border-primary focus:bg-white focus:ring-4 focus:ring-green-100"
             />
         </div>
     );
@@ -57,7 +57,7 @@ export function AdminFilterSelect({
                 value={value}
                 onChange={onChange}
                 disabled={disabled}
-                className={`h-11 w-full rounded-xl border-[#dfe9e2] bg-[#f8fbf9] px-3.5 text-sm text-[#4d5e53] focus:border-primary focus:bg-white focus:ring-4 focus:ring-green-100 ${
+                className={`h-11 w-full rounded-xl border border-[#dfe9e2] bg-[#f8fbf9] px-3.5 text-sm text-[#4d5e53] transition-[border-color,background-color,box-shadow] duration-150 ease-out focus:border-primary focus:bg-white focus:ring-4 focus:ring-green-100 ${
                     disabled ? 'opacity-50 bg-gray-100 cursor-not-allowed' : ''
                 }`}
             >

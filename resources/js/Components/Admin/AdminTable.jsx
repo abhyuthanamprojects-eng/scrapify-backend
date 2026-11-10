@@ -5,10 +5,10 @@ export default function AdminTable({
     columns,
     data,
     emptyMessage = 'No records found',
-    emptyIcon = <Package className="mx-auto mb-4 text-gray-400" size={48} />
+    emptyIcon = <Package className="mx-auto mb-4 text-[#9aa79f]" size={44} strokeWidth={1.8} />
 }) {
     return (
-        <div className="admin-table-shell overflow-hidden rounded-2xl border bg-white">
+        <div className="admin-table-shell overflow-hidden rounded-2xl border border-[#dde8e0] bg-white shadow-[0_2px_14px_rgba(31,92,57,0.04)]">
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead className="border-b border-[#e5eee7] bg-[#f3f8f4]">
@@ -27,10 +27,10 @@ export default function AdminTable({
                             ))}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-[#edf2ee]">
                         {data && data.length > 0 ? (
                             data.map((row, rowIndex) => (
-                        <tr key={rowIndex} className="border-b border-[#edf2ee] transition-colors duration-150 last:border-b-0 hover:bg-[#f8fbf9]">
+                                <tr key={rowIndex} className="border-b border-[#edf2ee] transition-colors duration-100 ease-out last:border-b-0 hover:bg-[#f8fbf9]">
                                     {columns.map((column) => (
                                         <td
                                             key={column.key}
@@ -50,7 +50,7 @@ export default function AdminTable({
                                     colSpan={columns.length}
                                     className="px-5 py-14 text-center"
                                 >
-                                    <div>
+                                    <div className="flex flex-col items-center justify-center">
                                         {emptyIcon}
                                         <p className="text-sm font-medium text-[#7d8b83]">{emptyMessage}</p>
                                     </div>
@@ -69,24 +69,24 @@ export function AdminTablePagination({ links }) {
 
     return (
         <div className="mt-5 flex justify-center">
-            <div className="flex gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
                 {links.map((link, i) => (
                     link.url ? (
                         <Link
                             key={i}
                             href={link.url}
                             dangerouslySetInnerHTML={{ __html: link.label }}
-                            className={`px-3.5 py-1.5 rounded-lg font-medium transition-all ${
+                            className={`select-none rounded-lg px-3.5 py-1.5 text-sm font-medium transition-[transform,background-color,border-color,color,box-shadow] duration-150 ease-out active:scale-[0.96] ${
                                 link.active
                                     ? 'bg-primary text-white shadow-sm'
-                                    : 'border border-gray-200 bg-white text-gray-700 hover:border-primary hover:text-primary'
+                                    : 'border border-[#dce7df] bg-white text-[#526359] hover:border-primary hover:text-primary'
                             }`}
                         />
                     ) : (
                         <span
                             key={i}
                             dangerouslySetInnerHTML={{ __html: link.label }}
-                            className="px-3.5 py-1.5 rounded-lg text-gray-300 cursor-not-allowed bg-gray-50 border border-gray-200"
+                            className="select-none rounded-lg border border-[#e5ece7] bg-[#f8fbf9] px-3.5 py-1.5 text-sm text-[#a4b0a9] cursor-not-allowed opacity-60"
                         />
                     )
                 ))}

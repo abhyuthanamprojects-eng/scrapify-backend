@@ -6,6 +6,8 @@ export default function AdminHeader({
     action = null,
     icon = null
 }) {
+    const actionBtnClass = "inline-flex items-center gap-2 select-none rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-[0_4px_14px_rgba(47,125,79,0.22)] transition-[transform,background-color,box-shadow] duration-150 ease-out hover:bg-primary-hover active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-primary/15";
+
     return (
         <div className="admin-page-header mb-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -27,16 +29,15 @@ export default function AdminHeader({
                 {action && (
                     <div className="shrink-0">
                         {action.href ? (
-                            <Link href={action.href}>
-                                    <button className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-[0_6px_14px_rgba(47,125,79,0.18)] transition hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-primary/15">
-                                    <span>{action.icon || '+'}</span>
-                                    {action.label}
-                                </button>
+                            <Link href={action.href} className={actionBtnClass}>
+                                <span>{action.icon || '+'}</span>
+                                {action.label}
                             </Link>
                         ) : (
                             <button
+                                type="button"
                                 onClick={action.onClick}
-                                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-white shadow-[0_6px_14px_rgba(47,125,79,0.18)] transition hover:bg-primary-hover focus:outline-none focus:ring-4 focus:ring-primary/15"
+                                className={actionBtnClass}
                             >
                                 <span>{action.icon || '+'}</span>
                                 {action.label}

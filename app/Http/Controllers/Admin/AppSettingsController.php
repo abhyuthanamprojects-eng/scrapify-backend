@@ -7,6 +7,7 @@ use App\Models\AppSetting;
 use App\Models\CategoryType;
 use App\Models\HomeBanner;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class AppSettingsController extends Controller
@@ -40,6 +41,16 @@ class AppSettingsController extends Controller
             'force_update'  => (bool) AppSetting::get('force_update', false),
             'android_url'   => AppSetting::get('android_url', 'https://play.google.com/store/apps/details?id=com.abhyuthanam.scrapify'),
             'ios_url'       => AppSetting::get('ios_url',     'https://apps.apple.com/us/app/scrapify/id6775160804'),
+            'app_logo_url' => AppSetting::get('app_logo_url', ''),
+            'launch_campaign_enabled' => (bool) AppSetting::get('launch_campaign_enabled', false),
+            'launch_campaign_event' => AppSetting::get('launch_campaign_event', ''),
+            'launch_campaign_title' => AppSetting::get('launch_campaign_title', ''),
+            'launch_campaign_subtitle' => AppSetting::get('launch_campaign_subtitle', ''),
+            'launch_campaign_image_url' => AppSetting::get('launch_campaign_image_url', ''),
+            'launch_campaign_gif_url' => AppSetting::get('launch_campaign_gif_url', ''),
+            'launch_campaign_images' => AppSetting::get('launch_campaign_images', []),
+            'launch_campaign_animation' => AppSetting::get('launch_campaign_animation', 'none'),
+            'launch_campaign_duration_seconds' => AppSetting::get('launch_campaign_duration_seconds', 3),
             'customer_support_number' => AppSetting::get('customer_support_number', '+91 00000 00000'),
             'support_phone' => AppSetting::get('support_phone', '+91 00000 00000'),
             'feedback_url' => AppSetting::get('feedback_url', 'https://scrapify.in/feedback'),
@@ -93,6 +104,7 @@ class AppSettingsController extends Controller
             'qr_verification_enabled',
             'scrap_proof_images_required',
             'force_update',
+            'launch_campaign_enabled',
         ];
 
         $intFields = [
@@ -104,6 +116,7 @@ class AppSettingsController extends Controller
             'minimum_free_pickup_amount',
             'low_value_shipping_charge',
             'warehouse_service_pincodes_limit',
+            'launch_campaign_duration_seconds',
         ];
 
         $stringFields = [
@@ -112,6 +125,12 @@ class AppSettingsController extends Controller
             'min_version',
             'android_url',
             'ios_url',
+            'app_logo_url',
+            'launch_campaign_event',
+            'launch_campaign_title',
+            'launch_campaign_subtitle',
+            'launch_campaign_image_url',
+            'launch_campaign_animation',
             'customer_support_number',
             'support_phone',
             'feedback_url',
@@ -130,6 +149,7 @@ class AppSettingsController extends Controller
             'donation_products',
             'corporate_meeting_types',
             'scrap_proof_image_labels',
+            'launch_campaign_images',
         ];
 
         foreach ($booleanFields as $key) {
@@ -154,12 +174,29 @@ class AppSettingsController extends Controller
             if ($request->has($key)) {
                 $value = $request->input($key);
                 if (is_string($value)) {
-                    $value = array_values(array_filter(array_map('trim', explode(',', $value))));
+                    $value = array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/', $value))));
                 }
                 AppSetting::set($key, is_array($value) ? $value : [], 'json', 'settings');
             }
         }
 
         return back()->with('success', 'App settings updated successfully.');
+    }
+
+    public function uploadLaunchGif(Request $request)
+    {
+        $request->validate([
+            'launch_gif' => ['required', 'file', 'mimetypes:image/gif', 'max:20480'],
+        ]);
+
+        $previousUrl = (string) AppSetting::get('launch_campaign_gif_url', '');
+        if (str_contains($previousUrl, '/storage/launch_campaigns/')) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', parse_url($previousUrl, PHP_URL_PATH) ?? ''));
+        }
+
+        $path = $request->file('launch_gif')->store('launch_campaigns', 'public');
+        AppSetting::set('launch_campaign_gif_url', Storage::disk('public')->url($path), 'string', 'settings');
+
+        return back()->with('success', 'Launch GIF uploaded successfully.');
     }
 }

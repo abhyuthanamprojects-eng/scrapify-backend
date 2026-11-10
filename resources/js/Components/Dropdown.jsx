@@ -1,6 +1,7 @@
 import { useState, createContext, useContext, Fragment } from 'react';
 import { Link } from '@inertiajs/react';
 import { Transition } from '@headlessui/react';
+import DropdownLink from '@/Components/DropdownLink';
 
 const DropDownContext = createContext();
 
@@ -29,7 +30,7 @@ const Trigger = ({ children }) => {
     );
 };
 
-const Content = ({ align = 'right', width = '48', contentClasses = 'py-1 bg-white dark:bg-gray-700', children }) => {
+const Content = ({ align = 'right', width = '48', contentClasses = 'py-1.5 bg-white dark:bg-gray-800', children }) => {
     const { open, setOpen } = useContext(DropDownContext);
 
     let alignmentClasses = 'origin-top';
@@ -50,28 +51,22 @@ const Content = ({ align = 'right', width = '48', contentClasses = 'py-1 bg-whit
         <Transition
             as={Fragment}
             show={open}
-            enter="transition ease-out duration-200"
+            enter="transition-[transform,opacity] ease-out duration-150"
             enterFrom="opacity-0 scale-95"
             enterTo="opacity-100 scale-100"
-            leave="transition ease-in duration-75"
+            leave="transition-[transform,opacity] ease-out duration-100"
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
         >
             <div
-                className={`absolute z-50 mt-2 rounded-md shadow-lg ${alignmentClasses} ${widthClasses}`}
+                className={`absolute z-50 mt-2 rounded-xl border border-[#e1eae4] shadow-xl ${alignmentClasses} ${widthClasses}`}
                 onClick={() => setOpen(false)}
             >
-                <div className={`rounded-md ring-1 ring-black ring-opacity-5 ` + contentClasses}>{children}</div>
+                <div className={`rounded-xl overflow-hidden ` + contentClasses}>{children}</div>
             </div>
         </Transition>
     );
 };
-
-import DropdownLink from '@/Components/DropdownLink';
-
-// ... existing imports ...
-
-// ... existing components ...
 
 Dropdown.Trigger = Trigger;
 Dropdown.Content = Content;

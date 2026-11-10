@@ -40,6 +40,9 @@ yarn-error.log*
 .env.local
 .env.*.local
 
+# Public build assets
+/public/build
+
 # Dependencies
 composer.lock
 package-lock.json
@@ -64,4 +67,5 @@ coverage/
 *.md
 !README.md
 !CHANGELOG.md
+!.agents/**
 branch_structure.json

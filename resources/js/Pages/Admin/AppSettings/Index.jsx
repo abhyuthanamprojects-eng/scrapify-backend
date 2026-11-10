@@ -12,6 +12,9 @@ export default function Index({ settings, homeBanners = [] }) {
         donation_products: normalizeCsvValue(settings.donation_products),
         corporate_meeting_types: normalizeCsvValue(settings.corporate_meeting_types),
         scrap_proof_image_labels: normalizeCsvValue(settings.scrap_proof_image_labels),
+        launch_campaign_images: Array.isArray(settings.launch_campaign_images)
+            ? settings.launch_campaign_images.join('\n')
+            : (settings.launch_campaign_images ?? ''),
     });
 
     const [activeTab, setActiveTab] = useState('features');
@@ -32,9 +35,9 @@ export default function Index({ settings, homeBanners = [] }) {
                 onClick={() => setData(name, !data[name])}
                 aria-pressed={Boolean(data[name])}
                 aria-label={`${label}: ${data[name] ? 'enabled' : 'disabled'}`}
-                className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-4 focus:ring-green-100 ${data[name] ? 'bg-primary' : 'bg-gray-300'}`}
+                className={`relative inline-flex h-7 w-12 flex-shrink-0 items-center rounded-full transition-[background-color,transform] duration-150 ease-out active:scale-95 focus:outline-none focus:ring-4 focus:ring-green-100 ${data[name] ? 'bg-primary' : 'bg-gray-300'}`}
             >
-                <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform ${data[name] ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] ${data[name] ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
         </div>
     );
@@ -54,10 +57,25 @@ export default function Index({ settings, homeBanners = [] }) {
                     }
                     props.onKeyDown?.(e);
                 }}
-                className="h-11 w-full rounded-xl border-[#dfe9e2] bg-[#f8fbf9] px-4 text-sm text-[#26372d] focus:border-primary focus:bg-white focus:ring-4 focus:ring-green-100 focus:outline-none"
+                className="h-11 w-full rounded-xl border border-[#dfe9e2] bg-[#f8fbf9] px-4 text-sm text-[#26372d] transition-[border-color,background-color,box-shadow] duration-150 ease-out focus:border-primary focus:bg-white focus:ring-4 focus:ring-green-100 focus:outline-none"
             />
             {description && <p className="text-xs text-gray-500">{description}</p>}
             {errors[name] && <p className="text-xs text-red-500 mt-1">{errors[name]}</p>}
+        </div>
+    );
+
+    const Textarea = ({ name, label, description, ...props }) => (
+        <div className="flex flex-col gap-1 md:col-span-2">
+            <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#526359]">{label}</label>
+            <textarea
+                {...props}
+                value={data[name] ?? ''}
+                onChange={e => setData(name, e.target.value)}
+                rows={4}
+                className="w-full resize-y rounded-xl border border-[#dfe9e2] bg-[#f8fbf9] px-4 py-3 text-sm text-[#26372d] focus:border-primary focus:bg-white focus:ring-4 focus:ring-green-100 focus:outline-none"
+            />
+            {description && <p className="text-xs text-gray-500">{description}</p>}
+            {errors[name] && <p className="mt-1 text-xs text-red-500">{errors[name]}</p>}
         </div>
     );
 
@@ -104,6 +122,13 @@ export default function Index({ settings, homeBanners = [] }) {
                             className={`border-b-2 px-4 py-4 text-sm font-bold transition-colors sm:px-5 ${activeTab === 'banners' ? 'border-primary text-primary' : 'border-transparent text-[#7a8980] hover:text-[#2f4035]'}`}
                         >
                             Home Banners
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setActiveTab('launch')}
+                            className={`border-b-2 px-4 py-4 text-sm font-bold transition-colors sm:px-5 ${activeTab === 'launch' ? 'border-primary text-primary' : 'border-transparent text-[#7a8980] hover:text-[#2f4035]'}`}
+                        >
+                            Brand & Launch
                         </button>
                     </div>
 
@@ -159,6 +184,43 @@ export default function Index({ settings, homeBanners = [] }) {
                             </div>
                         )}
 
+                        {activeTab === 'launch' && (
+                            <div className="space-y-6">
+                                <div className="rounded-2xl border border-[#dfe9e2] bg-[#f8fbf9] p-5">
+                                    <h3 className="text-base font-bold text-[#26372d]">Remote brand identity</h3>
+                                    <p className="mt-1 text-sm text-gray-500">Change the mobile logo from the admin panel. Leave blank to use the bundled Scrapify logo.</p>
+                                    <div className="mt-4">
+                                        <Input name="app_logo_url" label="App Logo URL" description="Use a publicly reachable HTTPS image URL. The app falls back safely if the URL fails." />
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-[#dfe9e2] bg-white p-5 shadow-[0_8px_24px_rgba(31,92,57,0.05)]">
+                                    <div className="mb-5 flex items-start justify-between gap-4">
+                                        <div>
+                                            <h3 className="text-base font-bold text-[#26372d]">Launch campaign</h3>
+                                            <p className="mt-1 text-sm text-gray-500">Show a short seasonal or promotional scene at app startup without rebuilding the app.</p>
+                                        </div>
+                                        <span className="rounded-full bg-[#e7f3eb] px-3 py-1 text-xs font-bold text-primary">Remote content</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                        <Toggle name="launch_campaign_enabled" label="Enable launch campaign" description="Show the configured campaign during the splash screen" />
+                                        <Input name="launch_campaign_event" label="Event Label" description="Example: Diwali 2026, New Year, Summer Drive" />
+                                        <Input name="launch_campaign_title" label="Campaign Title" description="Main text shown on the launch screen" />
+                                        <Input name="launch_campaign_subtitle" label="Campaign Subtitle" description="Supporting text shown under the title" />
+                                        <Input name="launch_campaign_image_url" label="Primary Campaign Image URL" description="Optional single artwork or fallback image" />
+                                        <LaunchGifUpload currentUrl={settings.launch_campaign_gif_url} />
+                                        <Input name="launch_campaign_animation" label="Animation Style" description="Use: none, diwali, new_year, or celebration" />
+                                        <Input name="launch_campaign_duration_seconds" label="Display Duration (seconds)" type="number" description="Recommended: 2–5 seconds" />
+                                        <Textarea name="launch_campaign_images" label="Additional Campaign Image URLs" description="One public HTTPS image URL per line. The app can rotate these during the launch scene." />
+                                    </div>
+                                </div>
+
+                                <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
+                                    Save these settings, then reopen the app. The logo, campaign text, artwork, and animation style are loaded from the live settings API; no app rebuild is required for content changes.
+                                </div>
+                            </div>
+                        )}
+
                         {activeTab === 'intervals' && (
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <Input name="pickup_boy_location_interval_seconds" label="Location Update Interval" type="number" description="Seconds between pickup boy GPS updates" />
@@ -209,6 +271,58 @@ export default function Index({ settings, homeBanners = [] }) {
                 </div>
             </div>
         </AdminLayout>
+    );
+}
+
+function LaunchGifUpload({ currentUrl }) {
+    const [file, setFile] = useState(null);
+    const [processing, setProcessing] = useState(false);
+    const [error, setError] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!file) {
+            setError('Choose a GIF file first.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('launch_gif', file);
+        setProcessing(true);
+        setError('');
+        router.post(route('admin.app-settings.launch-gif'), formData, {
+            forceFormData: true,
+            onFinish: () => setProcessing(false),
+            onSuccess: () => setFile(null),
+        });
+    };
+
+    return (
+        <div className="rounded-xl border border-[#dfe9e2] bg-[#f8fbf9] p-4 md:col-span-2">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                    <label className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#526359]">Launch GIF Upload</label>
+                    <p className="mt-1 text-xs text-gray-500">Upload a GIF up to 20 MB. It will be shown as the launch campaign artwork.</p>
+                    {currentUrl && <p className="mt-2 break-all text-xs font-medium text-primary">Current: {currentUrl}</p>}
+                    {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+                </div>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <input
+                        type="file"
+                        accept="image/gif,.gif"
+                        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                        className="block w-full rounded-lg border border-[#dfe9e2] bg-white px-3 py-2 text-xs text-[#526359] sm:w-auto"
+                    />
+                    <button
+                        type="submit"
+                        disabled={processing}
+                        className="rounded-lg bg-primary px-4 py-2 text-xs font-bold text-white transition hover:bg-primary-hover disabled:opacity-50"
+                    >
+                        {processing ? 'Uploading...' : 'Upload GIF'}
+                    </button>
+                </form>
+            </div>
+        </div>
     );
 }
 
