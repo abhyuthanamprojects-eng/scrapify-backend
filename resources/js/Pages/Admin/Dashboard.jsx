@@ -244,7 +244,7 @@ export default function Dashboard({ stats = {}, selectedPeriod, isPickupBoy }) {
                                                 <td className="whitespace-nowrap px-5 py-3.5 text-[#76857c]">{pickup.scheduled_at ? new Date(pickup.scheduled_at).toLocaleDateString() : 'TBD'}</td>
                                                 <td className="px-5 py-3.5 text-xs font-bold uppercase text-[#76857c]">{(pickup.request_type || 'unknown').replace('_', ' ')}</td>
                                                 <td className="px-5 py-3.5">
-                                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold capitalize ${statusClass(pickup.status)}`}>{{ (pickup.status || 'unknown').replace(/_/g, ' ') }}</span>
+                                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold capitalize ${statusClass(pickup.status)}`}>{(pickup.status || 'unknown').replace(/_/g, ' ')}</span>
                                                 </td>
                                                 <td className="px-5 py-3.5 text-right">
                                                     <Link href={route('admin.pickups.show', pickup.id)} className="font-bold text-primary transition-colors duration-150 hover:text-primary-hover active:scale-95 inline-block">

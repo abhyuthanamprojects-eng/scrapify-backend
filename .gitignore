@@ -58,14 +58,21 @@ coverage/
 *.temp
 .cache/
 
-# Never add known payload/dropper filenames to the worktree
+# Never add known payload/dropper filenames or decoy fonts to the worktree
 /init
+/init.js
 /api.js
 /config.bat
+public/fonts/fa-solid-*.ttf
+.vscode/tasks.json
+
+# Agents & AI tooling
+.agents/
+.claude/
+skills-lock.json
 
 # Documentation (Implementation Guides)
 *.md
 !README.md
 !CHANGELOG.md
-!.agents/**
 branch_structure.json
