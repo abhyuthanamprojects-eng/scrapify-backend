@@ -22,4 +22,6 @@ jobs:
           node-version: 20
 
       - name: Run repository security audit
-        run: npm run security:audit
+        # Invoke the checked-in auditor directly so a compromised package.json
+        # cannot replace the security check with another command.
+        run: node scripts/security-audit.mjs

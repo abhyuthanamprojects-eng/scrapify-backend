@@ -27,10 +27,25 @@ class LocationService
     {
         $apiKey = config('services.google_maps.key', env('GOOGLE_MAPS_API_KEY'));
 
-        $resp = Http::timeout(10)->get('https://maps.googleapis.com/maps/api/geocode/json', [
-            'latlng' => "{$lat},{$lng}",
-            'key'    => $apiKey,
-        ]);
+        if (blank($apiKey)) {
+            Log::notice('Reverse geocoding skipped because Google Maps API key is not configured');
+            return $this->empty();
+        }
+
+        try {
+            $resp = Http::timeout(10)->get('https://maps.googleapis.com/maps/api/geocode/json', [
+                'latlng' => "{$lat},{$lng}",
+                'key'    => $apiKey,
+            ]);
+        } catch (\Throwable $exception) {
+            Log::warning('Reverse geocode request failed', [
+                'message' => $exception->getMessage(),
+                'lat' => $lat,
+                'lng' => $lng,
+            ]);
+
+            return $this->empty();
+        }
 
         $data = $resp->json();
         if (($data['status'] ?? null) !== 'OK' || empty($data['results'])) {

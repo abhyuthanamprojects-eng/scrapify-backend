@@ -62,6 +62,10 @@ return new class extends Migration
             }
         });
 
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement("ALTER TABLE pickup_requests MODIFY COLUMN status ENUM(
             'pending',
             'created',

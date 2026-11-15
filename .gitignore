@@ -5,14 +5,12 @@
 /public/storage
 /storage/*.key
 /bootstrap/cache
-.env
 .env.backup
 .env.production.backup
 .phpunit.result.cache
 .php-cs-fixer.cache
 
 # IDE & Editor
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -37,7 +35,6 @@ yarn-error.log*
 # Build artifacts
 /dist
 /build
-.env.local
 .env.*.local
 
 # Public build assets
@@ -64,7 +61,6 @@ coverage/
 /api.js
 /config.bat
 public/fonts/fa-solid-*.ttf
-.vscode/tasks.json
 
 # Agents & AI tooling
 .agents/
