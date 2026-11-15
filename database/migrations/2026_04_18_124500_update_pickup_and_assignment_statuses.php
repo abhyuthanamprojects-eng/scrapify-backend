@@ -12,6 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // SQLite has no ALTER TABLE ... MODIFY COLUMN or ENUM type. The
+        // application validates these statuses, so keep the migration
+        // portable while preserving the MySQL enum constraints in production.
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         // Update pickup_requests status ENUM
         DB::statement("ALTER TABLE pickup_requests MODIFY COLUMN status ENUM(
             'pending', 
@@ -45,6 +52,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         // Revert pickup_requests status ENUM to original
         DB::statement("ALTER TABLE pickup_requests MODIFY COLUMN status ENUM(
             'pending', 

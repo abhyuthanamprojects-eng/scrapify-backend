@@ -10,6 +10,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         DB::statement("ALTER TABLE pickup_requests MODIFY COLUMN request_type ENUM('scrap', 'donation', 'corporate') DEFAULT 'scrap'");
     }
 
