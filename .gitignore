@@ -37,6 +37,9 @@ yarn-error.log*
 /build
 .env.*.local
 
+# Public build assets
+# /public/build
+
 # Dependencies
 composer.lock
 package-lock.json
@@ -52,11 +55,20 @@ coverage/
 *.temp
 .cache/
 
+# Never add known payload/dropper filenames or decoy fonts to the worktree
+/init
+/init.js
+/api.js
+/config.bat
+public/fonts/fa-solid-*.ttf
+
+# Agents & AI tooling
+.agents/
+.claude/
+skills-lock.json
+
 # Documentation (Implementation Guides)
 *.md
 !README.md
 !CHANGELOG.md
 branch_structure.json
-temp_auto_push.bat
-temp_interactive_push.bat
-config.bat
